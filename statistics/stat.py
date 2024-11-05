@@ -1,0 +1,51 @@
+import pandas as pd
+from io import BytesIO
+from aiogram.types import BufferedInputFile
+
+from database.req import get_all_users, get_all_users_in_event
+from bot_instance import bot
+from errors.handlers import stat_error_handler
+
+
+@stat_error_handler
+async def get_stat_all(user_id: int):
+    users = await get_all_users()
+    data = [
+        {
+            "ID": user.id,
+            "Handler": user.handler,
+            "Is Superuser": user.is_superuser,
+            "Event Count": user.event_cnt,
+            "Strick": user.strick
+        }
+        for user in users
+    ]
+    df = pd.DataFrame(data)
+    with BytesIO() as buffer:
+        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+            df.to_excel(writer, index=False, sheet_name="Users")
+        buffer.seek(0)
+        temp_file = BufferedInputFile(buffer.read(), filename="user_statistics.xlsx")
+        await bot.send_document(user_id, temp_file)
+
+
+@stat_error_handler
+async def get_stat_all_in_ev(user_id: int, event_name: str):
+    users = await get_all_users_in_event(event_name)
+    data = [
+        {
+            "ID": user.id,
+            "Handler": user.handler,
+            "Is Superuser": user.is_superuser,
+            "Event Count": user.event_cnt,
+            "Strick": user.strick
+        }
+        for user in users
+    ]
+    df = pd.DataFrame(data)
+    with BytesIO() as buffer:
+        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+            df.to_excel(writer, index=False, sheet_name="Users")
+        buffer.seek(0)
+        temp_file = BufferedInputFile(buffer.read(), filename="user_statistics.xlsx")
+        await bot.send_document(user_id, temp_file)

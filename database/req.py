@@ -1,4 +1,4 @@
-from sqlalchemy import select, desc, distinct, and_
+from sqlalchemy import select, desc, distinct, and_, func
 from sqlalchemy.exc import NoResultFound
 
 from database.models import User, async_session, UserXEvent, Event, Questionary, Vacancy
@@ -129,8 +129,8 @@ async def create_event(name: str):
             user_data = Questionary(**data)
             session.add(user_data)
             await session.commit()
+            return "all ok"
         else:
-            # TODO: write message that event with this name already exist and give loop while user dont get new name
             raise EventNameError
 
 
@@ -177,8 +177,8 @@ async def add_vacancy(name: str):
             user_data = Vacancy(**data)
             session.add(user_data)
             await session.commit()
+            return "all ok"
         else:
-            # TODO: write message that event with this name already exist and give loop while user dont get new name
             raise VacancyNameError
 
 
@@ -191,6 +191,7 @@ async def delete_vacancy(name: str):
         else:
             await session.delete(vacancy)
             await session.commit()
+            return "all ok"
 
 
 @db_error_handler
@@ -203,9 +204,85 @@ async def get_all_vacancy_names():
         return vacancy_names_clean
 
 
+@db_error_handler
+async def get_user_x_event_row(user_id: int, event_name: str):
+    async with async_session() as session:
+        row = await session.scalar(select(UserXEvent).where(and_(
+            UserXEvent.user_id == user_id,
+            UserXEvent.event_name == event_name)))
+        if row:
+            return row
+        else:
+            return "not created"
+
+
+@db_error_handler
+async def create_user_x_event_row(user_id: int, event_name: str):
+    async with async_session() as session:
+        row = await get_user_x_event_row(user_id, event_name)
+        data = {}
+        if row == 'not created':
+            data['user_id'] = user_id
+            data['event_name'] = event_name
+            user_x_event_data = UserXEvent(**data)
+            session.add(user_x_event_data)
+            await session.commit()
+        else:
+            raise Error409
+
+
+@db_error_handler
+async def get_random_user_from_event(event_name: str):
+    async with async_session() as session:
+        result = await session.execute(
+            select(UserXEvent.user_id)
+            .where(UserXEvent.event_name == event_name)
+            .order_by(func.random())
+            .limit(1)
+        )
+        random_user = result.scalar_one_or_none()
+        if not random_user:
+            raise Error404()
+        return random_user
+
+
+@db_error_handler
+async def get_random_user_from_event_wth_bad(event_name: str, bad_ids: int):
+    async with async_session() as session:
+        result = await session.execute(
+            select(UserXEvent.user_id)
+            .where(and_(
+                UserXEvent.event_name == event_name,
+                UserXEvent.user_id.notin_(bad_ids)
+            ))
+            .order_by(func.random())
+            .limit(1)
+        )
+        random_user = result.scalar_one_or_none()
+        if not random_user:
+            raise Error404()
+        return random_user
+
+
+@db_error_handler
 async def get_users_tg_id_in_event(event_name: str):
-    pass
+    async with async_session() as session:
+        users_tg_id = await session.execute(select(distinct(UserXEvent.user_id)).where(UserXEvent.event_name == event_name))
+        users_tg_ids = users_tg_id.scalars().all()
+        if not users_tg_ids:
+            raise Error404
+        return users_tg_ids
 
 
-async def create_user_x_event_row():
-    pass
+@db_error_handler
+async def get_all_users_in_event(event_name: str):
+    async with async_session() as session:
+        users = await session.execute(
+            select(User)
+            .join(UserXEvent, User.id == UserXEvent.user_id)
+            .where(UserXEvent.event_name == event_name)
+        )
+        users_tg_ids = users.scalars().all()
+        if not users_tg_ids:
+            raise Error404
+        return users_tg_ids

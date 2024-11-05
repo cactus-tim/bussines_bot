@@ -7,11 +7,18 @@ from aiogram.fsm.state import State, StatesGroup
 
 from error import safe_send_message
 from bot_instance import bot
-from database.req import get_user, create_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,  get_users_tg_id_in_event
-from keyboards.keyboards import post_target, post_ev_tagret, stat_target
+from database.req import (get_user, create_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,
+                          get_users_tg_id_in_event, get_random_user_from_event, update_event,
+                          get_random_user_from_event_wth_bad, get_all_vacancy_names)
+from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner
+from statistics.stat import get_stat_all, get_stat_all_in_ev
 
 
 router = Router()
+
+
+class EventState(StatesGroup):
+    waiting_ev = State()
 
 
 @router.message(Command("add_event"))
@@ -19,13 +26,66 @@ async def cmd_add_event():
     pass
 
 
-async def cmd_end_event():
-    pass
+@router.message(Command("end_event"))
+async def cmd_end_event(message: Message, state: FSMContext):
+    events = await get_all_events()
+    await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_tagret(events))
+    await state.set_state(EventState.waiting_ev)
+
+
+@router.message(EventState.waiting_ev)
+async def process_end_event(message: Message, state: FSMContext):
+    user_id = await get_random_user_from_event(message.text)
+    await state.update_data(event_name=message.text)
+    await state.update_data(user_id=user_id)
+    bad_ids = []
+    await state.update_data(bad_ids=bad_ids)
+    user = await get_user(user_id)
+    await safe_send_message(bot, message, text=f"Предварительный победитель - {user.handler}, проверьте его наличие в "
+                                               f"аудитории", reply_markup=apply_winner())
+
+
+@router.callback_query(F.data == "reroll")
+async def reroll_end_event(callback: F.CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    bad_ids = data.get("bad_ids")
+    user_id = data.get("user_id")
+    event_name = data.get("event_name")
+    bad_ids.append(user_id)
+    user_id = await get_random_user_from_event_wth_bad(event_name, bad_ids)
+    await state.update_data(bad_ids=bad_ids)
+    await state.update_data(user_id=user_id)
+    user = await get_user(user_id)
+    await safe_send_message(bot, callback, text=f"Предварительный победитель - {user.handler}, проверьте его наличие в "
+                                               f"аудитории", reply_markup=apply_winner())
+
+
+@router.callback_query(F.data == "confirm")
+async def confirm_end_event(callback: F.CallbackQuery, state: FSMContext):
+    await safe_send_message(bot, callback, text="Отличное, рассылаю все информацию")
+    data = await state.get_data()
+    event_name = data.get("event_name")
+    user_id = data.get("user_id")
+    await update_event(event_name, {'winner': user_id})
+    user = await get_user(user_id)
+    user_ids = await get_users_tg_id_in_event(event_name)
+    for user_id in user_ids:
+        await safe_send_message(bot, user_id, text=f"Сегодняшний победитель - {user.handler}")
+    await state.clear()
 
 
 class VacancyState(StatesGroup):
     waiting_for_vacancy_name = State()
     waiting_for_vacancy_name_to_delete = State()
+
+
+@router.message(Command("all_vacancies"))
+async def cmd_all_vacancies(message: Message):
+    vacancies = await get_all_vacancy_names()
+    msg = "Вот все доступные вакансии на данный момент:\n"
+    for v in vacancies:
+        msg += v + '\n'
+    await safe_send_message(bot, message, text=msg)
 
 
 @router.message(Command("add_vacancy"))
@@ -39,10 +99,18 @@ async def cmd_add_vacancy(message: Message, state: FSMContext):
 
 @router.message(VacancyState.waiting_for_vacancy_name)
 async def process_vacancy_name(message: Message, state: FSMContext):
+    if message.text.lower() == "стоп":
+        await state.clear()
+        return
     vacancy_name = message.text
-    await add_vacancy(vacancy_name)
-    await message.answer(f"Вакансия '{vacancy_name}' успешно добавлена.")
-    await state.clear()
+    resp = await add_vacancy(vacancy_name)
+    if not resp:
+        await message.answer(f"Вакансия с именем '{vacancy_name}' уже существует.\n"
+                             f"Если хотите добавить другую - напишите ее название.\n"
+                             f"Если не хотите напишите \"стоп\"")
+    else:
+        await message.answer(f"Вакансия '{vacancy_name}' успешно добавлена.")
+        await state.clear()
 
 
 @router.message(Command("dell_vacancy"))
@@ -57,7 +125,10 @@ async def cmd_dell_vacancy(message: Message, state: FSMContext):
 @router.message(VacancyState.waiting_for_vacancy_name_to_delete)
 async def process_vacancy_name_to_delete(message: Message, state: FSMContext):
     vacancy_name = message.text
-    await delete_vacancy(vacancy_name)
+    resp = await delete_vacancy(vacancy_name)
+    if not resp:
+        await message.answer(f"Вакансии '{vacancy_name}' нет.")
+        await state.clear()
     await message.answer(f"Вакансия '{vacancy_name}' успешно удалена.")
     await state.clear()
 
@@ -93,7 +164,7 @@ async def process_post_to_all(message: Message, state: FSMContext):
     await state.clear()
 
 
-@router.callback_query(F.data == "post_to_env")
+@router.callback_query(F.data == "post_to_ev")
 async def cmd_post_to_ev(callback: F.CallbackQuery, state: FSMContext):
     events = await get_all_events()
     if not events:
@@ -137,8 +208,7 @@ async def cmd_send_stat(message: Message):
 
 @router.callback_query(F.data == "stat_all")
 async def cmd_stat_all(callback: F.CallbackQuery):
-    await safe_send_message(bot, callback, text="Да, конечно, вот:")
-    # TODO: create stat about all and send(view in cb)
+    await get_stat_all(callback.message.from_user.id)
 
 
 @router.callback_query(F.data == "stat_ev")
@@ -153,8 +223,5 @@ async def cmd_stat_ev(callback: F.CallbackQuery, state: FSMContext):
 
 @router.message(StatState.waiting_for_ev)
 async def process_post_to_all(message: Message, state: FSMContext):
-    await safe_send_message(bot, message, text="Да, конечно, вот:")
-    # TODO: create stat about ev and send (view in cb)
+    await get_stat_all_in_ev(message.from_user.id, message.text)
     await state.clear()
-
-

@@ -44,8 +44,6 @@ class Questionary(Base):
     resume = Column(String, default='')
 
 
-
-
 class Event(Base):
     __tablename__ = "event"
 
@@ -62,7 +60,7 @@ class UserXEvent(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
-    event_id = Column(Integer, ForeignKey("event.id"), nullable=False)
+    event_name = Column(String, ForeignKey("event.name"), nullable=False)
 
 
 class Vacancy(Base):

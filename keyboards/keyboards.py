@@ -24,12 +24,12 @@ def vacancy_selection_keyboard(vacancies: list):
 
 
 def another_vacancy_keyboard():
-    keyboard = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="Нет"), KeyboardButton(text="Да, хочу подать заявление на еще одну вакансию")]
-            ],
-        resize_keyboard=True)
-    return keyboard
+    ikb = [
+        [InlineKeyboardButton(text="Нет", callback_data="another_no")],
+        [InlineKeyboardButton(text="Да, хочу подать заявление на еще одну вакансию", callback_data="another_yes")]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
 
 
 def post_target():
@@ -57,3 +57,19 @@ def stat_target():
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
+
+
+def apply_winner():
+    ikb = [
+        [InlineKeyboardButton(text="Он здесь, все хорошо", callback_data="confirm")],
+        [InlineKeyboardButton(text="Его нет, нужен реролл", callback_data="reroll")]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
+
+
+def confirm_qr():
+    ikb = [
+        InlineKeyboardButton(text="Да", callback_data="confirm_qr"),
+        InlineKeyboardButton(text="Нет", callback_data="cancel_qr")
+    ]

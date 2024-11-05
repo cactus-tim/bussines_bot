@@ -1,6 +1,6 @@
 from aiogram import types
 from aiogram.filters import Command
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
@@ -51,6 +51,11 @@ async def start_first_part(message: types.Message, state: FSMContext):
     await state.set_state(Questionnaire.full_name)
 
 
+async def start_first_part(message: types.Message, state: FSMContext):
+    await safe_send_message(bot, message, text="Введите свое ФИО")
+    await state.set_state(Questionnaire.full_name)
+
+
 @router.message(Questionnaire.full_name)
 async def enter_full_name(message: types.Message, state: FSMContext):
     await update_questionary(message.from_user.id, {'full_name': message.text})
@@ -94,13 +99,16 @@ async def enter_vacancy(message: types.Message, state: FSMContext):
     await state.set_state(Questionnaire.another_vacancy)
 
 
-@router.message(Questionnaire.another_vacancy)
-async def ask_another_vacancy(message: types.Message, state: FSMContext):
-    if message.text == "Да, хочу подать заявление на еще одну вакансию":
-        await safe_send_message(bot, message, text="Какая вакансия тебя интересует?", reply_markup=vacancy_selection_keyboard())
+@router.callback_query(F.text(startswith="another_"), state=Questionnaire.another_vacancy)
+async def ask_another_vacancy(callback: types.CallbackQuery, state: FSMContext):
+    if callback.data == "another_yes":
+        vacancies = await get_all_vacancy_names()
+        await callback.message.edit_text("Какая вакансия тебя интересует?", reply_markup=vacancy_selection_keyboard(vacancies))
         await state.set_state(Questionnaire.vacancy)
-    else:
-        await continue_from_second_part(message, state)
+    elif callback.data == "another_no":
+        await callback.message.edit_text("Спасибо за ваш выбор.")
+        await continue_from_second_part(callback.message, state)
+    await callback.answer()
 
 
 async def continue_from_second_part(message: types.Message, state: FSMContext):
