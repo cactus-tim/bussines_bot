@@ -25,7 +25,7 @@ async def cmd_start(message: Message, command: CommandObject):
         await safe_send_message(bot, message, text="QR-код удачно отсканирован!", reply_markup=single_command_button_keyboard())
     else:
         await create_user(message.from_user.id, {'handler': message.from_user.username})
-        name = message.from_user.first_name if not message.from_user.first_name else message.from_user.username
+        name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
         await safe_send_message(bot, message, text=f"{name}, привет от команды HSE SPB Business Club 🎉\n"
                                 "Здесь можно будет принимать участие в розыгрышах, подавать заявку на отбор в команду и закрытый клуб, а также задавать вопросы и получать анонсы мероприятий в числе первых.\n"
                                 "Рекомендуем оставить уведомления включенными: так ты не пропустишь ни одно важное событие клуба.\n"                                           
