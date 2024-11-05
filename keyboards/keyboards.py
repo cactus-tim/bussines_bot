@@ -52,8 +52,9 @@ def post_ev_tagret(events: list):
 
 def stat_target():
     ikb = [
-        [InlineKeyboardButton(text="Всех пользователям", callback_data="stat_all")],
+        [InlineKeyboardButton(text="Всех пользователей", callback_data="stat_all")],
         [InlineKeyboardButton(text="Всех участников ивента", callback_data="stat_ev")],
+        [InlineKeyboardButton(text="Всех из опроса", callback_data="stat_quest")],
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
@@ -68,8 +69,9 @@ def apply_winner():
     return ikeyboard
 
 
-def confirm_qr():
-    ikb = [
-        InlineKeyboardButton(text="Да", callback_data="confirm_qr"),
-        InlineKeyboardButton(text="Нет", callback_data="cancel_qr")
-    ]
+def single_command_button_keyboard():
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="Анкета")]],
+        resize_keyboard=True
+    )
+    return keyboard

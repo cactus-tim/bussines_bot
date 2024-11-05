@@ -5,13 +5,13 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
-from error import safe_send_message
+from handlers.error import safe_send_message
 from bot_instance import bot
 from database.req import (get_user, create_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,
                           get_users_tg_id_in_event, get_random_user_from_event, update_event,
-                          get_random_user_from_event_wth_bad, get_all_vacancy_names)
-from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner
-from statistics.stat import get_stat_all, get_stat_all_in_ev
+                          get_random_user_from_event_wth_bad, get_all_vacancy_names, get_event, get_all_events_in_p)
+from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner, vacancy_selection_keyboard
+from statistics.stat import get_stat_all, get_stat_all_in_ev, get_stat_quest
 
 
 router = Router()
@@ -21,6 +21,12 @@ class EventState(StatesGroup):
     waiting_ev = State()
 
 
+async def get_link():
+    pass
+
+#https://t.me/brewbegtbot?start=ff
+
+
 @router.message(Command("add_event"))
 async def cmd_add_event():
     pass
@@ -28,7 +34,7 @@ async def cmd_add_event():
 
 @router.message(Command("end_event"))
 async def cmd_end_event(message: Message, state: FSMContext):
-    events = await get_all_events()
+    events = await get_all_events_in_p()
     await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_tagret(events))
     await state.set_state(EventState.waiting_ev)
 
@@ -66,7 +72,7 @@ async def confirm_end_event(callback: F.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     event_name = data.get("event_name")
     user_id = data.get("user_id")
-    await update_event(event_name, {'winner': user_id})
+    await update_event(event_name, {'winner': user_id, "status": "end"})
     user = await get_user(user_id)
     user_ids = await get_users_tg_id_in_event(event_name)
     for user_id in user_ids:
@@ -82,6 +88,9 @@ class VacancyState(StatesGroup):
 @router.message(Command("all_vacancies"))
 async def cmd_all_vacancies(message: Message):
     vacancies = await get_all_vacancy_names()
+    if not vacancies:
+        await safe_send_message(bot, message, text="У вас нет активных вакансий")
+        return
     msg = "Вот все доступные вакансии на данный момент:\n"
     for v in vacancies:
         msg += v + '\n'
@@ -118,7 +127,8 @@ async def cmd_dell_vacancy(message: Message, state: FSMContext):
     user = await get_user(message.from_user.id)
     if not user.is_superuser:
         return
-    await safe_send_message(bot, message, text="Введите название вакансии, которую вы хотите удалить")
+    vacancies = await get_all_vacancy_names()
+    await safe_send_message(bot, message, text="Выберете название вакансии, которую вы хотите удалить", reply_markup=vacancy_selection_keyboard(vacancies))
     await state.set_state(VacancyState.waiting_for_vacancy_name_to_delete)
 
 
@@ -208,7 +218,7 @@ async def cmd_send_stat(message: Message):
 
 @router.callback_query(F.data == "stat_all")
 async def cmd_stat_all(callback: F.CallbackQuery):
-    await get_stat_all(callback.message.from_user.id)
+    await get_stat_all(callback.from_user.id)
 
 
 @router.callback_query(F.data == "stat_ev")
@@ -225,3 +235,8 @@ async def cmd_stat_ev(callback: F.CallbackQuery, state: FSMContext):
 async def process_post_to_all(message: Message, state: FSMContext):
     await get_stat_all_in_ev(message.from_user.id, message.text)
     await state.clear()
+
+
+@router.callback_query(F.data == "stat_quest")
+async def cmd_stat_ev(callback: F.CallbackQuery):
+    await get_stat_quest(callback.from_user.id)

@@ -55,7 +55,7 @@ async def get_users_tg_id():
 @db_error_handler
 async def get_all_users():
     async with async_session() as session:
-        users = await session.execute(select(distinct(User)))
+        users = await session.execute(select(User))
         users_tg_ids = users.scalars().all()
         if not users_tg_ids:
             raise Error404
@@ -65,7 +65,7 @@ async def get_all_users():
 @db_error_handler
 async def get_questionary(tg_id: int):
     async with async_session() as session:
-        questionary = await session.scalar(select(Questionary).where(Questionary.id == tg_id))
+        questionary = await session.scalar(select(Questionary).where(Questionary.user_id == tg_id))
         if questionary:
             return questionary
         else:
@@ -102,7 +102,7 @@ async def update_questionary(tg_id: int, data: dict):
 @db_error_handler
 async def get_all_quests():
     async with async_session() as session:
-        quests = await session.execute(select(distinct(Questionary)))
+        quests = await session.execute(select(Questionary))
         quests_tg_ids = quests.scalars().all()
         if not quests_tg_ids:
             raise Error404
@@ -145,6 +145,15 @@ async def update_event(name: str, data: dict):
                 setattr(event, key, value)
             session.add(event)
             await session.commit()
+
+
+async def get_all_events_in_p():
+    async with async_session() as session:
+        event = await session.execute(select(distinct(Event.name)).where(Event.status == "in_progress"))
+        event_names = event.scalars().all()
+        if not event_names:
+            raise Error404
+        return event_names
 
 
 @db_error_handler

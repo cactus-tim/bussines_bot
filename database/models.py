@@ -26,7 +26,8 @@ class User(Base):
 class Questionary(Base):
     __tablename__ = "questionary"
 
-    user_id = Column(BigInteger, ForeignKey("uses.id"), nullable=False)
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
     full_name = Column(String, default='')
     degree = Column(String, default='')
     course = Column(String, default='')
@@ -47,8 +48,7 @@ class Questionary(Base):
 class Event(Base):
     __tablename__ = "event"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String)
+    name = Column(String, primary_key=True)
     desc = Column(String)
     date = Column(Date)
     status = Column(String)  # in_progress end
@@ -66,8 +66,7 @@ class UserXEvent(Base):
 class Vacancy(Base):
     __tablename__ = "vacancy"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String)
+    name = Column(String, primary_key=True)
 
 
 async def async_main():

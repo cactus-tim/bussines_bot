@@ -3,10 +3,12 @@ from aiogram.filters import Command
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.filters import StateFilter
+
 
 from bot_instance import bot
 from database.req import create_questionary, update_questionary, get_questionary, get_all_vacancy_names
-from error import safe_send_message
+from handlers.error import safe_send_message
 from keyboards.keyboards import vacancy_selection_keyboard, another_vacancy_keyboard
 
 
@@ -32,8 +34,17 @@ class Questionnaire(StatesGroup):
     another_vacancy = State()
 
 
+@router.message(F.text == "Анкета")
+async def start2(message: types.Message, state: FSMContext):
+    await start(message, state)
+
+
 @router.message(Command("quest"))
 async def start(message: types.Message, state: FSMContext):
+    vacancies = await get_all_vacancy_names()
+    if not vacancies:
+        await safe_send_message(bot, message, text="К сожалению сейчас нет доступных вакансий")
+        return
     quest = await get_questionary(message.from_user.id)
     if quest == "not created":
         await create_questionary(message.from_user.id)
@@ -44,11 +55,6 @@ async def start(message: types.Message, state: FSMContext):
         await continue_from_second_part(message, state)
     else:
         await start_first_part(message, state)
-
-
-async def start_first_part(message: types.Message, state: FSMContext):
-    await safe_send_message(bot, message, text="Введите свое ФИО")
-    await state.set_state(Questionnaire.full_name)
 
 
 async def start_first_part(message: types.Message, state: FSMContext):
@@ -99,7 +105,7 @@ async def enter_vacancy(message: types.Message, state: FSMContext):
     await state.set_state(Questionnaire.another_vacancy)
 
 
-@router.callback_query(F.text(startswith="another_"), state=Questionnaire.another_vacancy)
+@router.callback_query(StateFilter(Questionnaire.another_vacancy), F.data.startswith("another_"))
 async def ask_another_vacancy(callback: types.CallbackQuery, state: FSMContext):
     if callback.data == "another_yes":
         vacancies = await get_all_vacancy_names()
@@ -175,5 +181,5 @@ async def enter_found_info(message: types.Message, state: FSMContext):
 @router.message(Questionnaire.resume)
 async def enter_resume(message: types.Message, state: FSMContext):
     await update_questionary(message.from_user.id, {'resume': message.text})
-    await safe_send_message(bot, message, text="Благодарим тебя за заполнение анкеты! Мы вернемся с обратной связью после 15-го ноября.")
+    await safe_send_message(bot, message, text="Благодарим тебя за заполнение анкеты!")
     await state.clear()
