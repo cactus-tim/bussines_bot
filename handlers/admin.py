@@ -47,7 +47,7 @@ async def process_end_event(message: Message, state: FSMContext):
     bad_ids = []
     await state.update_data(bad_ids=bad_ids)
     user = await get_user(user_id)
-    await safe_send_message(bot, message, text=f"Предварительный победитель - {user.handler}, проверьте его наличие в "
+    await safe_send_message(bot, message, text=f"Предварительный победитель - @{user.handler}, проверьте его наличие в "
                                                f"аудитории", reply_markup=apply_winner())
 
 
