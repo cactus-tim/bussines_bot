@@ -19,7 +19,7 @@ async def cmd_start(message: Message, command: CommandObject):
     hash_value = command.args
     if hash_value:
         user = await get_user(message.from_user.id)
-        if not user:
+        if user == "not created":
             await create_user(message.from_user.id, {'handler': message.from_user.username})
             name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
             await safe_send_message(bot, message.from_user.id, text=f"{name}, привет от команды HSE SPB Business Club 🎉\n\n"
