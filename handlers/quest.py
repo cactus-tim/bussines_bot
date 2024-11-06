@@ -41,7 +41,7 @@ async def start2(message: types.Message):
 
 @router.message(Command("quest"))
 async def start(message: types.Message):
-    await safe_send_message(bot, message, text="По кнопке ниже тебя ждет гугл форма со всем, что нам интересно о тебе!",
+    await safe_send_message(bot, message, text="По кнопке ниже тебя ждет google-форма для отбора в нашу команду 👇",
                             reply_markup=quest_keyboard())
 
 

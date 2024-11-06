@@ -22,7 +22,7 @@ async def cmd_start(message: Message, command: CommandObject):
         if not user:
             await create_user(message.from_user.id, {'handler': message.from_user.username})
             name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
-            await safe_send_message(bot, message, text=f"{name}, привет от команды HSE SPB Business Club 🎉\n\n"
+            await safe_send_message(bot, message.from_user.id, text=f"{name}, привет от команды HSE SPB Business Club 🎉\n\n"
                                                        "Здесь можно будет принимать участие в розыгрышах, подавать заявку на отбор в команду "
                                                        "и закрытый клуб, а также задавать вопросы и получать анонсы "
                                                        "мероприятий в числе первых.\n\n"

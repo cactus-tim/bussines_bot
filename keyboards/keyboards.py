@@ -71,7 +71,7 @@ def apply_winner():
 
 def single_command_button_keyboard():
     keyboard = ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="Анкета")]],
+        keyboard=[[KeyboardButton(text="Анкета для отбора в команду")]],
         resize_keyboard=True
     )
     return keyboard
