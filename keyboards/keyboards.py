@@ -1,17 +1,19 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
-from math import ceil
+from math import ceil, floor
 
 from database.req import get_all_vacancy_names
 
 
-def make_k_from_list(a: list) -> list:
-    rows_cnt = ceil(len(a) / 3)
-    keyboard = []
-    for i in range(0, rows_cnt - 1):
-        keyboard.append([KeyboardButton(text=a[0 + (i * 3)]), KeyboardButton(text=a[1 + (i * 3)]),
-                         KeyboardButton(text=a[2 + (i * 3)])])
-    keyboard.append([KeyboardButton(text=a[i + ((rows_cnt - 1) * 3)]) for i in range(0, len(a) % 3)])
-    return keyboard
+def make_k_from_list(a: list[str]) -> list[list[KeyboardButton]]:
+    keyboard: list[KeyboardButton] = [KeyboardButton(text=el) for el in a]
+    result: list[list[KeyboardButton]] = [[]]
+    row = 0
+    for button in keyboard:
+        if len(result[row]) == 3:
+            result.append([])
+            row += 1
+        result[row].append(button)
+    return result
 
 
 def vacancy_selection_keyboard(vacancies: list):
