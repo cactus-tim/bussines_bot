@@ -54,7 +54,7 @@ def stat_target():
     ikb = [
         [InlineKeyboardButton(text="Всех пользователей", callback_data="stat_all")],
         [InlineKeyboardButton(text="Всех участников ивента", callback_data="stat_ev")],
-        [InlineKeyboardButton(text="Всех из опроса", callback_data="stat_quest")],
+        # [InlineKeyboardButton(text="Всех из опроса", callback_data="stat_quest")],
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
@@ -75,3 +75,11 @@ def single_command_button_keyboard():
         resize_keyboard=True
     )
     return keyboard
+
+
+def quest_keyboard():
+    ikb = [
+        [InlineKeyboardButton(text='Стать частью команды HSE SPB Business Club', url='https://forms.gle/SHYAncupSwvmSEZp7')]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard

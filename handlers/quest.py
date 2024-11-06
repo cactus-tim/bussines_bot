@@ -9,7 +9,7 @@ from aiogram.filters import StateFilter
 from bot_instance import bot
 from database.req import create_questionary, update_questionary, get_questionary, get_all_vacancy_names
 from handlers.error import safe_send_message
-from keyboards.keyboards import vacancy_selection_keyboard, another_vacancy_keyboard
+from keyboards.keyboards import vacancy_selection_keyboard, another_vacancy_keyboard, quest_keyboard
 
 
 router = Router()
@@ -35,12 +35,18 @@ class Questionnaire(StatesGroup):
 
 
 @router.message(F.text == "Анкета")
-async def start2(message: types.Message, state: FSMContext):
-    await start(message, state)
+async def start2(message: types.Message):
+    await start(message)
 
 
 @router.message(Command("quest"))
-async def start(message: types.Message, state: FSMContext):
+async def start(message: types.Message):
+    await safe_send_message(bot, message, text="По кнопке ниже тебя ждет гугл форма со всем, что нам интересно о тебе!",
+                            reply_markup=quest_keyboard())
+
+
+@router.message(Command("quest"))
+async def start_nu(message: types.Message, state: FSMContext):
     vacancies = await get_all_vacancy_names()
     if not vacancies:
         await safe_send_message(bot, message, text="К сожалению сейчас нет доступных вакансий")
