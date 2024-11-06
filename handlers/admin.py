@@ -75,8 +75,11 @@ async def confirm_end_event(callback: F.CallbackQuery, state: FSMContext):
     await update_event(event_name, {'winner': user_id, "status": "end"})
     user = await get_user(user_id)
     user_ids = await get_users_tg_id_in_event(event_name)
+    if not user_ids:
+        await safe_send_message(bot, user_id, text=f"У вас нет пользоватеkей))")
+        return
     for user_id in user_ids:
-        await safe_send_message(bot, user_id, text=f"Сегодняшний победитель - {user.handler}")
+        await safe_send_message(bot, user_id, text=f"Сегодняшний победитель - @{user.handler}")
     await state.clear()
 
 
