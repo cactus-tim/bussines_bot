@@ -47,6 +47,10 @@ async def process_end_event(message: Message, state: FSMContext):
     bad_ids = []
     await state.update_data(bad_ids=bad_ids)
     user = await get_user(user_id)
+    if user == "not created":
+        await safe_send_message(bot, message, text="Какие то проблемы, попробуйте заново")
+        await state.clear()
+        return
     await safe_send_message(bot, message, text=f"Предварительный победитель - @{user.handler}, проверьте его наличие в "
                                                f"аудитории", reply_markup=apply_winner())
 
@@ -62,7 +66,11 @@ async def reroll_end_event(callback: F.CallbackQuery, state: FSMContext):
     await state.update_data(bad_ids=bad_ids)
     await state.update_data(user_id=user_id)
     user = await get_user(user_id)
-    await safe_send_message(bot, callback, text=f"Предварительный победитель - {user.handler}, проверьте его наличие в "
+    if user == "not created":
+        await safe_send_message(bot, callback, text="Какие то проблемы, попробуйте заново")
+        await state.clear()
+        return
+    await safe_send_message(bot, callback, text=f"Предварительный победитель - @{user.handler}, проверьте его наличие в "
                                                f"аудитории", reply_markup=apply_winner())
 
 
