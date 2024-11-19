@@ -7,8 +7,9 @@ from aiogram.fsm.state import State, StatesGroup
 
 from handlers.error import safe_send_message
 from bot_instance import bot
-from database.req import get_user, create_user, create_user_x_event_row
+from database.req import get_user, create_user, create_user_x_event_row, update_user
 from keyboards.keyboards import single_command_button_keyboard
+from handlers.quest import start
 
 
 router = Router()
@@ -18,22 +19,29 @@ router = Router()
 async def cmd_start(message: Message, command: CommandObject):
     hash_value = command.args
     if hash_value:
-        user = await get_user(message.from_user.id)
-        if user == "not created":
-            await create_user(message.from_user.id, {'handler': message.from_user.username})
-            name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
-            await safe_send_message(bot, message.from_user.id, text=f"{name}, привет от команды HSE SPB Business Club 🎉\n\n"
-                                                       "Здесь можно будет принимать участие в розыгрышах, подавать заявку на отбор в команду "
-                                                       "и закрытый клуб, а также задавать вопросы и получать анонсы "
-                                                       "мероприятий в числе первых.\n\n"
-                                                       "Рекомендуем оставить уведомления включенными: так ты не пропустишь ни одно важное "
-                                                       "событие клуба.\n\n"
-                                                       "Также у нас есть Telegram-канал, где мы регулярно публикуем полезные посты на тему "
-                                                       "бизнеса.\n"
-                                                       "Подписывайся: @HSE_SPB_Business_Club",
-                                    reply_markup=single_command_button_keyboard())
-        await create_user_x_event_row(message.from_user.id, hash_value)
-        await safe_send_message(bot, message, text="QR-код удачно отсканирован!", reply_markup=single_command_button_keyboard())
+        if hash_value == 'otbor':
+            user = await get_user(message.from_user.id)
+            if user == "not created":
+                await create_user(message.from_user.id, {'handler': message.from_user.username, 'first_contact': hash_value})
+            await safe_send_message(bot, message, 'Некоторое приветственное сообщение, текст для которого тоже надо написать', reply_markup=single_command_button_keyboard())
+            await start(message)
+        else:
+            user = await get_user(message.from_user.id)
+            if user == "not created":
+                await create_user(message.from_user.id, {'handler': message.from_user.username, 'first_contact': hash_value})
+                name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
+                await safe_send_message(bot, message.from_user.id, text=f"{name}, привет от команды HSE SPB Business Club 🎉\n\n"
+                                                           "Здесь можно будет принимать участие в розыгрышах, подавать заявку на отбор в команду "
+                                                           "и закрытый клуб, а также задавать вопросы и получать анонсы "
+                                                           "мероприятий в числе первых.\n\n"
+                                                           "Рекомендуем оставить уведомления включенными: так ты не пропустишь ни одно важное "
+                                                           "событие клуба.\n\n"
+                                                           "Также у нас есть Telegram-канал, где мы регулярно публикуем полезные посты на тему "
+                                                           "бизнеса.\n"
+                                                           "Подписывайся: @HSE_SPB_Business_Club",
+                                        reply_markup=single_command_button_keyboard())
+            await create_user_x_event_row(message.from_user.id, hash_value)
+            await safe_send_message(bot, message, text="QR-код удачно отсканирован!", reply_markup=single_command_button_keyboard())
     else:
         await create_user(message.from_user.id, {'handler': message.from_user.username})
         name = message.from_user.first_name if message.from_user.first_name else message.from_user.username

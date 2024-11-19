@@ -9,8 +9,8 @@ from aiogram.filters import StateFilter
 from bot_instance import bot
 from database.req import create_questionary, update_questionary, get_questionary, get_all_vacancy_names
 from handlers.error import safe_send_message
-from keyboards.keyboards import vacancy_selection_keyboard, another_vacancy_keyboard, quest_keyboard
-
+from keyboards.keyboards import vacancy_selection_keyboard, another_vacancy_keyboard, quest_keyboard_1, \
+    quest_keyboard_2, single_command_button_keyboard
 
 router = Router()
 
@@ -41,11 +41,16 @@ async def start2(message: types.Message):
 
 @router.message(Command("quest"))
 async def start(message: types.Message):
-    await safe_send_message(bot, message, text="По кнопке ниже тебя ждет google-форма для отбора в нашу команду 👇",
-                            reply_markup=quest_keyboard())
+    await safe_send_message(bot, message, text="Сообщение 1",
+                            reply_markup=quest_keyboard_1())
 
 
-@router.message(Command("quest"))
+@router.callback_query(F.data == "next")
+async def start_2(callback: F.CallbackQuery):
+    await safe_send_message(bot, callback, 'Сообщение 2', reply_markup=quest_keyboard_2())
+
+
+# @router.message(Command("quest"))
 async def start_nu(message: types.Message, state: FSMContext):
     vacancies = await get_all_vacancy_names()
     if not vacancies:

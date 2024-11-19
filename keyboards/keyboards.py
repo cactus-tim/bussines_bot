@@ -79,7 +79,15 @@ def single_command_button_keyboard():
     return keyboard
 
 
-def quest_keyboard():
+def quest_keyboard_1():
+    ikb = [
+        [InlineKeyboardButton(text='Стать частью команды HSE SPB Business Club', callback_data="next")]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
+
+
+def quest_keyboard_2():
     ikb = [
         [InlineKeyboardButton(text='Стать частью команды HSE SPB Business Club', url='https://forms.gle/SHYAncupSwvmSEZp7')]
     ]

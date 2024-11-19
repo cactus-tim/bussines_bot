@@ -21,6 +21,7 @@ class User(Base):
     is_superuser = Column(Boolean, nullable=False, default=False)
     event_cnt = Column(Integer, nullable=False, default=0)
     strick = Column(Integer, nullable=False, default=0)
+    first_contact = Column(String, default='')
 
 
 class Questionary(Base):

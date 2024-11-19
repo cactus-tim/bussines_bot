@@ -10,7 +10,8 @@ from bot_instance import bot
 from database.req import (get_user, create_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,
                           get_users_tg_id_in_event, get_random_user_from_event, update_event,
                           get_random_user_from_event_wth_bad, get_all_vacancy_names, get_event, get_all_events_in_p)
-from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner, vacancy_selection_keyboard
+from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner, vacancy_selection_keyboard, \
+    single_command_button_keyboard
 from statistics.stat import get_stat_all, get_stat_all_in_ev, get_stat_quest
 
 
@@ -84,10 +85,10 @@ async def confirm_end_event(callback: F.CallbackQuery, state: FSMContext):
     user = await get_user(user_id)
     user_ids = await get_users_tg_id_in_event(event_name)
     if not user_ids:
-        await safe_send_message(bot, user_id, text=f"У вас нет пользоватеkей))")
+        await safe_send_message(bot, user_id, text=f"У вас нет пользоватеkей))", reply_markup=single_command_button_keyboard())
         return
     for user_id in user_ids:
-        await safe_send_message(bot, user_id, text=f"Сегодняшний победитель - @{user.handler}")
+        await safe_send_message(bot, user_id, text=f"Сегодняшний победитель - @{user.handler}", reply_markup=single_command_button_keyboard())
     await state.clear()
 
 
@@ -105,7 +106,7 @@ async def cmd_all_vacancies(message: Message):
     msg = "Вот все доступные вакансии на данный момент:\n"
     for v in vacancies:
         msg += v + '\n'
-    await safe_send_message(bot, message, text=msg)
+    await safe_send_message(bot, message, text=msg, reply_markup=single_command_button_keyboard())
 
 
 @router.message(Command("add_vacancy"))
@@ -129,7 +130,7 @@ async def process_vacancy_name(message: Message, state: FSMContext):
                              f"Если хотите добавить другую - напишите ее название.\n"
                              f"Если не хотите напишите \"стоп\"")
     else:
-        await message.answer(f"Вакансия '{vacancy_name}' успешно добавлена.")
+        await message.answer(f"Вакансия '{vacancy_name}' успешно добавлена.", reply_markup=single_command_button_keyboard())
         await state.clear()
 
 
@@ -148,9 +149,9 @@ async def process_vacancy_name_to_delete(message: Message, state: FSMContext):
     vacancy_name = message.text
     resp = await delete_vacancy(vacancy_name)
     if not resp:
-        await message.answer(f"Вакансии '{vacancy_name}' нет.")
+        await message.answer(f"Вакансии '{vacancy_name}' нет.", reply_markup=single_command_button_keyboard())
         await state.clear()
-    await message.answer(f"Вакансия '{vacancy_name}' успешно удалена.")
+    await message.answer(f"Вакансия '{vacancy_name}' успешно удалена.", reply_markup=single_command_button_keyboard())
     await state.clear()
 
 
@@ -178,10 +179,10 @@ async def cmd_post_to_all(callback: F.CallbackQuery, state: FSMContext):
 async def process_post_to_all(message: Message, state: FSMContext):
     user_ids = await get_users_tg_id()
     if not user_ids:
-        await safe_send_message(bot, message, text="У вас нет пользователей((")
+        await safe_send_message(bot, message, text="У вас нет пользователей((", reply_markup=single_command_button_keyboard())
         return
     for user_id in user_ids:
-        await safe_send_message(bot, user_id, text=message.text)
+        await safe_send_message(bot, user_id, text=message.text, reply_markup=single_command_button_keyboard())
     await state.clear()
 
 
@@ -208,10 +209,10 @@ async def process_post_to_all(message: Message, state: FSMContext):
     event_name = data.get("event_name")
     user_ids = await get_users_tg_id_in_event(event_name)
     if not user_ids:
-        await safe_send_message(bot, message, text="У вас нет пользователей принявших участие в этом событии")
+        await safe_send_message(bot, message, text="У вас нет пользователей принявших участие в этом событии", reply_markup=single_command_button_keyboard())
         return
     for user_id in user_ids:
-        await safe_send_message(bot, user_id, text=message.text)
+        await safe_send_message(bot, user_id, text=message.text, reply_markup=single_command_button_keyboard())
     await state.clear()
 
 
@@ -236,7 +237,8 @@ async def cmd_stat_all(callback: F.CallbackQuery):
 async def cmd_stat_ev(callback: F.CallbackQuery, state: FSMContext):
     events = await get_all_events()
     if not events:
-        await safe_send_message(bot, callback, text="У вас нет событий")
+        await safe_send_message(bot, callback, text="У вас нет событий", reply_markup=single_command_button_keyboard())
+        await state.clear()
         return
     await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_tagret(events))
     await state.set_state(StatState.waiting_for_ev)
