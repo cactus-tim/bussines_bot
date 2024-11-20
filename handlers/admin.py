@@ -275,6 +275,16 @@ async def pre_process_post_to_ev(message: Message, state: FSMContext):
     await state.set_state(PostState.waiting_for_post_wth_op_to_ev_text)
 
 
+msg = """
+Привет! 
+Благодарим за посещение нашего мероприятия! 🔥
+
+Мы хотим становиться лучше, поэтому нам, как всегда, очень нужна твоя обратная связь 🤝
+
+Поделись парочкой слов о том, что понравилось, а что можно улучшить, по ссылке ниже 👇
+"""
+
+
 @router.message(PostState.waiting_for_post_wth_op_to_ev_text)
 async def process_post_to_wth_op_to_ev(message: Message, state: FSMContext):
     data = await state.get_data()
@@ -284,7 +294,7 @@ async def process_post_to_wth_op_to_ev(message: Message, state: FSMContext):
         await safe_send_message(bot, message, text="У вас нет пользователей принявших участие в этом событии", reply_markup=single_command_button_keyboard())
         return
     for user_id in user_ids:
-        await safe_send_message(bot, user_id, text='some text', reply_markup=feedback_form_ikb(message.text))
+        await safe_send_message(bot, user_id, text=msg, reply_markup=feedback_form_ikb(message.text))
     await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
     await state.clear()
 

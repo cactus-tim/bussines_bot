@@ -97,7 +97,7 @@ def quest_keyboard_2():
 
 def feedback_form_ikb(url):
     ikb = [
-        [InlineKeyboardButton(text='some text for feedback', url=url)]
+        [InlineKeyboardButton(text='Анкета обратной связи', url=url)]
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
