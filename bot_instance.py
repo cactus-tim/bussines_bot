@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import sys
 from aiogram.client.bot import DefaultBotProperties
+# from aiogram.fsm.storage.redis import RedisStorage
 import logging
 import asyncio
 
@@ -30,3 +31,5 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 event = asyncio.Event()
+
+# storage = RedisStorage.from_url("redis://localhost")

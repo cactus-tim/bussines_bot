@@ -120,13 +120,13 @@ async def get_event(name: str):
 
 
 @db_error_handler
-async def create_event(name: str):
+async def create_event(name: str, data: dict):
     async with async_session() as session:
         event = await get_event(name)
-        data = {}
         if event == 'not created':
             data['name'] = name
-            user_data = Questionary(**data)
+            data['status'] = 'in_progress'
+            user_data = Event(**data)
             session.add(user_data)
             await session.commit()
             return "all ok"

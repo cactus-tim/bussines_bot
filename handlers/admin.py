@@ -4,33 +4,70 @@ from aiogram import Router, F
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from datetime import date
 
 from handlers.error import safe_send_message
 from bot_instance import bot
 from database.req import (get_user, create_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,
                           get_users_tg_id_in_event, get_random_user_from_event, update_event,
-                          get_random_user_from_event_wth_bad, get_all_vacancy_names, get_event, get_all_events_in_p)
+                          get_random_user_from_event_wth_bad, get_all_vacancy_names, get_event, get_all_events_in_p,
+                          create_event)
 from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner, vacancy_selection_keyboard, \
-    single_command_button_keyboard
+    single_command_button_keyboard, feedback_form_ikb
 from statistics.stat import get_stat_all, get_stat_all_in_ev, get_stat_quest
 
 
 router = Router()
 
 
-class EventState(StatesGroup):
-    waiting_ev = State()
-
-
-async def get_link():
-    pass
-
-#https://t.me/brewbegtbot?start=ff
+class EventCreateState(StatesGroup):
+    waiting_event_name = State()
+    waiting_event_date = State()
 
 
 @router.message(Command("add_event"))
-async def cmd_add_event():
-    pass
+async def cmd_add_event(message: Message, state: FSMContext):
+    await safe_send_message(bot, message, "Введите полное названиве события")
+    await state.set_state(EventCreateState.waiting_event_name)
+
+
+@router.message(EventCreateState.waiting_event_name)
+async def add_event_part_2(message: Message, state: FSMContext):
+    await state.update_data({'desc': message.text})
+    await safe_send_message(bot, message, "Введите дату проведения события в формате DD.MM.YY")
+    await state.set_state(EventCreateState.waiting_event_date)
+
+
+@router.message(EventCreateState.waiting_event_date)
+async def add_event_part_3(message: Message, state: FSMContext):
+    data = await state.get_data()
+    desc = data.get('desc')
+    name = "event" + message.text.replace('.', '_')
+    dat = date(int(message.text.split('.')[2]), int(message.text.split('.')[1]), int(message.text.split('.')[0]))
+    await create_event(name, {'desc': desc, 'date': dat})
+    # link = "https://t.me/?start={event.name}"
+    await safe_send_message(bot, message, f"все круто, все создано!!\nсслыка:\nhttps://t.me/brewbegtbot?start={name}")
+    await state.clear()
+
+
+class EventState(StatesGroup):
+    waiting_ev = State()
+    waiting_ev_for_link = State()
+
+
+@router.message(Command("get_link"))
+async def get_link(message: Message, state: FSMContext):
+    events = await get_all_events_in_p()
+    await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_tagret(events))
+    await state.set_state(EventState.waiting_ev_for_link)
+
+
+@router.message(EventState.waiting_ev_for_link)
+async def make_link(message: Message, state: FSMContext):
+    event = await get_event(message.text)
+    # link = "https://t.me/?start={event.name}"
+    await safe_send_message(bot, message, f"https://t.me/brewbegtbot?start={event.name}")
+    await state.clear()
 
 
 @router.message(Command("end_event"))
@@ -159,6 +196,8 @@ class PostState(StatesGroup):
     waiting_for_post_to_all_text = State()
     waiting_for_post_to_ev_ev = State()
     waiting_for_post_to_ev_text = State()
+    waiting_for_post_wth_op_to_ev_ev = State()
+    waiting_for_post_wth_op_to_ev_text = State()
 
 
 @router.message(Command("send_post"))
@@ -183,6 +222,7 @@ async def process_post_to_all(message: Message, state: FSMContext):
         return
     for user_id in user_ids:
         await safe_send_message(bot, user_id, text=message.text, reply_markup=single_command_button_keyboard())
+    await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
     await state.clear()
 
 
@@ -203,8 +243,8 @@ async def pre_process_post_to_ev(message: Message, state: FSMContext):
     await state.set_state(PostState.waiting_for_post_to_ev_text)
 
 
-@router.message(PostState.waiting_for_post_to_all_text)
-async def process_post_to_all(message: Message, state: FSMContext):
+@router.message(PostState.waiting_for_post_to_ev_text)
+async def process_post_to_ev(message: Message, state: FSMContext):
     data = await state.get_data()
     event_name = data.get("event_name")
     user_ids = await get_users_tg_id_in_event(event_name)
@@ -213,6 +253,39 @@ async def process_post_to_all(message: Message, state: FSMContext):
         return
     for user_id in user_ids:
         await safe_send_message(bot, user_id, text=message.text, reply_markup=single_command_button_keyboard())
+    await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
+    await state.clear()
+
+
+# https://chatgpt.com/share/673d7302-fcc0-8004-877f-11760ff426f4
+@router.callback_query(F.data == "post_wth_op_to_ev")
+async def cmd_post_to_ev(callback: F.CallbackQuery, state: FSMContext):
+    events = await get_all_events()
+    if not events:
+        await safe_send_message(bot, callback, text="У вас нет событий")
+        return
+    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await state.set_state(PostState.waiting_for_post_wth_op_to_ev_ev)
+
+
+@router.message(PostState.waiting_for_post_wth_op_to_ev_ev)
+async def pre_process_post_to_ev(message: Message, state: FSMContext):
+    await safe_send_message(bot, message, text="Отправьте мне ссылку на гугл-форму")
+    await state.update_data(event_name=message.text)
+    await state.set_state(PostState.waiting_for_post_wth_op_to_ev_text)
+
+
+@router.message(PostState.waiting_for_post_wth_op_to_ev_text)
+async def process_post_to_wth_op_to_ev(message: Message, state: FSMContext):
+    data = await state.get_data()
+    event_name = data.get("event_name")
+    user_ids = await get_users_tg_id_in_event(event_name)
+    if not user_ids:
+        await safe_send_message(bot, message, text="У вас нет пользователей принявших участие в этом событии", reply_markup=single_command_button_keyboard())
+        return
+    for user_id in user_ids:
+        await safe_send_message(bot, user_id, text='some text', reply_markup=feedback_form_ikb(message.text))
+    await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
     await state.clear()
 
 

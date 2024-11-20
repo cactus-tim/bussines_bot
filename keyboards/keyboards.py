@@ -38,6 +38,7 @@ def post_target():
     ikb = [
         [InlineKeyboardButton(text="Всем пользователям", callback_data="post_to_all")],
         [InlineKeyboardButton(text="Всем участникам ивента", callback_data="post_to_ev")],
+        [InlineKeyboardButton(text="Обратная связь от всех участников ивента", callback_data="post_wth_op_to_ev")],
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
@@ -90,6 +91,13 @@ def quest_keyboard_1():
 def quest_keyboard_2():
     ikb = [
         [InlineKeyboardButton(text='Анкета для отбора в команду', url='https://forms.gle/SHYAncupSwvmSEZp7')]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
+
+def feedback_form_ikb(url):
+    ikb = [
+        [InlineKeyboardButton(text='some text for feedback', url=url)]
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
