@@ -23,7 +23,8 @@ async def cmd_start(message: Message, command: CommandObject):
             user = await get_user(message.from_user.id)
             if user == "not created":
                 await create_user(message.from_user.id, {'handler': message.from_user.username, 'first_contact': hash_value})
-            await safe_send_message(bot, message, 'Некоторое приветственное сообщение, текст для которого тоже надо написать', reply_markup=single_command_button_keyboard())
+            name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
+            await safe_send_message(bot, message, f'Привет, {name}!', reply_markup=single_command_button_keyboard())
             await start(message)
         else:
             user = await get_user(message.from_user.id)

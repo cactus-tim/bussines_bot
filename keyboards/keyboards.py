@@ -73,7 +73,7 @@ def apply_winner():
 
 def single_command_button_keyboard():
     keyboard = ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="Анкета для отбора в команду")]],
+        keyboard=[[KeyboardButton(text="Стать частью команды HSE SPB Business Club")]],
         resize_keyboard=True
     )
     return keyboard
@@ -81,7 +81,7 @@ def single_command_button_keyboard():
 
 def quest_keyboard_1():
     ikb = [
-        [InlineKeyboardButton(text='Стать частью команды HSE SPB Business Club', callback_data="next")]
+        [InlineKeyboardButton(text='Приступить к первому этапу', callback_data="next")]
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
@@ -89,7 +89,7 @@ def quest_keyboard_1():
 
 def quest_keyboard_2():
     ikb = [
-        [InlineKeyboardButton(text='Стать частью команды HSE SPB Business Club', url='https://forms.gle/SHYAncupSwvmSEZp7')]
+        [InlineKeyboardButton(text='Анкета для отбора в команду', url='https://forms.gle/SHYAncupSwvmSEZp7')]
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
