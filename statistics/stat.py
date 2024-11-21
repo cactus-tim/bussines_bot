@@ -37,8 +37,7 @@ async def get_stat_all_in_ev(user_id: int, event_name: str):
             "ID": user.id,
             "Handler": user.handler,
             "Is Superuser": user.is_superuser,
-            "Event Count": user.event_cnt,
-            "Strick": user.strick
+            "Status": (True if user.status == 'been' else False)
         }
         for user in users
     ]

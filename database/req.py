@@ -147,6 +147,7 @@ async def update_event(name: str, data: dict):
             await session.commit()
 
 
+@db_error_handler
 async def get_all_events_in_p():
     async with async_session() as session:
         event = await session.execute(select(distinct(Event.name)).where(Event.status == "in_progress"))
@@ -233,6 +234,7 @@ async def create_user_x_event_row(user_id: int, event_name: str):
         if row == 'not created':
             data['user_id'] = user_id
             data['event_name'] = event_name
+            data['status'] = 'reg'
             user_x_event_data = UserXEvent(**data)
             session.add(user_x_event_data)
             await session.commit()
@@ -240,12 +242,26 @@ async def create_user_x_event_row(user_id: int, event_name: str):
             raise Error409
 
 
+async def update_user_x_event_row_status(user_id: int, event_name: str, new_status: str):
+    async with async_session() as session:
+        row = await get_user_x_event_row(user_id, event_name)
+        if row == 'not created':
+            raise Error404
+        else:
+            setattr(row, 'status', new_status)
+            session.add(row)
+            await session.commit()
+
+
 @db_error_handler
 async def get_random_user_from_event(event_name: str):
     async with async_session() as session:
         result = await session.execute(
             select(UserXEvent.user_id)
-            .where(UserXEvent.event_name == event_name)
+            .where(and_(
+                UserXEvent.event_name == event_name,
+                UserXEvent.status == 'been'
+            ))
             .order_by(func.random())
             .limit(1)
         )
@@ -262,6 +278,7 @@ async def get_random_user_from_event_wth_bad(event_name: str, bad_ids: int):
             select(UserXEvent.user_id)
             .where(and_(
                 UserXEvent.event_name == event_name,
+                UserXEvent.status == 'been',
                 UserXEvent.user_id.notin_(bad_ids)
             ))
             .order_by(func.random())
@@ -276,7 +293,23 @@ async def get_random_user_from_event_wth_bad(event_name: str, bad_ids: int):
 @db_error_handler
 async def get_users_tg_id_in_event(event_name: str):
     async with async_session() as session:
-        users_tg_id = await session.execute(select(distinct(UserXEvent.user_id)).where(UserXEvent.event_name == event_name))
+        users_tg_id = await session.execute(select(distinct(UserXEvent.user_id)).where(and_(
+            UserXEvent.event_name == event_name,
+            UserXEvent.status == 'been'
+        )))
+        users_tg_ids = users_tg_id.scalars().all()
+        if not users_tg_ids:
+            raise Error404
+        return users_tg_ids
+
+
+@db_error_handler
+async def get_users_tg_id_in_event_bad(event_name: str):
+    async with async_session() as session:
+        users_tg_id = await session.execute(select(distinct(UserXEvent.user_id)).where(and_(
+            UserXEvent.event_name == event_name,
+            UserXEvent.status == 'reg'
+        )))
         users_tg_ids = users_tg_id.scalars().all()
         if not users_tg_ids:
             raise Error404
@@ -287,7 +320,7 @@ async def get_users_tg_id_in_event(event_name: str):
 async def get_all_users_in_event(event_name: str):
     async with async_session() as session:
         users = await session.execute(
-            select(User)
+            select(User, UserXEvent.status)
             .join(UserXEvent, User.id == UserXEvent.user_id)
             .where(UserXEvent.event_name == event_name)
         )
@@ -295,3 +328,19 @@ async def get_all_users_in_event(event_name: str):
         if not users_tg_ids:
             raise Error404
         return users_tg_ids
+
+
+@db_error_handler
+async def get_all_user_events(user_id: int):
+    async with async_session() as session:
+        query = (
+            select(Event)
+            .join(UserXEvent, Event.name == UserXEvent.event_name)
+            .where(UserXEvent.user_id == user_id)
+            .where(Event.status == 'in_progress')
+        )
+        result = await session.execute(query)
+        events = result.scalars().all()
+        if not events:
+            raise Error404
+        return events

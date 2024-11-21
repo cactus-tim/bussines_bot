@@ -53,6 +53,12 @@ def post_ev_tagret(events: list):
     return keyboard
 
 
+def events_ikb(events: list):
+    ikb = [[InlineKeyboardButton(text=ev.desc, callback_data=ev.name)] for ev in events]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
+
+
 def stat_target():
     ikb = [
         [InlineKeyboardButton(text="Всех пользователей", callback_data="stat_all")],
@@ -94,6 +100,7 @@ def quest_keyboard_2():
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
+
 
 def feedback_form_ikb(url):
     ikb = [

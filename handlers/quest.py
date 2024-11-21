@@ -1,5 +1,6 @@
 from aiogram import types
 from aiogram.filters import Command
+from aiogram.types import CallbackQuery
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -80,7 +81,7 @@ async def start(message: types.Message):
 
 
 @router.callback_query(F.data == "next")
-async def start_2(callback: F.CallbackQuery):
+async def start_2(callback: CallbackQuery):
     await safe_send_message(bot, callback, msg2, reply_markup=quest_keyboard_2())
 
 

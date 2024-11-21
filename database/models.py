@@ -62,6 +62,7 @@ class UserXEvent(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
     event_name = Column(String, ForeignKey("event.name"), nullable=False)
+    status = Column(String, default='')  # reg, been, nbeeb (after event all reg -> nbeen)
 
 
 class Vacancy(Base):

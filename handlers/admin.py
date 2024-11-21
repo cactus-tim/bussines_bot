@@ -1,7 +1,7 @@
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram import Router, F
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from datetime import date
@@ -11,7 +11,7 @@ from bot_instance import bot
 from database.req import (get_user, create_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,
                           get_users_tg_id_in_event, get_random_user_from_event, update_event,
                           get_random_user_from_event_wth_bad, get_all_vacancy_names, get_event, get_all_events_in_p,
-                          create_event)
+                          create_event, get_users_tg_id_in_event_bad, update_user_x_event_row_status)
 from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner, vacancy_selection_keyboard, \
     single_command_button_keyboard, feedback_form_ikb
 from statistics.stat import get_stat_all, get_stat_all_in_ev, get_stat_quest
@@ -46,7 +46,10 @@ async def add_event_part_3(message: Message, state: FSMContext):
     dat = date(int(message.text.split('.')[2]), int(message.text.split('.')[1]), int(message.text.split('.')[0]))
     await create_event(name, {'desc': desc, 'date': dat})
     # link = "https://t.me/?start={event.name}"
-    await safe_send_message(bot, message, f"все круто, все создано!!\nсслыка:\nhttps://t.me/brewbegtbot?start={name}")
+    await safe_send_message(bot, message, f"все круто, все создано!!\nсслыка для регистрации:"
+                                          f"\nhttps://t.me/brewbegtbot?start={name}"
+                                          f"ссылка для подтверждения:"
+                                          f"\nhttps://t.me/brewbegtbot?start=reg_{name}")
     await state.clear()
 
 
@@ -66,13 +69,19 @@ async def get_link(message: Message, state: FSMContext):
 async def make_link(message: Message, state: FSMContext):
     event = await get_event(message.text)
     # link = "https://t.me/?start={event.name}"
-    await safe_send_message(bot, message, f"https://t.me/brewbegtbot?start={event.name}")
+    await safe_send_message(bot, message, f"сслыка для регистрации:"
+                                          f"\nhttps://t.me/brewbegtbot?start=reg_{event.name}"
+                                          f"\nссылка для подтверждения:"
+                                          f"\nhttps://t.me/brewbegtbot?start={event.name}")
     await state.clear()
 
 
 @router.message(Command("end_event"))
 async def cmd_end_event(message: Message, state: FSMContext):
     events = await get_all_events_in_p()
+    if not events:
+        await safe_send_message(bot, message, "Нет актиыных событий(")
+        return
     await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_tagret(events))
     await state.set_state(EventState.waiting_ev)
 
@@ -94,7 +103,7 @@ async def process_end_event(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "reroll")
-async def reroll_end_event(callback: F.CallbackQuery, state: FSMContext):
+async def reroll_end_event(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     bad_ids = data.get("bad_ids")
     user_id = data.get("user_id")
@@ -113,7 +122,7 @@ async def reroll_end_event(callback: F.CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(F.data == "confirm")
-async def confirm_end_event(callback: F.CallbackQuery, state: FSMContext):
+async def confirm_end_event(callback: CallbackQuery, state: FSMContext):
     await safe_send_message(bot, callback, text="Отличное, рассылаю все информацию")
     data = await state.get_data()
     event_name = data.get("event_name")
@@ -123,9 +132,13 @@ async def confirm_end_event(callback: F.CallbackQuery, state: FSMContext):
     user_ids = await get_users_tg_id_in_event(event_name)
     if not user_ids:
         await safe_send_message(bot, user_id, text=f"У вас нет пользоватеkей))", reply_markup=single_command_button_keyboard())
-        return
-    for user_id in user_ids:
-        await safe_send_message(bot, user_id, text=f"Сегодняшний победитель - @{user.handler}", reply_markup=single_command_button_keyboard())
+    else:
+        for user_id in user_ids:
+            await safe_send_message(bot, user_id, text=f"Сегодняшний победитель - @{user.handler}", reply_markup=single_command_button_keyboard())
+    bad_user_ids = await get_users_tg_id_in_event_bad(event_name)
+    if bad_user_ids:
+        for user_id in bad_user_ids:
+            await update_user_x_event_row_status(user_id, event_name, 'nbeen')
     await state.clear()
 
 
@@ -209,7 +222,7 @@ async def cmd_send_post(message: Message):
 
 
 @router.callback_query(F.data == "post_to_all")
-async def cmd_post_to_all(callback: F.CallbackQuery, state: FSMContext):
+async def cmd_post_to_all(callback: CallbackQuery, state: FSMContext):
     await safe_send_message(bot, callback, text="Отправьте мне пост")
     await state.set_state(PostState.waiting_for_post_to_all_text)
 
@@ -227,7 +240,7 @@ async def process_post_to_all(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "post_to_ev")
-async def cmd_post_to_ev(callback: F.CallbackQuery, state: FSMContext):
+async def cmd_post_to_ev(callback: CallbackQuery, state: FSMContext):
     events = await get_all_events()
     if not events:
         await safe_send_message(bot, callback, text="У вас нет событий")
@@ -259,7 +272,7 @@ async def process_post_to_ev(message: Message, state: FSMContext):
 
 # https://chatgpt.com/share/673d7302-fcc0-8004-877f-11760ff426f4
 @router.callback_query(F.data == "post_wth_op_to_ev")
-async def cmd_post_to_ev(callback: F.CallbackQuery, state: FSMContext):
+async def cmd_post_to_ev(callback: CallbackQuery, state: FSMContext):
     events = await get_all_events()
     if not events:
         await safe_send_message(bot, callback, text="У вас нет событий")
@@ -312,12 +325,12 @@ async def cmd_send_stat(message: Message):
 
 
 @router.callback_query(F.data == "stat_all")
-async def cmd_stat_all(callback: F.CallbackQuery):
+async def cmd_stat_all(callback: CallbackQuery):
     await get_stat_all(callback.from_user.id)
 
 
 @router.callback_query(F.data == "stat_ev")
-async def cmd_stat_ev(callback: F.CallbackQuery, state: FSMContext):
+async def cmd_stat_ev(callback: CallbackQuery, state: FSMContext):
     events = await get_all_events()
     if not events:
         await safe_send_message(bot, callback, text="У вас нет событий", reply_markup=single_command_button_keyboard())
@@ -334,5 +347,5 @@ async def process_post_to_all(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "stat_quest")
-async def cmd_stat_ev(callback: F.CallbackQuery):
+async def cmd_stat_ev(callback: CallbackQuery):
     await get_stat_quest(callback.from_user.id)
