@@ -242,6 +242,7 @@ async def create_user_x_event_row(user_id: int, event_name: str):
             raise Error409
 
 
+@db_error_handler
 async def update_user_x_event_row_status(user_id: int, event_name: str, new_status: str):
     async with async_session() as session:
         row = await get_user_x_event_row(user_id, event_name)
@@ -324,7 +325,7 @@ async def get_all_users_in_event(event_name: str):
             .join(UserXEvent, User.id == UserXEvent.user_id)
             .where(UserXEvent.event_name == event_name)
         )
-        users_tg_ids = users.scalars().all()
+        users_tg_ids = users.all()
         if not users_tg_ids:
             raise Error404
         return users_tg_ids

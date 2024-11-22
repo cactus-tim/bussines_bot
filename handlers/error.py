@@ -1,3 +1,4 @@
+import requests
 from aiogram import Router, types, Bot
 import asyncio
 from aiogram.types import ReplyKeyboardRemove, Message
@@ -7,6 +8,7 @@ from aiogram.exceptions import TelegramBadRequest, TelegramRetryAfter, TelegramU
 from bot_instance import logger, bot
 from aiohttp import ClientConnectorError
 
+from keyboards.keyboards import single_command_button_keyboard
 
 router = Router()
 
@@ -33,7 +35,7 @@ async def global_error_handler(update: types.Update, exception: Exception):
         return True
 
 
-async def safe_send_message(bott: Bot, recipient, text: str, reply_markup=ReplyKeyboardRemove(), retry_attempts=3, delay=5) -> Message:
+async def safe_send_message(bott: Bot, recipient, text: str, reply_markup=single_command_button_keyboard(), retry_attempts=3, delay=5) -> Message:
     """Отправка сообщения с обработкой ClientConnectorError, поддержкой reply_markup и выбором метода отправки."""
 
     for attempt in range(retry_attempts):
@@ -59,3 +61,15 @@ async def safe_send_message(bott: Bot, recipient, text: str, reply_markup=ReplyK
         except Exception as e:
             logger.error(str(e))
             return None
+
+
+async def make_short_link(url):
+    try:
+        response = requests.post('https://clck.ru/--', data={'url': url})
+        if response.status_code == 200:
+            return response.text
+        else:
+            return None
+    except Exception as e:
+        logger.error(str(e))
+        return None

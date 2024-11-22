@@ -37,9 +37,9 @@ async def get_stat_all_in_ev(user_id: int, event_name: str):
             "ID": user.id,
             "Handler": user.handler,
             "Is Superuser": user.is_superuser,
-            "Status": (True if user.status == 'been' else False)
+            "Status": (True if status == 'been' else False)
         }
-        for user in users
+        for user, status in users
     ]
     df = pd.DataFrame(data)
     with BytesIO() as buffer:

@@ -7,6 +7,8 @@ from aiogram.client.bot import DefaultBotProperties
 # from aiogram.fsm.storage.redis import RedisStorage
 import logging
 import asyncio
+from cryptography.fernet import Fernet
+
 
 sys.path.append(os.path.join(sys.path[0], 'lida'))
 
@@ -33,3 +35,6 @@ logger = logging.getLogger(__name__)
 event = asyncio.Event()
 
 # storage = RedisStorage.from_url("redis://localhost")
+
+key = os.getenv('KEY').encode('utf-8')
+cipher = Fernet(key)

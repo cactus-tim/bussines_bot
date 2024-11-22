@@ -12,7 +12,7 @@ from database.models import async_main
 
 
 def register_routers(dp: Dispatcher) -> None:
-    dp.include_routers(user.router, admin.router, quest.router, error.router)
+    dp.include_routers(admin.router, quest.router, error.router, user.router)
 
 
 async def main() -> None:
