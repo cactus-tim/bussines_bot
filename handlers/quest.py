@@ -69,7 +69,7 @@ class Questionnaire(StatesGroup):
     another_vacancy = State()
 
 
-@router.message(F.text == "Анкета для отбора в команду")
+@router.message(F.text == "Стать частью команды HSE SPB Business Club")
 async def start2(message: types.Message):
     await start(message)
 
