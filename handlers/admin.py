@@ -50,9 +50,9 @@ async def add_event_part_3(message: Message, state: FSMContext):
     await create_event(name, {'desc': desc, 'date': dat})
     data1 = f'reg_{name}'
     data2 = name
-    url = f"https://t.me/brewbegtbot?start={data1}"
+    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}"
     short_url1 = await make_short_link(url)
-    url = f"https://t.me/brewbegtbot?start={data2}"
+    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"
     short_url2 = await make_short_link(url)
     if short_url1 and short_url2:
         await safe_send_message(bot, message, f"все круто, все создано!!\nсслыка для регистрации:"
@@ -86,9 +86,9 @@ async def make_link(message: Message, state: FSMContext):
     # link = "https://t.me/?start={event.name}"
     data1 = f'reg_{event.name}'
     data2 = event.name
-    url = f"https://t.me/brewbegtbot?start={data1}"
+    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}"
     short_url1 = await make_short_link(url)
-    url = f"https://t.me/brewbegtbot?start={data2}"
+    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"
     short_url2 = await make_short_link(url)
     if short_url1 and short_url2:
         await safe_send_message(bot, message, f"сслыка для регистрации:"

@@ -152,6 +152,8 @@ async def cmd_info(message: Message):
                                                    "/start - перезапуск бота\n"
                                                    "/info - информация о доступных комнадах\n"
                                                    "/quest - пройти анкетирование для отбора в команду\n"
+                                                   "/get_ref - получить реферальную ссылку\n"
+                                                   "/get_ref_to_event - получить реферальную ссылку на событие\n"
                                                    "/send_stat - получить статистику о пользователях\n"
                                                    "/send_post - отправить пост пользователям\n"
                                                    "/add_event - создает новое событие\n"
@@ -171,12 +173,11 @@ async def cmd_info(message: Message):
 @router.message(Command("get_ref"))
 async def get_ref(message: Message):
     data = f'ref{message.from_user.id}'
-    url = f"https://t.me/brewbegtbot?start={data}"
+    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data}"
     short_url = await make_short_link(url)
     if short_url:
         await safe_send_message(bot, message, "Вот твоя реферальная ссылка:\n"
                                               f"{short_url}", reply_markup=single_command_button_keyboard()
-                                # f"https://t.me/?start={message.from_user.id}"
                                 )
     else:
         await safe_send_message(bot, message, "Какая то ошибка. Попробуйте еще раз позже", reply_markup=single_command_button_keyboard())
@@ -197,12 +198,11 @@ async def get_ref_v2_part1(message: Message):
 async def get_ref_v2_part2(callback: CallbackQuery):
     event = await get_event(callback.data)
     data = f'ref_{event.name}__{callback.from_user.id}'
-    url = f"https://t.me/brewbegtbot?start={data}"
+    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data}"
     short_url = await make_short_link(url)
     if short_url:
         await safe_send_message(bot, callback, f"Вот твоя реферальная ссылка для событие {event.desc}:\n"
                                                f"{short_url}", reply_markup=single_command_button_keyboard()
-                                # f"https://t.me/?start=ref_{event.name}&{callback.from_user.id}"
                                 )
     else:
         await safe_send_message(bot, callback, "Какая то ошибка. Попробуйте еще раз позже", reply_markup=single_command_button_keyboard())
