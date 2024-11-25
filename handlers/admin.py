@@ -8,7 +8,7 @@ from datetime import date
 from cryptography.fernet import Fernet
 
 from handlers.error import safe_send_message, make_short_link
-from bot_instance import bot, cipher
+from bot_instance import bot
 from database.req import (get_user, create_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,
                           get_users_tg_id_in_event, get_random_user_from_event, update_event,
                           get_random_user_from_event_wth_bad, get_all_vacancy_names, get_event, get_all_events_in_p,

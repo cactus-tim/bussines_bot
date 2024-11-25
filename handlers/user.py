@@ -10,25 +10,13 @@ from aiogram.fsm.state import State, StatesGroup
 import urllib.parse
 
 from handlers.error import safe_send_message, make_short_link
-from bot_instance import bot, cipher
+from bot_instance import bot
 from database.req import get_user, create_user, create_user_x_event_row, update_user, get_all_user_events, get_event, \
     update_user_x_event_row_status
 from keyboards.keyboards import single_command_button_keyboard, events_ikb
 from handlers.quest import start
 
 router = Router()
-
-
-def simple_encrypt(data: str) -> str:
-    """Шифрует данные и возвращает зашифрованную строку."""
-    encrypted_data = cipher.encrypt(data.encode('utf-8'))
-    return base64.urlsafe_b64encode(encrypted_data).decode('utf-8')
-
-
-def simple_decrypt(encrypted_data: str) -> str:
-    """Расшифровывает данные и возвращает исходную строку."""
-    encrypted_data_bytes = base64.urlsafe_b64decode(encrypted_data)
-    return cipher.decrypt(encrypted_data_bytes).decode('utf-8')
 
 
 @router.message(CommandStart())
