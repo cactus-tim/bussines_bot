@@ -32,6 +32,24 @@ class EventReg(StatesGroup):
 give_away_ids = [483458201]
 
 
+mmsg = """
+🥞 Встреча с совладельцем «Теремка» в НИУ ВШЭ
+
+📎 Программа выступления:
+
+• Как с нуля построить компанию с многомиллиардным оборотом?
+• Почему клиенты возвращаются в «Теремок» снова и снова?
+• Какие навыки помогли выстроить успешную организацию в высоко конкурентной среде?
+• Как сделать компанию успешной через закладываемые ценности? 
+
+📅 4 декабря в 18:00
+
+📍 НИУ ВШЭ, Кантемировская улица, 3к1, ауд. 436
+
+Вся дальнейшая информация будет в нашем канале @HSE_SPB_Business_Club
+"""
+
+
 @router.message(CommandStart())
 async def cmd_start(message: Message, command: CommandObject, state: FSMContext):
     hash_value = command.args
@@ -41,20 +59,8 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
             if user == "not created":
                 await create_user(message.from_user.id,
                                   {'handler': message.from_user.username, 'first_contact': hash_value[4:]})
-                name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
                 await safe_send_message(bot, message.from_user.id,
-                                        text=f"{name}, привет от команды HSE SPB Business Club 🎉\n\n"
-                                             "Здесь можно будет принимать участие в розыгрышах, подавать заявку на "
-                                             "отбор в команду"
-                                             "и закрытый клуб, а также задавать вопросы и получать анонсы "
-                                             "мероприятий в числе первых.\n\n"
-                                             "Рекомендуем оставить уведомления включенными: так ты не пропустишь ни "
-                                             "одно важное"
-                                             "событие клуба.\n\n"
-                                             "Также у нас есть Telegram-канал, где мы регулярно публикуем полезные "
-                                             "посты на тему"
-                                             "бизнеса.\n"
-                                             "Подписывайся: @HSE_SPB_Business_Club",
+                                        text=mmsg,
                                         reply_markup=single_command_button_keyboard())
             event_name = hash_value[4:-2]
             user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
@@ -75,18 +81,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                                       {'handler': message.from_user.username, 'first_contact': str(user_id)})
                     name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
                     await safe_send_message(bot, message.from_user.id,
-                                            text=f"{name}, привет от команды HSE SPB Business Club 🎉\n\n"
-                                                 "Здесь можно будет принимать участие в розыгрышах, подавать заявку на "
-                                                 "отбор в команду"
-                                                 "и закрытый клуб, а также задавать вопросы и получать анонсы "
-                                                 "мероприятий в числе первых.\n\n"
-                                                 "Рекомендуем оставить уведомления включенными: так ты не пропустишь ни "
-                                                 "одно важное"
-                                                 "событие клуба.\n\n"
-                                                 "Также у нас есть Telegram-канал, где мы регулярно публикуем полезные "
-                                                 "посты на тему"
-                                                 "бизнеса.\n"
-                                                 "Подписывайся: @HSE_SPB_Business_Club",
+                                            text=mmsg,
                                             reply_markup=single_command_button_keyboard())
                 if user_id in give_away_ids:
                     ref_give_away = await get_ref_give_away(message.from_user.id, event_name)
