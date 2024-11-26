@@ -89,17 +89,17 @@ async def add_event_part_5(message: Message, state: FSMContext):
     data1 = f'reg_{name}'
     data2 = name
     url1 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}"
-    short_url1 = await make_short_link(url1)
+    # short_url1 = await make_short_link(url1)
     url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"
-    short_url2 = await make_short_link(url2)
-    if short_url1 and short_url2:
-        await safe_send_message(bot, message, f"все круто, все создано!!\nсслыка для регистрации:"
-                                              f"\n{short_url1}"
-                                              f"\nссылка для подтверждения:"
-                                              f"\n{short_url2}",
-                                reply_markup=single_command_button_keyboard())
-    else:
-        await safe_send_message(bot, message, "Какая то ошибка. Попробуйте еще раз позже, для этого используйте /get_link", reply_markup=single_command_button_keyboard())
+    # short_url2 = await make_short_link(url2)
+    # if short_url1 and short_url2:
+    await safe_send_message(bot, message, f"все круто, все создано!!\nсслыка для регистрации:"
+                                          f"\n{url1}"
+                                          f"\nссылка для подтверждения:"
+                                          f"\n{url2}",
+                            reply_markup=single_command_button_keyboard())
+    # else:
+    #     await safe_send_message(bot, message, "Какая то ошибка. Попробуйте еще раз позже, для этого используйте /get_link", reply_markup=single_command_button_keyboard())
     await state.clear()
 
 
@@ -125,17 +125,17 @@ async def make_link(message: Message, state: FSMContext):
     data1 = f'reg_{event.name}'
     data2 = event.name
     url1 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}"
-    short_url1 = await make_short_link(url1)
+    # short_url1 = await make_short_link(url1)
     url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"
-    short_url2 = await make_short_link(url2)
-    if short_url1 and short_url2:
-        await safe_send_message(bot, message, f"сслыка для регистрации:"
-                                              f"\n{short_url1}"
-                                              f"\nссылка для подтверждения:"
-                                              f"\n{short_url2}",
-                                reply_markup=single_command_button_keyboard())
-    else:
-        await safe_send_message(bot, message, "Какая то ошибка. Попробуйте еще раз позже, для этого используйте /get_link", reply_markup=single_command_button_keyboard())
+    # short_url2 = await make_short_link(url2)
+    # if short_url1 and short_url2:
+    await safe_send_message(bot, message, f"сслыка для регистрации:"
+                                          f"\n{url1}"
+                                          f"\nссылка для подтверждения:"
+                                          f"\n{url2}",
+                            reply_markup=single_command_button_keyboard())
+    # else:
+    #     await safe_send_message(bot, message, "Какая то ошибка. Попробуйте еще раз позже, для этого используйте /get_link", reply_markup=single_command_button_keyboard())
     await state.clear()
 
 

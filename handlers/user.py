@@ -99,7 +99,6 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 await safe_send_message(bot, user_id, f"По твоей рефеальной сслыке зарегистрировался на событие"
                                                       f" пользователь @{message.from_user.username}!")
                 # TODO: give reward to both (ref_v2)
-                # TODO: some messages, discuss wth Anton/Vitaly
                 user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
                 if user_x_event == 'not created':
                     event = await get_event(event_name)
@@ -295,10 +294,10 @@ async def get_ref_v2_part2(callback: CallbackQuery):
     event = await get_event(callback.data)
     data = f'ref_{event.name}__{callback.from_user.id}'
     url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data}"
-    short_url = await make_short_link(url)
-    if short_url:
-        await safe_send_message(bot, callback, f"Вот твоя реферальная ссылка для событие {event.desc}:\n"
-                                               f"{short_url}", reply_markup=single_command_button_keyboard()
-                                )
-    else:
-        await safe_send_message(bot, callback, "Какая то ошибка. Попробуйте еще раз позже", reply_markup=single_command_button_keyboard())
+    # short_url = await make_short_link(url)
+    # if short_url:
+    await safe_send_message(bot, callback, f"Вот твоя реферальная ссылка для событие {event.desc}:\n"
+                                           f"{url}", reply_markup=single_command_button_keyboard()
+                            )
+    # else:
+    #     await safe_send_message(bot, callback, "Какая то ошибка. Попробуйте еще раз позже", reply_markup=single_command_button_keyboard())
