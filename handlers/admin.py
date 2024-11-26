@@ -23,6 +23,8 @@ router = Router()
 class EventCreateState(StatesGroup):
     waiting_event_name = State()
     waiting_event_date = State()
+    waiting_event_time = State()
+    waiting_event_place = State()
 
 
 @router.message(Command("add_event"))
@@ -41,19 +43,55 @@ async def add_event_part_2(message: Message, state: FSMContext):
     await state.set_state(EventCreateState.waiting_event_date)
 
 
+month = {
+    1: " января",
+    2: " февраля",
+    3: " марта",
+    4: " апреля",
+    5: " мая",
+    6: " июня",
+    7: " июля",
+    8: " августа",
+    9: " сентября",
+    10: " октября",
+    11: " ноября",
+    12: " декабря"
+}
+
+
 @router.message(EventCreateState.waiting_event_date)
 async def add_event_part_3(message: Message, state: FSMContext):
     data = await state.get_data()
     desc = data.get('desc')
     name = "event" + message.text.replace('.', '_')
-    dat = date(int(message.text.split('.')[2]), int(message.text.split('.')[1]), int(message.text.split('.')[0]))
+    dat = (message.text.split('.')[0] if message.text.split('.')[0][0] != '0' else message.text.split('.')[0][1]) + '' + month[int((message.text.split('.')[1] if message.text.split('.')[1][0] != '0' else message.text.split('.')[1][1]))]
+    # dat = date(int(message.text.split('.')[2]), int(message.text.split('.')[1]), int(message.text.split('.')[0]))
     await create_event(name, {'desc': desc, 'date': dat})
+    await safe_send_message(bot, message, 'Отправьте время проведение мероприятия')
+    await state.update_data({'name': name})
+    await state.set_state(EventCreateState.waiting_event_time)
+
+
+@router.message(EventCreateState.waiting_event_time)
+async def add_event_part_4(message: Message, state: FSMContext):
+    data = await state.get_data()
+    name = data.get('name')
+    await update_event(name, {'time': message.text})
+    await safe_send_message(bot, message, 'Отправьте место проведение мероприятия')
+    await state.set_state(EventCreateState.waiting_event_place)
+
+
+@router.message(EventCreateState.waiting_event_place)
+async def add_event_part_5(message: Message, state: FSMContext):
+    data = await state.get_data()
+    name = data.get('name')
+    await update_event(name, {'place': message.text})
     data1 = f'reg_{name}'
     data2 = name
-    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}"
-    short_url1 = await make_short_link(url)
-    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"
-    short_url2 = await make_short_link(url)
+    url1 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}"
+    short_url1 = await make_short_link(url1)
+    url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"
+    short_url2 = await make_short_link(url2)
     if short_url1 and short_url2:
         await safe_send_message(bot, message, f"все круто, все создано!!\nсслыка для регистрации:"
                                               f"\n{short_url1}"
@@ -86,10 +124,10 @@ async def make_link(message: Message, state: FSMContext):
     # link = "https://t.me/?start={event.name}"
     data1 = f'reg_{event.name}'
     data2 = event.name
-    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}"
-    short_url1 = await make_short_link(url)
-    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"
-    short_url2 = await make_short_link(url)
+    url1 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}"
+    short_url1 = await make_short_link(url1)
+    url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"
+    short_url2 = await make_short_link(url2)
     if short_url1 and short_url2:
         await safe_send_message(bot, message, f"сслыка для регистрации:"
                                               f"\n{short_url1}"

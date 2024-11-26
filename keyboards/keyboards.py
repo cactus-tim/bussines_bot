@@ -108,3 +108,25 @@ def feedback_form_ikb(url):
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
+
+
+def yes_no_ikb():
+    ikb = [
+        [
+            InlineKeyboardButton(text='ДА', callback_data='event_yes'),
+            InlineKeyboardButton(text='НЕТ', callback_data='event_no')
+         ]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
+
+
+def yes_no_hse_ikb():
+    ikb = [
+        [
+            InlineKeyboardButton(text='ДА', callback_data='hse_yes'),
+            InlineKeyboardButton(text='НЕТ', callback_data='hse_no')
+         ]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard

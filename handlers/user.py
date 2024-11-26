@@ -12,15 +12,28 @@ import urllib.parse
 from handlers.error import safe_send_message, make_short_link
 from bot_instance import bot
 from database.req import get_user, create_user, create_user_x_event_row, update_user, get_all_user_events, get_event, \
-    update_user_x_event_row_status
-from keyboards.keyboards import single_command_button_keyboard, events_ikb
+    update_user_x_event_row_status, update_reg_event, check_completly_reg_event, create_reg_event, get_reg_event, \
+    get_user_x_event_row, get_ref_give_away, create_ref_give_away
+from keyboards.keyboards import single_command_button_keyboard, events_ikb, yes_no_ikb, yes_no_hse_ikb
 from handlers.quest import start
 
 router = Router()
 
 
+class EventReg(StatesGroup):
+    waiting_name = State()
+    waiting_surname = State()
+    waiting_fathername = State()
+    waiting_mail = State()
+    waiting_phone = State()
+    waiting_org = State()
+
+
+give_away_ids = [483458201]
+
+
 @router.message(CommandStart())
-async def cmd_start(message: Message, command: CommandObject):
+async def cmd_start(message: Message, command: CommandObject, state: FSMContext):
     hash_value = command.args
     user = await get_user(message.from_user.id)
     if hash_value:
@@ -43,9 +56,15 @@ async def cmd_start(message: Message, command: CommandObject):
                                              "бизнеса.\n"
                                              "Подписывайся: @HSE_SPB_Business_Club",
                                         reply_markup=single_command_button_keyboard())
-            await create_user_x_event_row(message.from_user.id, hash_value[4:])
-            await safe_send_message(bot, message, text="Вы удачно зарегистрировались!",
-                                    reply_markup=single_command_button_keyboard())
+            event_name = hash_value[4:-2]
+            user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
+            if user_x_event == 'not created':
+                event = await get_event(event_name)
+                await state.update_data({'name': event_name})
+                await safe_send_message(bot, message, f'Хотите зарегистрироваться на мероприятие {event.desc},'
+                                                      f'которое пройдет {event.date} в {event.time}', reply_markup=yes_no_ikb())
+            else:
+                await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие')
         elif hash_value[:3] == 'ref':
             if hash_value[3] == '_':
                 event_part, user_id = hash_value.split("__")
@@ -53,37 +72,43 @@ async def cmd_start(message: Message, command: CommandObject):
                 user_id = int(user_id)
                 if user == "not created":
                     await create_user(message.from_user.id,
-                                      {'handler': message.from_user.username, 'first_contact': event_name})
-                    # TODO: give reward to both
-                    await safe_send_message(bot, user_id, f"По твоей рефеальной сслыке зарегистрировался "
-                                                          f"пользователь @{message.from_user.username}!")
-
+                                      {'handler': message.from_user.username, 'first_contact': str(user_id)})
+                    name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
+                    await safe_send_message(bot, message.from_user.id,
+                                            text=f"{name}, привет от команды HSE SPB Business Club 🎉\n\n"
+                                                 "Здесь можно будет принимать участие в розыгрышах, подавать заявку на "
+                                                 "отбор в команду"
+                                                 "и закрытый клуб, а также задавать вопросы и получать анонсы "
+                                                 "мероприятий в числе первых.\n\n"
+                                                 "Рекомендуем оставить уведомления включенными: так ты не пропустишь ни "
+                                                 "одно важное"
+                                                 "событие клуба.\n\n"
+                                                 "Также у нас есть Telegram-канал, где мы регулярно публикуем полезные "
+                                                 "посты на тему"
+                                                 "бизнеса.\n"
+                                                 "Подписывайся: @HSE_SPB_Business_Club",
+                                            reply_markup=single_command_button_keyboard())
+                if user_id in give_away_ids:
+                    ref_give_away = await get_ref_give_away(message.from_user.id, event_name)
+                    if not ref_give_away:
+                        await create_ref_give_away(message.from_user.id, event_name, user_id)
+                        host = await get_user(user_id)
+                        await safe_send_message(bot, message, f'Поздравляю, вы учавствуете в розыгрыше, предназначенным только для подписчиков @{host.handler}')
+                    else:
+                        await safe_send_message(bot, message, 'Вы уже учавствуете в чьем то розыгрыше')
                 await safe_send_message(bot, user_id, f"По твоей рефеальной сслыке зарегистрировался на событие"
                                                       f" пользователь @{message.from_user.username}!")
                 # TODO: give reward to both (ref_v2)
                 # TODO: some messages, discuss wth Anton/Vitaly
-                await create_user_x_event_row(message.from_user.id, event_name)
-            else:
-                if user == "not created":
-                    await create_user(message.from_user.id,
-                                      {'handler': message.from_user.username, 'first_contact': hash_value[3:]})
-                    # TODO: give reward to both
-                    await safe_send_message(bot, int(hash_value[3:]), f"По твоей рефеальной сслыке зарегистрировался "
-                                                                      f"пользователь @{message.from_user.username}!")
-                name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
-                await safe_send_message(bot, message, text=f"{name}, привет от команды HSE SPB Business Club 🎉\n\n"
-                                                           "Здесь можно будет принимать участие в розыгрышах, подавать "
-                                                           "заявку на отбор в команду"
-                                                           "и закрытый клуб, а также задавать вопросы и получать анонсы "
-                                                           "мероприятий в числе первых.\n\n"
-                                                           "Рекомендуем оставить уведомления включенными: так ты не "
-                                                           "пропустишь ни одно важное"
-                                                           "событие клуба.\n\n"
-                                                           "Также у нас есть Telegram-канал, где мы регулярно публикуем "
-                                                           "полезные посты на тему"
-                                                           "бизнеса.\n"
-                                                           "Подписывайся: @HSE_SPB_Business_Club",
-                                        reply_markup=single_command_button_keyboard())
+                user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
+                if user_x_event == 'not created':
+                    event = await get_event(event_name)
+                    await state.update_data({'name': event_name})
+                    await safe_send_message(bot, message, f'Хотите зарегистрироваться на мероприятие {event.desc},'
+                                                          f'которое пройдет {event.date} в {event.time}',
+                                            reply_markup=yes_no_ikb())
+                else:
+                    await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие')
         elif hash_value == 'otbor':
             if user == "not created":
                 await create_user(message.from_user.id,
@@ -132,6 +157,104 @@ async def cmd_start(message: Message, command: CommandObject):
                                 reply_markup=single_command_button_keyboard())
 
 
+@router.callback_query(F.data == "event_no")
+async def reg_event_part0_5(callback: CallbackQuery, state: FSMContext):
+    await safe_send_message(bot, callback, "Это очень грустно((", reply_markup=single_command_button_keyboard())
+    await state.clear()
+
+
+@router.callback_query(F.data == "event_yes")
+async def reg_event_part1(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    name = data.get('name')
+    await create_user_x_event_row(callback.from_user.id, name)
+    await safe_send_message(bot, callback, "Вы студент/сотрудник НИУ ВШЭ?", reply_markup=yes_no_hse_ikb())
+
+
+@router.callback_query(F.data == "hse_yes")
+async def reg_event_part1_5(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    name = data.get('name')
+    event = await get_event(name)
+    await safe_send_message(bot, callback, f"Мы вас ждем на мероприятии {event.desc}, которое пройдет {event.date} в {event.time}\n"
+                                               f"Место проведение - {event.place}\n\n", reply_markup=single_command_button_keyboard())
+    await state.clear()
+
+
+@router.callback_query(F.data == "hse_no")
+async def reg_event_part2(callback: CallbackQuery, state: FSMContext):
+    reg_event = await get_reg_event(callback.from_user.id)
+    if not reg_event:
+        await create_reg_event(callback.from_user.id)
+        flag = False
+    else:
+        flag = await check_completly_reg_event(callback.from_user.id)
+    if flag:
+        data = await state.get_data()
+        name = data.get('name')
+        event = await get_event(name)
+        await safe_send_message(bot, callback, "Ваши данные уже сохранены!\n"
+                                               f"Мы вас ждем на мероприятии {event.desc}, которое пройдет {event.date} в {event.time}\n"
+                                               f"Место проведение - {event.place}\n\n"
+                                               f"⚠ Обязательно возьмите с собой паспорт!", reply_markup=single_command_button_keyboard())
+        await state.clear()
+    else:
+        await safe_send_message(bot, callback, "Для пропуска на мероприятие нужно будет сообщить ваши данные. Напишите, пожалуйста, ваше имя")
+        await state.set_state(EventReg.waiting_name)
+
+
+@router.message(EventReg.waiting_name)
+async def reg_event_part3(message: Message, state: FSMContext):
+    await update_reg_event(message.from_user.id, {'name': message.text})
+    await safe_send_message(bot, message, 'Напишите, пожалуйста, вашу фамилию')
+    await state.set_state(EventReg.waiting_surname)
+
+
+@router.message(EventReg.waiting_surname)
+async def reg_event_part3(message: Message, state: FSMContext):
+    await update_reg_event(message.from_user.id, {'surname': message.text})
+    await safe_send_message(bot, message, 'Напишите, пожалуйста, ваше отчество')
+    await state.set_state(EventReg.waiting_fathername)
+
+
+@router.message(EventReg.waiting_fathername)
+async def reg_event_part3(message: Message, state: FSMContext):
+    await update_reg_event(message.from_user.id, {'fathername': message.text})
+    await safe_send_message(bot, message, 'Укажите, пожалуйста, ваш мобильный телефон')
+    await state.set_state(EventReg.waiting_phone)
+
+
+@router.message(EventReg.waiting_phone)
+async def reg_event_part3(message: Message, state: FSMContext):
+    await update_reg_event(message.from_user.id, {'phone': message.text})
+    await safe_send_message(bot, message, 'Укажите, пожалуйста, вашу почту')
+    await state.set_state(EventReg.waiting_mail)
+
+
+@router.message(EventReg.waiting_mail)
+async def reg_event_part3(message: Message, state: FSMContext):
+    await update_reg_event(message.from_user.id, {'mail': message.text})
+    await safe_send_message(bot, message, 'Укажите, пожалуйста, из какого вы вуза/организации')
+    await state.set_state(EventReg.waiting_org)
+
+
+@router.message(EventReg.waiting_org)
+async def reg_event_part3(message: Message, state: FSMContext):
+    await update_reg_event(message.from_user.id, {'org': message.text})
+    if await check_completly_reg_event(message.from_user.id):
+        data = await state.get_data()
+        name = data.get('name')
+        event = await get_event(name)
+        await safe_send_message(bot, message, f"Мы вас ждем на мероприятии {event.desc}, которое пройдет {event.date} в {event.time}\n"
+                                               f"Место проведение - {event.place}\n\n"
+                                               f"⚠ Обязательно возьмите с собой паспорт!",
+                                reply_markup=single_command_button_keyboard())
+    else:
+        await safe_send_message(bot, message, 'Что то пошло не так, начните регистрацию заново, пожалуйста\n'
+                                              'Для этого повтороно перейдите по ссылке')
+    await state.clear()
+
+
 @router.message(Command("info"))
 async def cmd_info(message: Message):
     user = await get_user(message.from_user.id)
@@ -140,8 +263,7 @@ async def cmd_info(message: Message):
                                                    "/start - перезапуск бота\n"
                                                    "/info - информация о доступных комнадах\n"
                                                    "/quest - пройти анкетирование для отбора в команду\n"
-                                                   "/get_ref - получить реферальную ссылку\n"
-                                                   "/get_ref_to_event - получить реферальную ссылку на событие\n"
+                                                   "/get_ref - получить реферальную ссылку на событие\n"
                                                    "/send_stat - получить статистику о пользователях\n"
                                                    "/send_post - отправить пост пользователям\n"
                                                    "/add_event - создает новое событие\n"
@@ -153,25 +275,11 @@ async def cmd_info(message: Message):
                                                    "/start - перезапуск бота\n"
                                                    "/info - информация о доступных комнадах\n"
                                                    "/quest - пройти анкетирование для отбора в команду\n"
-                                                   "/get_ref - получить реферальную ссылку\n"
-                                                   "/get_ref_to_event - получить реферальную ссылку на событие\n",
+                                                   "/get_ref - получить реферальную ссылку на событие\n",
                                 reply_markup=single_command_button_keyboard())
 
 
 @router.message(Command("get_ref"))
-async def get_ref(message: Message):
-    data = f'ref{message.from_user.id}'
-    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data}"
-    short_url = await make_short_link(url)
-    if short_url:
-        await safe_send_message(bot, message, "Вот твоя реферальная ссылка:\n"
-                                              f"{short_url}", reply_markup=single_command_button_keyboard()
-                                )
-    else:
-        await safe_send_message(bot, message, "Какая то ошибка. Попробуйте еще раз позже", reply_markup=single_command_button_keyboard())
-
-
-@router.message(Command("get_ref_to_event"))
 async def get_ref_v2_part1(message: Message):
     events = await get_all_user_events(message.from_user.id)
     if not events:

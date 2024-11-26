@@ -1,7 +1,7 @@
 from sqlalchemy import select, desc, distinct, and_, func
 from sqlalchemy.exc import NoResultFound
 
-from database.models import User, async_session, UserXEvent, Event, Questionary, Vacancy
+from database.models import User, async_session, UserXEvent, Event, Questionary, Vacancy, RegEvent, RefGiveAway
 from errors.errors import Error409, Error404, EventNameError, VacancyNameError
 from errors.handlers import db_error_handler
 
@@ -345,3 +345,73 @@ async def get_all_user_events(user_id: int):
         if not events:
             raise Error404
         return events
+
+
+@db_error_handler
+async def get_reg_event(tg_id: int):
+    async with async_session() as session:
+        reg_event = await session.scalar(select(RegEvent).where(RegEvent.id == tg_id))
+        if reg_event:
+            return reg_event
+        else:
+            raise Error404
+
+
+@db_error_handler
+async def create_reg_event(tg_id: int):
+    async with async_session() as session:
+        reg_event = await get_reg_event(tg_id)
+        if not reg_event:
+            data = {'id': tg_id}
+            reg_event_data = RegEvent(**data)
+            session.add(reg_event_data)
+            await session.commit()
+        else:
+            raise Error409
+
+
+@db_error_handler
+async def update_reg_event(tg_id: int, data: dict):
+    async with async_session() as session:
+        reg_event = await get_reg_event(tg_id)
+        if not reg_event:
+            raise Error404
+        else:
+            for key, value in data.items():
+                setattr(reg_event, key, value)
+            session.add(reg_event)
+            await session.commit()
+
+
+@db_error_handler
+async def check_completly_reg_event(tg_id: int):
+    async with async_session() as session:
+        reg_event = await get_reg_event(tg_id)
+        if not reg_event:
+            return False
+        if reg_event.name == '' or reg_event.surname == '' or reg_event.fathername == '' or reg_event.mail == '' or reg_event.phone == '' or reg_event.org == '':
+            return False
+        return True
+
+
+@db_error_handler
+async def get_ref_give_away(tg_id: int, event_name: str):
+    async with async_session() as session:
+        ref_give_away = await session.scalar(select(RefGiveAway).where(and_(RefGiveAway.user_id == tg_id, RefGiveAway.event_name == event_name)))
+        if not ref_give_away:
+            raise Error404
+        else:
+            return ref_give_away
+
+
+@db_error_handler
+async def create_ref_give_away(tg_id: int, event_name: str, host_id: int):
+    async with async_session() as session:
+        ref_give_away = await get_ref_give_away(tg_id, event_name)
+        if not ref_give_away:
+            data = {'user_id': tg_id, 'event_name': event_name, 'host_id': host_id}
+            ref_give_away_data = RefGiveAway(**data)
+            session.add(ref_give_away_data)
+            await session.commit()
+        else:
+            raise Error409

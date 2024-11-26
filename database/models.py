@@ -51,8 +51,10 @@ class Event(Base):
 
     name = Column(String, primary_key=True)
     desc = Column(String)
-    date = Column(Date)
+    date = Column(String)
     status = Column(String)  # in_progress end
+    time = Column(String, default='')
+    place = Column(String, default='')
     winner = Column(BigInteger)
 
 
@@ -69,6 +71,27 @@ class Vacancy(Base):
     __tablename__ = "vacancy"
 
     name = Column(String, primary_key=True)
+
+
+class RegEvent(Base):
+    __tablename__ = "reg_event"
+
+    id = Column(BigInteger, primary_key=True, index=True)
+    name = Column(String, default='')
+    surname = Column(String, default='')
+    fathername = Column(String, default='')
+    mail = Column(String, default='')
+    phone = Column(String, default='')
+    org = Column(String, default='')
+
+
+class RefGiveAway(Base):
+    __tablename__ = "reg_give_away"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    event_name = Column(String, ForeignKey("event.name"), nullable=False)
+    host_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
 
 
 async def async_main():
