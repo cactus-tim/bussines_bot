@@ -65,6 +65,7 @@ class UserXEvent(Base):
     user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
     event_name = Column(String, ForeignKey("event.name"), nullable=False)
     status = Column(String, default='')  # reg, been, nbeeb (after event all reg -> nbeen)
+    first_contact = Column(String, default='')
 
 
 class Vacancy(Base):

@@ -1,5 +1,5 @@
 import base64
-
+from aiogram.utils.deep_linking import create_start_link, decode_payload
 import requests
 from aiogram.filters import Command, CommandStart
 from aiogram import Router, F
@@ -52,20 +52,23 @@ mmsg = """
 
 @router.message(CommandStart())
 async def cmd_start(message: Message, command: CommandObject, state: FSMContext):
-    hash_value = command.args
+    hash_value = command.args  # TODO: after 04_12 event hash_value = decode_payload(command.args)
     user = await get_user(message.from_user.id)
     if hash_value:
         if hash_value[:3] == 'reg':
             if user == "not created":
                 await create_user(message.from_user.id,
                                   {'handler': message.from_user.username, 'first_contact': hash_value[4:]})
-                await safe_send_message(bot, message.from_user.id,
-                                        text=mmsg,
-                                        reply_markup=single_command_button_keyboard())
-            event_name = hash_value[4:-2]
+            await safe_send_message(bot, message.from_user.id,
+                                    text=mmsg,
+                                    reply_markup=single_command_button_keyboard())
+            event_name = hash_value.split('_')[1] + '_' + hash_value.split('_')[2] + '_' + hash_value.split('_')[3]
             user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
             if user_x_event == 'not created':
+                await create_user_x_event_row(message.from_user.id, event_name, hash_value.split('_')[-1])
                 event = await get_event(event_name)
+                if event == 'not created':
+                    await safe_send_message(bot, message, 'Такого события не существует..')
                 await state.update_data({'name': event_name})
                 await safe_send_message(bot, message, f'Хотите зарегистрироваться на мероприятие {event.desc},'
                                                       f'которое пройдет {event.date} в {event.time}', reply_markup=yes_no_ikb())
@@ -79,10 +82,9 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 if user == "not created":
                     await create_user(message.from_user.id,
                                       {'handler': message.from_user.username, 'first_contact': str(user_id)})
-                    name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
-                    await safe_send_message(bot, message.from_user.id,
-                                            text=mmsg,
-                                            reply_markup=single_command_button_keyboard())
+                await safe_send_message(bot, message.from_user.id,
+                                        text=mmsg,
+                                        reply_markup=single_command_button_keyboard())
                 if user_id in give_away_ids:
                     ref_give_away = await get_ref_give_away(message.from_user.id, event_name)
                     if not ref_give_away:
@@ -96,7 +98,10 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 # TODO: give reward to both (ref_v2)
                 user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
                 if user_x_event == 'not created':
+                    await create_user_x_event_row(message.from_user.id, event_name, str(user_id))
                     event = await get_event(event_name)
+                    if event == 'not created':
+                        await safe_send_message(bot, message, 'Такого события не существует..')
                     await state.update_data({'name': event_name})
                     await safe_send_message(bot, message, f'Хотите зарегистрироваться на мероприятие {event.desc},'
                                                           f'которое пройдет {event.date} в {event.time}',
@@ -131,7 +136,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                                         reply_markup=single_command_button_keyboard())
             tr = await update_user_x_event_row_status(message.from_user.id, hash_value, 'been')
             if not tr:
-                await create_user_x_event_row(message.from_user.id, hash_value)
+                await create_user_x_event_row(message.from_user.id, hash_value, '0')
                 await update_user_x_event_row_status(message.from_user.id, hash_value, 'been')
             await safe_send_message(bot, message, text="QR-код удачно отсканирован!",
                                     reply_markup=single_command_button_keyboard())
@@ -159,9 +164,6 @@ async def reg_event_part0_5(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == "event_yes")
 async def reg_event_part1(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    name = data.get('name')
-    await create_user_x_event_row(callback.from_user.id, name)
     await safe_send_message(bot, callback, "Вы студент/сотрудник НИУ ВШЭ?", reply_markup=yes_no_hse_ikb())
 
 
@@ -288,7 +290,7 @@ async def get_ref_v2_part1(message: Message):
 async def get_ref_v2_part2(callback: CallbackQuery):
     event = await get_event(callback.data)
     data = f'ref_{event.name}__{callback.from_user.id}'
-    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data}"
+    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data}"  # TODO: after 04_12 event url = await create_start_link(bot, data, encode=True)
     # short_url = await make_short_link(url)
     # if short_url:
     await safe_send_message(bot, callback, f"Вот твоя реферальная ссылка для событие {event.desc}:\n"

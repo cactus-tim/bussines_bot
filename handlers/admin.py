@@ -5,6 +5,8 @@ from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from datetime import date
+
+from aiogram.utils.deep_linking import create_start_link
 from cryptography.fernet import Fernet
 
 from handlers.error import safe_send_message, make_short_link
@@ -25,6 +27,7 @@ class EventCreateState(StatesGroup):
     waiting_event_date = State()
     waiting_event_time = State()
     waiting_event_place = State()
+    waiting_links_count = State()
 
 
 @router.message(Command("add_event"))
@@ -86,26 +89,43 @@ async def add_event_part_5(message: Message, state: FSMContext):
     data = await state.get_data()
     name = data.get('name')
     await update_event(name, {'place': message.text})
-    data1 = f'reg_{name}'
+    await safe_send_message(bot, message, 'Введи количество ссылок для регистрации, которое вам нужно')
+    await state.set_state(EventCreateState.waiting_links_count)
+
+
+async def is_number_in_range(s):
+    try:
+        num = float(s)
+        return 1 <= num <= 20
+    except ValueError:
+        return False
+
+
+@router.message(EventCreateState.waiting_links_count)
+async def add_event_part_6(message: Message, state: FSMContext):
+    data = await state.get_data()
+    name = data.get('name')
+    links = ''
+    if not await is_number_in_range(message.text):
+        await safe_send_message(bot, message, 'Введи число от 1 до 20')
+        return
+    for i in range(1, int(message.text) + 1):
+        data1 = f'reg_{name}_{i}'
+        links += f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
     data2 = name
-    url1 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}"
-    # short_url1 = await make_short_link(url1)
-    url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"
-    # short_url2 = await make_short_link(url2)
-    # if short_url1 and short_url2:
-    await safe_send_message(bot, message, f"все круто, все создано!!\nсслыка для регистрации:"
-                                          f"\n{url1}"
+    url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
+    await safe_send_message(bot, message, f"все круто, все создано!!\nсслыки для регистрации:"
+                                          f"\n{links}"
                                           f"\nссылка для подтверждения:"
                                           f"\n{url2}",
                             reply_markup=single_command_button_keyboard())
-    # else:
-    #     await safe_send_message(bot, message, "Какая то ошибка. Попробуйте еще раз позже, для этого используйте /get_link", reply_markup=single_command_button_keyboard())
     await state.clear()
 
 
 class EventState(StatesGroup):
     waiting_ev = State()
     waiting_ev_for_link = State()
+    waiting_links_count = State()
 
 
 @router.message(Command("get_link"))
@@ -119,23 +139,30 @@ async def get_link(message: Message, state: FSMContext):
 
 
 @router.message(EventState.waiting_ev_for_link)
+async def make_link_05(message: Message, state: FSMContext):
+    await state.update_data({'name': message.text})
+    await safe_send_message(bot, message, 'Введи количество ссылок для регистрации, которое вам нужно')
+    await state.set_state(EventState.waiting_links_count)
+
+
+@router.message(EventState.waiting_links_count)
 async def make_link(message: Message, state: FSMContext):
-    event = await get_event(message.text)
-    # link = "https://t.me/?start={event.name}"
-    data1 = f'reg_{event.name}'
-    data2 = event.name
-    url1 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}"
-    # short_url1 = await make_short_link(url1)
-    url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"
-    # short_url2 = await make_short_link(url2)
-    # if short_url1 and short_url2:
-    await safe_send_message(bot, message, f"сслыка для регистрации:"
-                                          f"\n{url1}"
+    data = await state.get_data()
+    name = data.get('name')
+    links = ''
+    if not await is_number_in_range(message.text):
+        await safe_send_message(bot, message, 'Введи число от 1 до 20')
+        return
+    for i in range(1, int(message.text) + 1):
+        data1 = f'reg_{name}_{i}'
+        links += f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
+    data2 = name
+    url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
+    await safe_send_message(bot, message, f"все круто, все создано!!\nсслыки для регистрации:"
+                                          f"\n{links}"
                                           f"\nссылка для подтверждения:"
                                           f"\n{url2}",
                             reply_markup=single_command_button_keyboard())
-    # else:
-    #     await safe_send_message(bot, message, "Какая то ошибка. Попробуйте еще раз позже, для этого используйте /get_link", reply_markup=single_command_button_keyboard())
     await state.clear()
 
 

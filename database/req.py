@@ -227,13 +227,14 @@ async def get_user_x_event_row(user_id: int, event_name: str):
 
 
 @db_error_handler
-async def create_user_x_event_row(user_id: int, event_name: str):
+async def create_user_x_event_row(user_id: int, event_name: str, first_contact: str):
     async with async_session() as session:
         row = await get_user_x_event_row(user_id, event_name)
         data = {}
         if row == 'not created':
             data['user_id'] = user_id
             data['event_name'] = event_name
+            data['first_contact'] = first_contact
             data['status'] = 'reg'
             user_x_event_data = UserXEvent(**data)
             session.add(user_x_event_data)
