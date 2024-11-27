@@ -29,7 +29,7 @@ class EventReg(StatesGroup):
     waiting_org = State()
 
 
-give_away_ids = [483458201]
+give_away_ids = [1568674379, 1426453089, 483458201]
 
 
 mmsg = """

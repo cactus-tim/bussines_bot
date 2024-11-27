@@ -416,3 +416,46 @@ async def create_ref_give_away(tg_id: int, event_name: str, host_id: int):
             await session.commit()
         else:
             raise Error409
+
+
+@db_error_handler
+async def get_all_from_give_away(user_id: int):
+    async with async_session() as session:
+        users = await session.execute(
+            select(RefGiveAway, User.handler)
+            .join(RefGiveAway, User.id == RefGiveAway.user_id)
+            .where(RefGiveAway.host_id == user_id)
+        )
+        users_tg_ids = users.all()
+        if not users_tg_ids:
+            raise Error404
+        return users_tg_ids
+
+
+@db_error_handler
+async def get_reg_users(event_name: str):
+    async with async_session() as session:
+        users = await session.execute(
+            select(RegEvent, User.handler)
+            .join(UserXEvent, RegEvent.id == UserXEvent.user_id)
+            .join(User, User.id == RegEvent.id)
+            .where(UserXEvent.event_name == event_name)
+        )
+        users_data = users.all()
+        if not users_data:
+            raise Error404()
+        return users_data
+
+
+@db_error_handler
+async def get_reg_users_stat(event_name: str):
+    async with async_session() as session:
+        users = await session.execute(
+            select(UserXEvent, User.handler)
+            .join(UserXEvent, User.id == UserXEvent.user_id)
+            .where(UserXEvent.event_name == event_name)
+        )
+        users_data = users.all()
+        if not users_data:
+            raise Error404()
+        return users_data

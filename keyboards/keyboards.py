@@ -64,6 +64,9 @@ def stat_target():
         [InlineKeyboardButton(text="Всех пользователей", callback_data="stat_all")],
         [InlineKeyboardButton(text="Всех участников ивента", callback_data="stat_ev")],
         # [InlineKeyboardButton(text="Всех из опроса", callback_data="stat_quest")],
+        [InlineKeyboardButton(text="Всех участников дополнительного розыгрыша", callback_data="stat_give_away")],
+        [InlineKeyboardButton(text="Всех зареганых на ивент, не из ВШЭ", callback_data="stat_reg_out")],
+        [InlineKeyboardButton(text="Всех зареганых на ивент + статистика", callback_data="stat_reg")],
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
@@ -102,9 +105,9 @@ def quest_keyboard_2():
     return ikeyboard
 
 
-def feedback_form_ikb(url):
+def link_ikb(text, url):
     ikb = [
-        [InlineKeyboardButton(text='Анкета обратной связи', url=url)]
+        [InlineKeyboardButton(text=text, url=url)]
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
@@ -126,6 +129,17 @@ def yes_no_hse_ikb():
         [
             InlineKeyboardButton(text='ДА', callback_data='hse_yes'),
             InlineKeyboardButton(text='НЕТ', callback_data='hse_no')
+         ]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
+
+
+def yes_no_link_ikb():
+    ikb = [
+        [
+            InlineKeyboardButton(text='ДА', callback_data='link_yes'),
+            InlineKeyboardButton(text='НЕТ', callback_data='link_no')
          ]
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
