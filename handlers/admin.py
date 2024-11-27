@@ -333,7 +333,7 @@ async def cmd_send_post(message: Message):
 
 @router.callback_query(F.data == "post_to_all")
 async def mb_add_link(callback: CallbackQuery, state: FSMContext):
-    await safe_send_message(bot, callback, "Хочешь добавить к посту кнопку с ссылку?", yes_no_link_ikb())
+    await safe_send_message(bot, callback, "Хочешь добавить к посту кнопку с ссылкой?", yes_no_link_ikb())
 
 
 @router.callback_query(F.data == "link_no")
@@ -359,8 +359,6 @@ async def cmd_post_to_all(message: Message, state: FSMContext):
 @router.message(PostState.waiting_for_post_to_all_text1)
 async def cmd_post_to_all(message: Message, state: FSMContext):
     await state.update_data({'text': message.text})
-    print('=' * 50)
-    print(message.text)
     await safe_send_message(bot, message, text="Отправьте мне пост")
     await state.set_state(PostState.waiting_for_post_to_all_text)
 
@@ -373,17 +371,13 @@ async def process_post_to_all(message: Message, state: FSMContext):
     if flag:
         link = data.get('link')
         text = data.get('text')
-        print('='*50)
-        print(text)
     if not user_ids:
         await safe_send_message(bot, message, text="У вас нет пользователей((",
                                 reply_markup=single_command_button_keyboard())
         return
     for user_id in user_ids:
         if flag:
-            print('=' * 50)
-            print(text)
-        await safe_send_message(bot, user_id, text=message.text, reply_markup=(single_command_button_keyboard() if not flag else link_ikb(text, link)))
+            await safe_send_message(bot, user_id, text=message.text, reply_markup=(single_command_button_keyboard() if not flag else link_ikb(text, link)))
     await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
     await state.clear()
 

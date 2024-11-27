@@ -145,7 +145,7 @@ async def get_stat_reg(user_id: int, event_name: str):  # TODO: такая же,
         cnt[user.first_contact] += 1
         cntt += 1
 
-    msg = ''.join((f'С потока {key} зарегистировалось человек: {value}, это {(value / cntt) * 100}% от общего трафика\n' for key, value in cnt.items()))
+    msg = ''.join((f'С потока {key} зарегистировалось человек: {value}, это {(value / cntt) * 100:.1f}% от общего трафика\n' for key, value in cnt.items()))
     msg += f'Всего зарегистировалось человек: {cntt} человек'
     # TODO: not important: think about replace 'flow n' to normal flow name
     df = pd.DataFrame(data)
