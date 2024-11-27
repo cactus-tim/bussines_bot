@@ -29,7 +29,9 @@ class EventReg(StatesGroup):
     waiting_org = State()
 
 
-give_away_ids = [1568674379, 1426453089, 483458201]
+give_away_ids = {1568674379: 'hsespbcareer',
+                 1426453089: 'Коляна',
+                 483458201: 'Me. Only for tests'}
 
 
 mmsg = """
@@ -85,12 +87,13 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 await safe_send_message(bot, message.from_user.id,
                                         text=mmsg,
                                         reply_markup=single_command_button_keyboard())
-                if user_id in give_away_ids:
+                if user_id in give_away_ids.keys():
                     ref_give_away = await get_ref_give_away(message.from_user.id, event_name)
                     if not ref_give_away:
                         await create_ref_give_away(message.from_user.id, event_name, user_id)
                         host = await get_user(user_id)
-                        await safe_send_message(bot, message, f'Поздравляю, вы учавствуете в розыгрыше, предназначенным только для подписчиков @{host.handler}')
+                        await safe_send_message(bot, message, f'Поздравляю, вы учавствуете в розыгрыше, предназначенным только для подписчиков @{give_away_ids[user_id]}')
+                        # await safe_send_message(bot, message, f'Поздравляю, вы учавствуете в розыгрыше, предназначенным только для подписчиков @{host.handler}')
                     else:
                         await safe_send_message(bot, message, 'Вы уже учавствуете в чьем то розыгрыше')
                 await safe_send_message(bot, user_id, f"По твоей рефеальной сслыке зарегистрировался на событие"
