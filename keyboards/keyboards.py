@@ -37,8 +37,10 @@ def another_vacancy_keyboard():
 def post_target():
     ikb = [
         [InlineKeyboardButton(text="Всем пользователям", callback_data="post_to_all")],
+        [InlineKeyboardButton(text="Всем пользователям, незареганным на ивент", callback_data="post_to_unreg")],
         [InlineKeyboardButton(text="Всем участникам ивента", callback_data="post_to_ev")],
         [InlineKeyboardButton(text="Обратная связь от всех участников ивента", callback_data="post_wth_op_to_ev")],
+        [InlineKeyboardButton(text="Отмена", callback_data="cancel")]
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
@@ -67,6 +69,7 @@ def stat_target():
         [InlineKeyboardButton(text="Всех участников дополнительного розыгрыша", callback_data="stat_give_away")],
         [InlineKeyboardButton(text="Всех зареганых на ивент, не из ВШЭ", callback_data="stat_reg_out")],
         [InlineKeyboardButton(text="Всех зареганых на ивент + статистика", callback_data="stat_reg")],
+        [InlineKeyboardButton(text="Отмена", callback_data="cancel")]
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
@@ -139,7 +142,20 @@ def yes_no_link_ikb():
     ikb = [
         [
             InlineKeyboardButton(text='ДА', callback_data='link_yes'),
-            InlineKeyboardButton(text='НЕТ', callback_data='link_no')
+            InlineKeyboardButton(text='НЕТ', callback_data='link_no'),
+            InlineKeyboardButton(text="Отмена", callback_data="cancel")
+         ]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
+
+
+def unreg_yes_no_link_ikb():
+    ikb = [
+        [
+            InlineKeyboardButton(text='ДА', callback_data='unreg_link_yes'),
+            InlineKeyboardButton(text='НЕТ', callback_data='unreg_link_no'),
+            InlineKeyboardButton(text="Отмена", callback_data="cancel")
          ]
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)

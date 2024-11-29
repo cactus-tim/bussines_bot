@@ -13,7 +13,7 @@ from handlers.error import safe_send_message, make_short_link
 from bot_instance import bot
 from database.req import get_user, create_user, create_user_x_event_row, update_user, get_all_user_events, get_event, \
     update_user_x_event_row_status, update_reg_event, check_completly_reg_event, create_reg_event, get_reg_event, \
-    get_user_x_event_row, get_ref_give_away, create_ref_give_away
+    get_user_x_event_row, get_ref_give_away, create_ref_give_away, delete_user_x_event_row, delete_ref_give_away_row
 from keyboards.keyboards import single_command_button_keyboard, events_ikb, yes_no_ikb, yes_no_hse_ikb
 from handlers.quest import start
 
@@ -162,6 +162,14 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
 @router.callback_query(F.data == "event_no")
 async def reg_event_part0_5(callback: CallbackQuery, state: FSMContext):
     await safe_send_message(bot, callback, "Это очень грустно((", reply_markup=single_command_button_keyboard())
+    data = await state.get_data()
+    event_name = data.get('name')
+    row = await get_user_x_event_row(callback.from_user.id, event_name)
+    if row != "not created":
+        await delete_user_x_event_row(callback.from_user.id, event_name)
+    row = await get_ref_give_away(callback.from_user.id, event_name)
+    if row:
+        await delete_ref_give_away_row(callback.from_user.id, event_name)
     await state.clear()
 
 

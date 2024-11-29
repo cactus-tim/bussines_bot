@@ -1,4 +1,4 @@
-from sqlalchemy import select, desc, distinct, and_, func
+from sqlalchemy import select, desc, distinct, and_, func, delete
 from sqlalchemy.exc import NoResultFound
 
 from database.models import User, async_session, UserXEvent, Event, Questionary, Vacancy, RegEvent, RefGiveAway
@@ -227,6 +227,21 @@ async def get_user_x_event_row(user_id: int, event_name: str):
 
 
 @db_error_handler
+async def delete_user_x_event_row(user_id: int, event_name: str):
+    async with async_session() as session:
+        await session.execute(
+            delete(UserXEvent)
+            .where(
+                and_(
+                    UserXEvent.user_id == user_id,
+                    UserXEvent.event_name == event_name
+                )
+            )
+        )
+        await session.commit()
+
+
+@db_error_handler
 async def create_user_x_event_row(user_id: int, event_name: str, first_contact: str):
     async with async_session() as session:
         row = await get_user_x_event_row(user_id, event_name)
@@ -322,9 +337,11 @@ async def get_users_tg_id_in_event_bad(event_name: str):
 async def get_all_users_in_event(event_name: str):
     async with async_session() as session:
         users = await session.execute(
-            select(User, UserXEvent.status)
+            select(UserXEvent, User.handler)
             .join(UserXEvent, User.id == UserXEvent.user_id)
-            .where(UserXEvent.event_name == event_name)
+            .where(and_(
+                UserXEvent.status == 'been',
+                UserXEvent.event_name == event_name))
         )
         users_tg_ids = users.all()
         if not users_tg_ids:
@@ -398,11 +415,30 @@ async def check_completly_reg_event(tg_id: int):
 @db_error_handler
 async def get_ref_give_away(tg_id: int, event_name: str):
     async with async_session() as session:
-        ref_give_away = await session.scalar(select(RefGiveAway).where(and_(RefGiveAway.user_id == tg_id, RefGiveAway.event_name == event_name)))
+        ref_give_away = await session.scalar(
+            select(RefGiveAway)
+            .where(
+                and_(
+                    RefGiveAway.user_id == tg_id,
+                    RefGiveAway.event_name == event_name
+                )))
         if not ref_give_away:
             raise Error404
         else:
             return ref_give_away
+
+
+@db_error_handler
+async def delete_ref_give_away_row(user_id: int, event_name: str):
+    async with async_session() as session:
+        await session.execute(
+            delete(RefGiveAway)
+            .where(
+                and_(
+                    RefGiveAway.user_id == user_id,
+                    RefGiveAway.event_name == event_name
+                )))
+        await session.commit()
 
 
 @db_error_handler
@@ -419,12 +455,15 @@ async def create_ref_give_away(tg_id: int, event_name: str, host_id: int):
 
 
 @db_error_handler
-async def get_all_from_give_away(user_id: int):
+async def get_all_from_give_away(user_id: int, event_name: str):
     async with async_session() as session:
         users = await session.execute(
             select(RefGiveAway, User.handler)
             .join(RefGiveAway, User.id == RefGiveAway.user_id)
-            .where(RefGiveAway.host_id == user_id)
+            .where(and_(
+                RefGiveAway.host_id == user_id,
+                RefGiveAway.event_name == event_name
+            ))
         )
         users_tg_ids = users.all()
         if not users_tg_ids:
@@ -456,6 +495,44 @@ async def get_reg_users_stat(event_name: str):
             .where(UserXEvent.event_name == event_name)
         )
         users_data = users.all()
+        if not users_data:
+            raise Error404()
+        return users_data
+
+
+@db_error_handler
+async def get_add_winner(host_id: int, event_name: str):
+    async with async_session() as session:
+        result = await session.execute(
+            select(RefGiveAway.user_id)
+            .join(UserXEvent, RefGiveAway.user_id == UserXEvent.user_id)
+            .where(and_(
+                RefGiveAway.host_id == host_id,
+                RefGiveAway.event_name == event_name,
+                UserXEvent.status == 'been'
+            ))
+            .order_by(func.random())
+            .limit(1)
+        )
+        random_user = result.scalar_one_or_none()
+        if not random_user:
+            raise Error404()
+        return random_user
+
+
+@db_error_handler
+async def get_users_unreg_tg_id(event_name: str):
+    async with async_session() as session:
+        result = await session.execute(
+            select(User.id)
+            .where(
+                ~User.id.in_(
+                    select(UserXEvent.user_id)
+                    .where(UserXEvent.event_name == event_name)
+                )
+            )
+        )
+        users_data = result.scalars().all()
         if not users_data:
             raise Error404()
         return users_data
