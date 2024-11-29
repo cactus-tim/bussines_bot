@@ -14,7 +14,7 @@ from bot_instance import bot
 from database.req import get_user, create_user, create_user_x_event_row, update_user, get_all_user_events, get_event, \
     update_user_x_event_row_status, update_reg_event, check_completly_reg_event, create_reg_event, get_reg_event, \
     get_user_x_event_row, get_ref_give_away, create_ref_give_away, delete_user_x_event_row, delete_ref_give_away_row
-from keyboards.keyboards import single_command_button_keyboard, events_ikb, yes_no_ikb, yes_no_hse_ikb
+from keyboards.keyboards import single_command_button_keyboard, events_ikb, yes_no_ikb, yes_no_hse_ikb, get_ref_ikb
 from handlers.quest import start
 
 router = Router()
@@ -75,7 +75,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 await safe_send_message(bot, message, f'Хотите зарегистрироваться на мероприятие {event.desc},'
                                                       f'которое пройдет {event.date} в {event.time}', reply_markup=yes_no_ikb())
             else:
-                await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие')
+                await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие', reply_markup=get_ref_ikb(event_name))
         elif hash_value[:3] == 'ref':
             if hash_value[3] == '_':
                 event_part, user_id = hash_value.split("__")
@@ -110,7 +110,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                                                           f'которое пройдет {event.date} в {event.time}',
                                             reply_markup=yes_no_ikb())
                 else:
-                    await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие')
+                    await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие', reply_markup=get_ref_ikb(event_name))
         elif hash_value == 'otbor':
             if user == "not created":
                 await create_user(message.from_user.id,
@@ -184,7 +184,7 @@ async def reg_event_part1_5(callback: CallbackQuery, state: FSMContext):
     name = data.get('name')
     event = await get_event(name)
     await safe_send_message(bot, callback, f"Мы вас ждем на мероприятии {event.desc}, которое пройдет {event.date} в {event.time}\n"
-                                               f"Место проведение - {event.place}\n\n", reply_markup=single_command_button_keyboard())
+                                                f"Место проведение - {event.place}\n\n", reply_markup=get_ref_ikb(name))
     await state.clear()
 
 
@@ -203,7 +203,7 @@ async def reg_event_part2(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, "Ваши данные уже сохранены!\n"
                                                f"Мы вас ждем на мероприятии {event.desc}, которое пройдет {event.date} в {event.time}\n"
                                                f"Место проведение - {event.place}\n\n"
-                                               f"⚠ Обязательно возьмите с собой паспорт!", reply_markup=single_command_button_keyboard())
+                                               f"⚠ Обязательно возьмите с собой паспорт!", reply_markup=get_ref_ikb(name))
         await state.clear()
     else:
         await safe_send_message(bot, callback, "Для пропуска на мероприятие нужно будет сообщить ваши данные. Напишите, пожалуйста, ваше имя")
@@ -255,7 +255,7 @@ async def reg_event_part3(message: Message, state: FSMContext):
         await safe_send_message(bot, message, f"Мы вас ждем на мероприятии {event.desc}, которое пройдет {event.date} в {event.time}\n"
                                                f"Место проведение - {event.place}\n\n"
                                                f"⚠ Обязательно возьмите с собой паспорт!",
-                                reply_markup=single_command_button_keyboard())
+                                reply_markup=get_ref_ikb(name))
     else:
         await safe_send_message(bot, message, 'Что то пошло не так, начните регистрацию заново, пожалуйста\n'
                                               'Для этого повтороно перейдите по ссылке')

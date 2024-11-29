@@ -160,3 +160,11 @@ def unreg_yes_no_link_ikb():
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
+
+
+def get_ref_ikb(event_name: str):
+    ikb = [
+        [InlineKeyboardButton(text="Получить реферальную ссылку на это мероприятие", callback_data=event_name)]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
