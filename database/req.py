@@ -1,7 +1,7 @@
 from sqlalchemy import select, desc, distinct, and_, func, delete
 from sqlalchemy.exc import NoResultFound
 
-from database.models import User, async_session, UserXEvent, Event, Questionary, Vacancy, RegEvent, RefGiveAway
+from database.models import User, async_session, UserXEvent, Event, Questionary, Vacancy, RegEvent, RefGiveAway, GiveAwayHost
 from errors.errors import Error409, Error404, EventNameError, VacancyNameError
 from errors.handlers import db_error_handler
 
@@ -536,3 +536,76 @@ async def get_users_unreg_tg_id(event_name: str):
         if not users_data:
             raise Error404()
         return users_data
+
+
+@db_error_handler
+async def get_host(user_id: int, event_name: str):
+    async with async_session() as session:
+        host = await session.scalar(
+            select(GiveAwayHost)
+            .where(and_(
+                GiveAwayHost.user_id == user_id,
+                GiveAwayHost.event_name == event_name
+            )))
+        if host:
+            return host
+        else:
+            raise Error404
+
+
+@db_error_handler
+async def get_host_by_org_name(org_name: str, event_name: str):
+    async with async_session() as session:
+        host = await session.scalar(
+            select(GiveAwayHost)
+            .where(and_(
+                GiveAwayHost.org_name == org_name,
+                GiveAwayHost.event_name == event_name
+            )))
+        if host:
+            return host
+        else:
+            raise Error404
+
+
+@db_error_handler
+async def create_host(user_id: int, event_name: str, org_name: str):
+    async with async_session() as session:
+        host = await get_host(user_id)
+        if not host:
+            data = {
+                'user_id': user_id,
+                'event_name': event_name,
+                'org_name': org_name
+            }
+            host_data = GiveAwayHost(**data)
+            session.add(host_data)
+            await session.commit()
+        else:
+            raise Error409
+
+
+@db_error_handler
+async def get_all_hosts_in_event_ids(event_name: str):
+    async with async_session() as session:
+        hosts_ids = await session.execute(
+            select(distinct(GiveAwayHost.user_id))
+            .where(GiveAwayHost.event_name == event_name)
+        )
+        hosts = hosts_ids.scalars().all()
+        if not hosts:
+            raise Error404
+        return hosts
+
+
+@db_error_handler
+async def get_all_hosts_in_event_orgs(event_name: str):
+    async with async_session() as session:
+        hosts_ids = await session.execute(
+            select(distinct(GiveAwayHost.org_name))
+            .where(GiveAwayHost.event_name == event_name)
+        )
+        hosts = hosts_ids.scalars().all()
+        if not hosts:
+            raise Error404
+        return hosts

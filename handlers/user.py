@@ -13,7 +13,8 @@ from handlers.error import safe_send_message, make_short_link
 from bot_instance import bot
 from database.req import get_user, create_user, create_user_x_event_row, update_user, get_all_user_events, get_event, \
     update_user_x_event_row_status, update_reg_event, check_completly_reg_event, create_reg_event, get_reg_event, \
-    get_user_x_event_row, get_ref_give_away, create_ref_give_away, delete_user_x_event_row, delete_ref_give_away_row
+    get_user_x_event_row, get_ref_give_away, create_ref_give_away, delete_user_x_event_row, delete_ref_give_away_row, \
+    get_all_hosts_in_event_ids, get_host
 from keyboards.keyboards import single_command_button_keyboard, events_ikb, yes_no_ikb, yes_no_hse_ikb, get_ref_ikb
 from handlers.quest import start
 
@@ -87,12 +88,17 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 await safe_send_message(bot, message.from_user.id,
                                         text=mmsg,
                                         reply_markup=single_command_button_keyboard())
-                if user_id in give_away_ids.keys():
+                hosts_ids = await get_all_hosts_in_event_ids(event_name)
+                if not hosts_ids:
+                    await safe_send_message(bot, message, 'Сейчас нет доступных розыгрышей')
+                    return
+                # if user_id in give_away_ids.keys():
+                if user_id in hosts_ids:
                     ref_give_away = await get_ref_give_away(message.from_user.id, event_name)
                     if not ref_give_away:
                         await create_ref_give_away(message.from_user.id, event_name, user_id)
-                        host = await get_user(user_id)
-                        await safe_send_message(bot, message, f'Поздравляю, вы учавствуете в розыгрыше, предназначенным только для подписчиков @{give_away_ids[user_id]}')
+                        host = await get_host(user_id, event_name)
+                        await safe_send_message(bot, message, f'Поздравляю, вы учавствуете в розыгрыше, предназначенным только для подписчиков @{host.org_name}')
                         # await safe_send_message(bot, message, f'Поздравляю, вы учавствуете в розыгрыше, предназначенным только для подписчиков @{host.handler}')
                     else:
                         await safe_send_message(bot, message, 'Вы уже учавствуете в чьем то розыгрыше')
@@ -275,7 +281,10 @@ async def cmd_info(message: Message):
                                                    "/send_post - отправить пост пользователям\n"
                                                    "/add_event - создает новое событие\n"
                                                    "/end_event - завершить событие\n"
-                                                   "/get_link - получить ссылки на событие\n",
+                                                   "/get_link - получить ссылки на событие\n"
+                                                   "/create_give_away - создать дополнительный розыгрыш для инфлюенсера\n"
+                                                   "/get_result - получить победителя в дополнительном розыгрыше"
+                                                   "Инструкция по пользованию ботом https://clck.ru/3EwSJM",
                                 reply_markup=single_command_button_keyboard())
     else:
         await safe_send_message(bot, message, text="Список доступных команд:\n"

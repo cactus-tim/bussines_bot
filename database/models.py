@@ -95,6 +95,15 @@ class RefGiveAway(Base):
     host_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
 
 
+class GiveAwayHost(Base):
+    __tablename__ = "give_away_host"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    event_name = Column(String, ForeignKey("event.name"), nullable=False)
+    org_name = Column(String, default='')
+
+
 async def async_main():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

@@ -15,9 +15,10 @@ from database.req import (get_user, create_user, add_vacancy, delete_vacancy, ge
                           get_users_tg_id_in_event, get_random_user_from_event, update_event,
                           get_random_user_from_event_wth_bad, get_all_vacancy_names, get_event, get_all_events_in_p,
                           create_event, get_users_tg_id_in_event_bad, update_user_x_event_row_status, get_add_winner,
-                          get_users_unreg_tg_id)
+                          get_users_unreg_tg_id, get_host, get_all_hosts_in_event_orgs, create_host,
+                          get_host_by_org_name)
 from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner, vacancy_selection_keyboard, \
-    single_command_button_keyboard, link_ikb, yes_no_link_ikb, unreg_yes_no_link_ikb
+    single_command_button_keyboard, link_ikb, yes_no_link_ikb, unreg_yes_no_link_ikb, get_ref_ikb
 from statistics.stat import get_stat_all, get_stat_all_in_ev, get_stat_quest, get_stat_ad_give_away, get_stat_reg_out, \
     get_stat_reg
 
@@ -98,7 +99,7 @@ async def add_event_part_5(message: Message, state: FSMContext):
 async def is_number_in_range(s):
     try:
         num = float(s)
-        return 1 <= num <= 20
+        return True
     except ValueError:
         return False
 
@@ -378,7 +379,7 @@ async def link_yes_unreg(callback: CallbackQuery, state: FSMContext):
 
 @router.message(PostState.waiting_for_post_to_all_text05_unreg)
 async def cmd_post_to_all_unreg(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
@@ -389,7 +390,7 @@ async def cmd_post_to_all_unreg(message: Message, state: FSMContext):
 
 @router.message(PostState.waiting_for_post_to_all_text1_unreg)
 async def cmd_post_to_all_unreg(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
@@ -400,7 +401,7 @@ async def cmd_post_to_all_unreg(message: Message, state: FSMContext):
 
 @router.message(PostState.waiting_for_post_to_all_text_unreg)
 async def process_post_to_all_unreg(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
@@ -442,7 +443,7 @@ async def link_yes(callback: CallbackQuery, state: FSMContext):
 
 @router.message(PostState.waiting_for_post_to_all_text05)
 async def cmd_post_to_all(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
@@ -453,7 +454,7 @@ async def cmd_post_to_all(message: Message, state: FSMContext):
 
 @router.message(PostState.waiting_for_post_to_all_text1)
 async def cmd_post_to_all(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
@@ -464,7 +465,7 @@ async def cmd_post_to_all(message: Message, state: FSMContext):
 
 @router.message(PostState.waiting_for_post_to_all_text)
 async def process_post_to_all(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
@@ -497,7 +498,7 @@ async def cmd_post_to_ev(callback: CallbackQuery, state: FSMContext):
 
 @router.message(PostState.waiting_for_post_to_ev_ev)
 async def pre_process_post_to_ev(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
@@ -508,7 +509,7 @@ async def pre_process_post_to_ev(message: Message, state: FSMContext):
 
 @router.message(PostState.waiting_for_post_to_ev_text)
 async def process_post_to_ev(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
@@ -538,7 +539,7 @@ async def cmd_post_to_ev(callback: CallbackQuery, state: FSMContext):
 
 @router.message(PostState.waiting_for_post_wth_op_to_ev_ev)
 async def pre_process_post_to_ev(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
@@ -559,7 +560,7 @@ msg = """
 
 @router.message(PostState.waiting_for_post_wth_op_to_ev_text)
 async def process_post_to_wth_op_to_ev(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
@@ -633,7 +634,7 @@ async def cmd_stat_give_away(callback: CallbackQuery, state: FSMContext):
 
 @router.message(StatState.waiting_for_give_away_ev)
 async def cmd_stat_give_away2(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await state.clear()
         return
     await state.update_data({'event_name': message.text})
@@ -643,7 +644,7 @@ async def cmd_stat_give_away2(message: Message, state: FSMContext):
 
 @router.message(StatState.waiting_user_id)
 async def cmd_stat_give_away3(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await state.clear()
         return
     data = await state.get_data()
@@ -707,11 +708,13 @@ async def cmd_get_result(message: Message, state: FSMContext):
 
 @router.message(WinnerState.wait_give_away_event)
 async def get_result(message: Message, state: FSMContext):
-    if message.text == 'quit':
+    await state.update_data({'event_name': message.text})
+    hosts_orgs = await get_all_hosts_in_event_orgs(message.text)
+    if not hosts_orgs:
+        await safe_send_message(bot, message, text="У вас нет организаторов дополнительных розыгрышей", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await state.update_data({'event_name': message.text})
-    await safe_send_message(bot, message, 'Введите юзер id организатора дополнительного розыгрыша\n\nДля отмены введите quit')
+    await safe_send_message(bot, message, text="Выберете организатора:\n\nДля отмены введите quit'", reply_markup=post_ev_tagret(hosts_orgs))
     await state.set_state(WinnerState.wait_give_away_id)
 
 
@@ -719,14 +722,69 @@ async def get_result(message: Message, state: FSMContext):
 async def get_result2(message: Message, state: FSMContext):
     data = await state.get_data()
     event_name = data.get('event_name')
-    if message.text == 'quit':
+    if message.text.lower() == 'quit':
         await state.clear()
         return
-    winner_id = await get_add_winner(int(message.text), event_name)
+    host = await get_host_by_org_name(message.text, event_name)
+    winner_id = await get_add_winner(host.user_id, event_name)
     if not winner_id:
         await safe_send_message(bot, message, 'В этом розыгрыше нет участников((')
         await state.clear()
         return
     winner = await get_user(winner_id)
-    user = await get_user(int(message.text))
-    await safe_send_message(bot, message, f'@{winner.handler} - победитель розыгрыша от @{user.handler}')
+    await safe_send_message(bot, message, f'@{winner.handler} - победитель розыгрыша от @{host.org_name}')
+
+
+class GiveAwayState(StatesGroup):
+    waiting_event = State()
+    waiting_org_name = State()
+    waiting_id = State()
+
+
+@router.message(Command('create_give_away'))
+async def cmd_create_give_away(message: Message, state: FSMContext):
+    user = await get_user(message.from_user.id)
+    if not user.is_superuser:
+        return
+    events = await get_all_events()
+    if not events:
+        await safe_send_message(bot, message, text="У вас нет событий", reply_markup=single_command_button_keyboard())
+        await state.clear()
+        return
+    await safe_send_message(bot, message, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await state.set_state(GiveAwayState.waiting_event)
+
+
+@router.message(GiveAwayState.waiting_event)
+async def cmd_create_give_away2(message: Message, state: FSMContext):
+    await state.update_data({'event_name': message.text})
+    await safe_send_message(bot, message, 'Введите название организации\n\nДля отмены введите quit')
+    await state.set_state(GiveAwayState.waiting_org_name)
+
+
+@router.message(GiveAwayState.waiting_org_name)
+async def cmd_create_give_away3(message: Message, state: FSMContext):
+    if message.text.lower() == 'quit':
+        await state.clear()
+        return
+    await state.update_data({'org_name': message.text})
+    await safe_send_message(bot, message, 'Введите айди организатора\n\nЕсли хотите использовать свое айди = отправьте Я\n\nДля отмены введите quit')
+    await state.set_state(GiveAwayState.waiting_id)
+
+
+@router.message(GiveAwayState.waiting_id)
+async def cmd_create_give_away4(message: Message, state: FSMContext):
+    if message.text.lower() == 'quit':
+        await state.clear()
+        return
+    data = await state.get_data()
+    event_name = data.get('event_name')
+    org_name = data.get('org_name')
+    user_id = message.from_user.id if message.text.lower() == 'я' else message.text
+    if not await is_number_in_range(user_id):
+        await safe_send_message(bot, message, 'Введи число - айди')
+        return
+    user_id = int(user_id)
+    await create_host(user_id, event_name, org_name)
+    await safe_send_message(bot, message, 'Готово!', reply_markup=get_ref_ikb(event_name))
+    await state.clear()
