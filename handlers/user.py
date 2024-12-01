@@ -89,11 +89,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                                         text=mmsg,
                                         reply_markup=single_command_button_keyboard())
                 hosts_ids = await get_all_hosts_in_event_ids(event_name)
-                if not hosts_ids:
-                    await safe_send_message(bot, message, 'Сейчас нет доступных розыгрышей')
-                    return
-                # if user_id in give_away_ids.keys():
-                if user_id in hosts_ids:
+                if hosts_ids and user_id in hosts_ids:
                     ref_give_away = await get_ref_give_away(message.from_user.id, event_name)
                     if not ref_give_away:
                         await create_ref_give_away(message.from_user.id, event_name, user_id)
