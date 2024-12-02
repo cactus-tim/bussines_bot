@@ -323,7 +323,7 @@ async def cmd_profile(message: Message):
     user = await get_user(message.from_user.id)
     name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
     rank = await get_user_rank_by_money(message.from_user.id)
-    msg = f'Твой личный кабинет\n\nКоличество посещенных мероприятий: {user.event_cnt}\nКоличество посещенных мероприятий подряд: {user.strick}\nКоличество рефералов: {user.ref_cnt}\nКоличество монеток: {user.money}\nМесто в топе: {rank}'
+    msg = f'Твой личный кабинет\n\nКоличество посещенных мероприятий: {user.event_cnt}\nКоличество посещенных мероприятий подряд: {user.strick}\nКоличество приглашённых на мероприятия людей: {user.ref_cnt}\nКоличество монеток: {user.money}\nМесто в топе: {rank}'
     await safe_send_message(bot, message, msg, reply_markup=top_ikb())
 
 
