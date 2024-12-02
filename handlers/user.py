@@ -54,6 +54,12 @@ mmsg = """
 Вся дальнейшая информация будет в нашем канале @HSE_SPB_Business_Club
 """
 
+msgc = """
+К сожалению, регистрация на встречу с директором компании «Теремок» закрыта из-за превышения количества заявок🫢
+
+С нетерпением ждём вас на следующих мероприятиях!
+"""
+
 
 @router.message(CommandStart())
 async def cmd_start(message: Message, command: CommandObject, state: FSMContext):
@@ -67,7 +73,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
             await safe_send_message(bot, message.from_user.id,
                                     text=mmsg,
                                     reply_markup=single_command_button_keyboard())
-            await safe_send_message(bot, message, '')
+            await safe_send_message(bot, message, msgc)
             return
             event_name = hash_value.split('_')[1] + '_' + hash_value.split('_')[2] + '_' + hash_value.split('_')[3]
             user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
@@ -92,7 +98,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 await safe_send_message(bot, message.from_user.id,
                                         text=mmsg,
                                         reply_markup=single_command_button_keyboard())
-                await safe_send_message(bot, message, '')
+                await safe_send_message(bot, message, msgc)
                 return
                 hosts_ids = await get_all_hosts_in_event_ids(event_name)
                 if hosts_ids and user_id in hosts_ids:
