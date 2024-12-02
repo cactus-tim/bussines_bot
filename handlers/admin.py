@@ -114,9 +114,9 @@ async def add_event_part_6(message: Message, state: FSMContext):
         return
     for i in range(1, int(message.text) + 1):
         data1 = f'reg_{name}_{i}'
-        links += f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
+        links += f"https://t.me/brewbegtbot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
     data2 = name
-    url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
+    url2 = f"https://t.me/brewbegtbot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
     await safe_send_message(bot, message, f"все круто, все создано!!\nсслыки для регистрации:"
                                           f"\n{links}"
                                           f"\nссылка для подтверждения:"
@@ -160,9 +160,9 @@ async def make_link(message: Message, state: FSMContext):
         return
     for i in range(1, int(message.text) + 1):
         data1 = f'reg_{name}_{i}'
-        links += f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
+        links += f"https://t.me/brewbegtbot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
     data2 = name
-    url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
+    url2 = f"https://t.me/brewbegtbot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
     await safe_send_message(bot, message, f"все круто, все создано!!\nсслыки для регистрации:"
                                           f"\n{links}"
                                           f"\nссылка для подтверждения:"

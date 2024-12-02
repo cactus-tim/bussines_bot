@@ -353,7 +353,7 @@ async def get_ref_v2_part1(message: Message):
 async def get_ref_v2_part2(callback: CallbackQuery):
     event = await get_event(callback.data)
     data = f'ref_{event.name}__{callback.from_user.id}'
-    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data}"  # TODO: after 04_12 event url = await create_start_link(bot, data, encode=True)
+    url = f"https://t.me/brewbegtbot?start={data}"  # TODO: after 04_12 event url = await create_start_link(bot, data, encode=True)
     # short_url = await make_short_link(url)
     # if short_url:
     await safe_send_message(bot, callback, f"Вот твоя реферальная ссылка для событие {event.desc}:\n"
