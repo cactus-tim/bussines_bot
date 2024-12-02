@@ -67,6 +67,8 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
             await safe_send_message(bot, message.from_user.id,
                                     text=mmsg,
                                     reply_markup=single_command_button_keyboard())
+            await safe_send_message(bot, message, '')
+            return
             event_name = hash_value.split('_')[1] + '_' + hash_value.split('_')[2] + '_' + hash_value.split('_')[3]
             user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
             if user_x_event == 'not created':
@@ -90,6 +92,8 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 await safe_send_message(bot, message.from_user.id,
                                         text=mmsg,
                                         reply_markup=single_command_button_keyboard())
+                await safe_send_message(bot, message, '')
+                return
                 hosts_ids = await get_all_hosts_in_event_ids(event_name)
                 if hosts_ids and user_id in hosts_ids:
                     ref_give_away = await get_ref_give_away(message.from_user.id, event_name)
@@ -286,13 +290,15 @@ async def cmd_info(message: Message):
                                                    "/info - информация о доступных комнадах\n"
                                                    "/quest - пройти анкетирование для отбора в команду\n"
                                                    "/get_ref - получить реферальную ссылку на событие\n"
+                                                   "/profile - ваш профиль со всей информацией о вас\n"
+                                                   "/top - топ 10 по владению монеткаим\n"
                                                    "/send_stat - получить статистику о пользователях\n"
                                                    "/send_post - отправить пост пользователям\n"
                                                    "/add_event - создает новое событие\n"
                                                    "/end_event - завершить событие\n"
                                                    "/get_link - получить ссылки на событие\n"
                                                    "/create_give_away - создать дополнительный розыгрыш для инфлюенсера\n"
-                                                   "/get_result - получить победителя в дополнительном розыгрыше"
+                                                   "/get_result - получить победителя в дополнительном розыгрыше\n"
                                                    "Инструкция по пользованию ботом https://clck.ru/3EwSJM",
                                 reply_markup=single_command_button_keyboard())
     else:
