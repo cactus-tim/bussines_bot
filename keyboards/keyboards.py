@@ -168,3 +168,11 @@ def get_ref_ikb(event_name: str):
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
+
+
+def top_ikb():
+    ikb = [
+        [InlineKeyboardButton(text="Топ пользователей", callback_data='top')]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard

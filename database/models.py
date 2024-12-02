@@ -22,6 +22,8 @@ class User(Base):
     event_cnt = Column(Integer, nullable=False, default=0)
     strick = Column(Integer, nullable=False, default=0)
     first_contact = Column(String, default='')
+    money = Column(Integer, nullable=False, default=1)
+    ref_cnt = Column(Integer, nullable=False, default=0)
 
 
 class Questionary(Base):

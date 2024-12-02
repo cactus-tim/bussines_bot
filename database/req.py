@@ -1,4 +1,4 @@
-from sqlalchemy import select, desc, distinct, and_, func, delete
+from sqlalchemy import select, desc, distinct, and_, func, delete, over
 from sqlalchemy.exc import NoResultFound
 
 from database.models import User, async_session, UserXEvent, Event, Questionary, Vacancy, RegEvent, RefGiveAway, GiveAwayHost
@@ -25,6 +25,7 @@ async def create_user(tg_id: int, data: dict):
             user_data = User(**data)
             session.add(user_data)
             await session.commit()
+            return user_data
         else:
             raise Error409
 
@@ -268,6 +269,8 @@ async def update_user_x_event_row_status(user_id: int, event_name: str, new_stat
             setattr(row, 'status', new_status)
             session.add(row)
             await session.commit()
+        row = await get_user_x_event_row(user_id, event_name)
+        return row
 
 
 @db_error_handler
@@ -609,3 +612,84 @@ async def get_all_hosts_in_event_orgs(event_name: str):
         if not hosts:
             raise Error404
         return hosts
+
+
+@db_error_handler
+async def add_money(tg_id: int, cnt: int):
+    async with async_session() as session:
+        user = await get_user(tg_id)
+        if user == 'not created':
+            raise Error404
+        else:
+            setattr(user, 'money', user.money + cnt)
+            session.add(user)
+            await session.commit()
+
+
+@db_error_handler
+async def one_more_event(tg_id: int):
+    async with async_session() as session:
+        user = await get_user(tg_id)
+        if user == 'not created':
+            raise Error404
+        else:
+            setattr(user, 'event_cnt', user.event_cnt + 1)
+            session.add(user)
+            await session.commit()
+
+
+@db_error_handler
+async def add_referal_cnt(tg_id: int):
+    async with async_session() as session:
+        user = await get_user(tg_id)
+        if user == 'not created':
+            raise Error404
+        else:
+            setattr(user, 'ref_cnt', user.ref_cnt + 1)
+            session.add(user)
+            await session.commit()
+
+
+@db_error_handler
+async def update_strick(tg_id: int, cnt: id = 1):
+    async with async_session() as session:
+        user = await get_user(tg_id)
+        if user == 'not created':
+            raise Error404
+        else:
+            if cnt == 0:
+                setattr(user, 'strick', 0)
+            else:
+                setattr(user, 'strick', user.strick + 1)
+            session.add(user)
+            await session.commit()
+
+
+@db_error_handler
+async def get_user_rank_by_money(specific_user_id: int) -> int:
+    async with async_session() as session:
+        rank_column = over(func.row_number(), order_by=User.money.desc()).label('rank')
+        subquery = (
+            select(User.id, rank_column)
+            .subquery()
+        )
+        query = select(subquery.c.rank).where(subquery.c.id == specific_user_id)
+        result = await session.execute(query)
+        user_rank = result.scalar()
+        if user_rank is None:
+            raise Error404
+
+        return user_rank
+
+
+@db_error_handler
+async def get_top_10_users_by_money() -> list[User]:
+    async with async_session() as session:
+        query = (
+            select(User)
+            .order_by(User.money.desc())
+            .limit(10)
+        )
+        result = await session.execute(query)
+        top_users = result.scalars().all()
+        return top_users
