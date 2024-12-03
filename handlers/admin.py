@@ -18,7 +18,7 @@ from database.req import (get_user, create_user, add_vacancy, delete_vacancy, ge
                           get_users_unreg_tg_id, get_host, get_all_hosts_in_event_orgs, create_host,
                           get_host_by_org_name, update_strick)
 from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner, vacancy_selection_keyboard, \
-    single_command_button_keyboard, link_ikb, yes_no_link_ikb, unreg_yes_no_link_ikb, get_ref_ikb
+    single_command_button_keyboard, link_ikb, yes_no_link_ikb, unreg_yes_no_link_ikb, get_ref_ikb, conf_ikb
 from statistics.stat import get_stat_all, get_stat_all_in_ev, get_stat_quest, get_stat_ad_give_away, get_stat_reg_out, \
     get_stat_reg
 
@@ -791,3 +791,12 @@ async def cmd_create_give_away4(message: Message, state: FSMContext):
     await create_host(user_id, event_name, org_name)
     await safe_send_message(bot, message, 'Готово!', reply_markup=get_ref_ikb(event_name))
     await state.clear()
+
+
+@router.message(Command('ss'))
+async def pupupu(message: Message):
+    user_ids = await get_users_tg_id_in_event('event04_12_24')
+    for user_id in user_ids:
+        await safe_send_message(bot, user_id, 'Будете ли вы присутствовать на мероприятии?', reply_markup=conf_ikb())
+    await safe_send_message(bot, message, 'ss')
+
