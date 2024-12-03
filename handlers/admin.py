@@ -471,7 +471,8 @@ async def process_post_to_all(message: Message, state: FSMContext):
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
-    user_ids = await get_users_tg_id()
+    # user_ids = await get_users_tg_id()
+    user_ids = await get_users_tg_id_in_event('event04_12_24')
     data = await state.get_data()
     flag = data.get('flag')
     if flag:

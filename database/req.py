@@ -315,7 +315,7 @@ async def get_users_tg_id_in_event(event_name: str):
     async with async_session() as session:
         users_tg_id = await session.execute(select(distinct(UserXEvent.user_id)).where(and_(
             UserXEvent.event_name == event_name,
-            UserXEvent.status == 'been'
+            UserXEvent.status == 'reg'
         )))
         users_tg_ids = users_tg_id.scalars().all()
         if not users_tg_ids:
