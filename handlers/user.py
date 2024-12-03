@@ -15,9 +15,9 @@ from database.req import get_user, create_user, create_user_x_event_row, update_
     update_user_x_event_row_status, update_reg_event, check_completly_reg_event, create_reg_event, get_reg_event, \
     get_user_x_event_row, get_ref_give_away, create_ref_give_away, delete_user_x_event_row, delete_ref_give_away_row, \
     get_all_hosts_in_event_ids, get_host, add_money, one_more_event, get_user_rank_by_money, get_top_10_users_by_money, \
-    add_referal_cnt, update_strick
+    add_referal_cnt, update_strick, get_conf, create_conf, get_conf_cnt, update_conf
 from keyboards.keyboards import single_command_button_keyboard, events_ikb, yes_no_ikb, yes_no_hse_ikb, get_ref_ikb, \
-    top_ikb
+    top_ikb, conf_ikb
 from handlers.quest import start
 
 router = Router()
@@ -61,11 +61,41 @@ msgc = """
 """
 
 
+msgconf = """
+Добрый день!
+Уже завтра состоится встреча с совладельцем и генеральным директоров "Теремка" Виталием Свидовским. 
+
+❗️К сожалению, количество желающих превысило число посадочных мест в зале, поэтому нам очень важно понимать, сколько человек действительно придет на мероприятие. 
+
+Пожалуйста, отнеситесь к вопросу ответственно.
+
+Будете ли вы присутствовать на завтрашем мероприятии?
+
+"""
+
+
+msgconf1 = """
+❗️Вынуждены сообщить, что вы зарегистрировались позже, чем критическое количество участников. 
+Есть большой шанс того, что вам не хватит места в зале, поэтому мы подготовили отдельную аудиторию, где будет работать прямая трансляция. Приносим свои извинения за доставленные неудобства. 
+"""
+
+
 @router.message(CommandStart())
 async def cmd_start(message: Message, command: CommandObject, state: FSMContext):
     hash_value = command.args  # TODO: after 04_12 event hash_value = decode_payload(command.args)
     user = await get_user(message.from_user.id)
     if hash_value:
+        if hash_value == 'pupupu':
+            conf = await get_conf(user.id)
+            if not conf:
+                cnt = await get_conf_cnt()
+                if cnt and len(cnt) >= 1:
+                    await safe_send_message(bot, user.id, msgconf1)
+                    return
+                await create_conf(user.id)
+                await safe_send_message(bot, user.id, msgconf, reply_markup=conf_ikb())
+            else:
+                await safe_send_message(bot, user.id, 'Вы уже подтвердили')
         if hash_value[:3] == 'reg':
             if user == "not created":
                 user = await create_user(message.from_user.id,
@@ -180,8 +210,18 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                                                    "бизнеса.\n"
                                                    "Подписывайся: @HSE_SPB_Business_Club",
                                 reply_markup=single_command_button_keyboard())
-    await safe_send_message(bot, message, 'Используйте /info что бы получить информацию о доступных командах')
-    # TODO: to del after bets
+
+
+@router.callback_query(F.data == "conf")
+async def cbq_conf(callback: CallbackQuery):
+    await update_conf(callback.from_user.id, {'conf': True})
+    await safe_send_message(bot, callback, 'Спасибо за подтверждение!')
+
+
+@router.callback_query(F.data == "not_conf")
+async def cbq_conf(callback: CallbackQuery):
+    await update_conf(callback.from_user.id, {'conf': False})
+    await safe_send_message(bot, callback, 'Спасибо за подтверждение!')
 
 
 @router.callback_query(F.data == "event_no")

@@ -1,7 +1,7 @@
 from sqlalchemy import select, desc, distinct, and_, func, delete, over
 from sqlalchemy.exc import NoResultFound
 
-from database.models import User, async_session, UserXEvent, Event, Questionary, Vacancy, RegEvent, RefGiveAway, GiveAwayHost
+from database.models import User, async_session, UserXEvent, Event, Questionary, Vacancy, RegEvent, RefGiveAway, GiveAwayHost, Conf
 from errors.errors import Error409, Error404, EventNameError, VacancyNameError
 from errors.handlers import db_error_handler
 
@@ -693,3 +693,100 @@ async def get_top_10_users_by_money() -> list[User]:
         result = await session.execute(query)
         top_users = result.scalars().all()
         return top_users
+
+
+# @db_error_handler
+# async def get_userrc(user_id: int):
+#     async with async_session() as session:
+#         user = await session.scalar(select(UserRC).where(UserRC.id == user_id))
+#         if user:
+#             return user
+#         else:
+#             return None
+#
+#
+# @db_error_handler
+# async def create_userrc(user_id: int):
+#     async with async_session() as session:
+#         user = await get_userrc(user_id)
+#         if not user:
+#             data = {}
+#             u = await get_user(user_id)
+#             data['id'] = user_id
+#             data['handler'] = u.handler
+#             user_data = UserRC(**data)
+#             session.add(user_data)
+#             await session.commit()
+#             return user_data
+#         else:
+#             raise Error409
+#
+#
+# @db_error_handler
+# async def update_userrc(user_id: int, data: dict):
+#     async with async_session() as session:
+#         user = await get_userrc(user_id)
+#         if not user:
+#             raise Error404
+#         else:
+#             for key, value in data.items():
+#                 setattr(user, key, value)
+#             session.add(user)
+#             await session.commit()
+#
+#
+# @db_error_handler
+# async def get_all_userrcs_wth_coffee():
+#     async with async_session() as session:
+#         users = await session.execute(select(UserRC).where(UserRC.is_active is True))
+#         users_tg_ids = users.scalars().all()
+#         if not users_tg_ids:
+#             raise Error404
+#         return users_tg_ids
+
+
+@db_error_handler
+async def get_conf(user_id: int):
+    async with async_session() as session:
+        user = await session.scalar(select(Conf).where(Conf.id == user_id))
+        if user:
+            return user
+        else:
+            return None
+
+
+@db_error_handler
+async def create_conf(user_id: int):
+    async with async_session() as session:
+        user = await get_conf(user_id)
+        if not user:
+            data = {'id': user_id}
+            user_data = Conf(**data)
+            session.add(user_data)
+            await session.commit()
+            return user_data
+        else:
+            raise Error409
+
+
+@db_error_handler
+async def update_conf(user_id: int, data: dict):
+    async with async_session() as session:
+        user = await get_conf(user_id)
+        if not user:
+            raise Error404
+        else:
+            for key, value in data.items():
+                setattr(user, key, value)
+            session.add(user)
+            await session.commit()
+
+
+@db_error_handler
+async def get_conf_cnt():
+    async with async_session() as session:
+        users = await session.execute(select(Conf))
+        users_tg_ids = users.scalars().all()
+        if not users_tg_ids:
+            raise Error404
+        return users_tg_ids

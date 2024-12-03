@@ -176,3 +176,86 @@ def top_ikb():
     ]
     ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
     return ikeyboard
+
+
+def yes_no_kb():
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="Да"), KeyboardButton(text="Нет")]],
+        resize_keyboard=True
+    )
+    return keyboard
+
+
+def expections_kb():
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="100% фан")],
+            [KeyboardButton(text="50% фан 50% польза")],
+            [KeyboardButton(text="100% польза")]
+        ],
+        resize_keyboard=True
+    )
+    return keyboard
+
+
+def yes_no_rc_ikb():
+    ikb = [
+        [
+            InlineKeyboardButton(text='ДА', callback_data='rc_yes'),
+            InlineKeyboardButton(text='НЕТ', callback_data='rc_no')
+         ]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
+
+
+def about_coffee_ikb():
+    ikb = [
+        [InlineKeyboardButton(text='Да, конечно!', callback_data='rc_week_yes')],
+        [InlineKeyboardButton(text='Пропущу неделю', callback_data='rc_week_no')],
+        [InlineKeyboardButton(text='Пропускаю месяц', callback_data='rc_mounth_no')]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
+
+
+def coffee_moves():
+    ikb = [
+        [InlineKeyboardButton(text='Изменить формат встреч', callback_data='change_format_rc')],
+        [InlineKeyboardButton(text='Перестать пить случайный кофе', callback_data='stop_rc')],
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
+
+
+def yes_no_change_format_rc_ikb():
+    ikb = [
+        [
+            InlineKeyboardButton(text='ДА', callback_data='change_format_rc_yes'),
+            InlineKeyboardButton(text='НЕТ', callback_data='change_format_rc_no')
+         ]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard
+
+
+def format_choice_kb():
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text='Онлайн')],
+            [KeyboardButton(text='Офлайн')]
+        ],
+        resize_keyboard=True
+    )
+    return keyboard
+
+
+def conf_ikb():
+    ikb = [
+        [
+            InlineKeyboardButton(text='ДА', callback_data='conf'),
+            InlineKeyboardButton(text='НЕТ', callback_data='not_conf')
+         ]
+    ]
+    ikeyboard = InlineKeyboardMarkup(inline_keyboard=ikb)
+    return ikeyboard

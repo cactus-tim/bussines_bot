@@ -26,6 +26,45 @@ class User(Base):
     ref_cnt = Column(Integer, nullable=False, default=0)
 
 
+class Conf(Base):
+    __tablename__ = "conf"
+
+    id = Column(BigInteger, primary_key=True, index=True)
+    conf = Column(Boolean, default=False)
+
+
+# class UserRC(Base):
+#     __tablename__ = "userrc"
+#
+#     id = Column(BigInteger, primary_key=True, index=True)
+#     handler = Column(String, nullable=False)
+#     is_quest = Column(Boolean, nullable=False, default=False)
+#     is_active = Column(Boolean, nullable=False, default=False)
+#     format = Column(String)
+#     dndist = Column(Integer, default=0)
+#     fio = Column(String)
+#     city = Column(String)
+#     organization = Column(String)
+#     business = Column(String)
+#     business_details = Column(String)
+#     business_interest = Column(String)
+#     hobby = Column(String)
+#     specialty = Column(String)
+#     expectations = Column(String)
+#
+#
+# class Meeting(Base):
+#     __tablename__ = 'meeting'
+#
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     user1_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+#     user2_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+#     status = Column(String)  # in_p, been, nbeen
+#     fb_user1 = Column(String)
+#     fb_user2 = Column(String)
+#     date = Column(Date)
+
+
 class Questionary(Base):
     __tablename__ = "questionary"
 
