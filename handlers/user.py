@@ -89,7 +89,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
             conf = await get_conf(user.id)
             if not conf:
                 cnt = await get_conf_cnt()
-                if cnt and len(cnt) >= 1:
+                if cnt and len(cnt) >= 300:
                     await safe_send_message(bot, user.id, msgconf1)
                     return
                 await create_conf(user.id)
