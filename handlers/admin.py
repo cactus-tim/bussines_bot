@@ -471,8 +471,7 @@ async def process_post_to_all(message: Message, state: FSMContext):
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
-    # user_ids = await get_users_tg_id()
-    user_ids = await get_users_tg_id_in_event('event04_12_24')
+    user_ids = await get_users_tg_id()
     data = await state.get_data()
     flag = data.get('flag')
     if flag:
@@ -793,10 +792,10 @@ async def cmd_create_give_away4(message: Message, state: FSMContext):
     await state.clear()
 
 
-@router.message(Command('ss'))
+@router.message(Command('ss1'))
 async def pupupu(message: Message):
     user_ids = await get_users_tg_id_in_event('event04_12_24')
     for user_id in user_ids:
-        await safe_send_message(bot, user_id, 'Будете ли вы присутствовать на мероприятии?', reply_markup=conf_ikb())
+        await safe_send_message(bot, user_id, 'Внимание ⚠️\nПосле 18:05 вход в зал будет закрыт. Это сделано, чтобы не мешать выступлению спикера.')
     await safe_send_message(bot, message, 'ss')
 
