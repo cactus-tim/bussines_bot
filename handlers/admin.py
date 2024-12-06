@@ -792,10 +792,20 @@ async def cmd_create_give_away4(message: Message, state: FSMContext):
     await state.clear()
 
 
-@router.message(Command('ss1'))
+msgw = """
+Привет! 
+Благодарим за посещение нашего мероприятия! 🔥
+
+Мы хотим становиться лучше, поэтому нам очень нужна твоя обратная связь 🤝
+
+Поделись парочкой слов о том, что понравилось, а что можно улучшить по ссылке ниже 👇
+"""
+
+
+@router.message(Command('ss2'))
 async def pupupu(message: Message):
     user_ids = await get_users_tg_id_in_event('event04_12_24')
     for user_id in user_ids:
-        await safe_send_message(bot, user_id, 'Внимание ⚠️\nПосле 18:05 вход в зал будет закрыт. Это сделано, чтобы не мешать выступлению спикера.')
-    await safe_send_message(bot, message, 'ss')
+        await safe_send_message(bot, user_id, msgw, reply_markup=link_ikb('Гугл форма', 'https://forms.gle/qZJwokoHJFwYVg516'))
+    await safe_send_message(bot, message, 'ss2')
 
