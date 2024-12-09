@@ -67,8 +67,6 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
             await safe_send_message(bot, message.from_user.id,
                                     text=mmsg,
                                     reply_markup=single_command_button_keyboard())
-            await safe_send_message(bot, message, '')
-            return
             event_name = hash_value.split('_')[1] + '_' + hash_value.split('_')[2] + '_' + hash_value.split('_')[3]
             user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
             if user_x_event == 'not created':
@@ -92,19 +90,6 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 await safe_send_message(bot, message.from_user.id,
                                         text=mmsg,
                                         reply_markup=single_command_button_keyboard())
-                await safe_send_message(bot, message, '')
-                return
-                hosts_ids = await get_all_hosts_in_event_ids(event_name)
-                if hosts_ids and user_id in hosts_ids:
-                    ref_give_away = await get_ref_give_away(message.from_user.id, event_name)
-                    if not ref_give_away:
-                        await create_ref_give_away(message.from_user.id, event_name, user_id)
-                        host = await get_host(user_id, event_name)
-                        await safe_send_message(bot, message, f'Поздравляю, вы учавствуете в розыгрыше, предназначенным только для подписчиков @{host.org_name}')
-                    else:
-                        await safe_send_message(bot, message, 'Вы уже учавствуете в чьем то розыгрыше')
-                await safe_send_message(bot, user_id, f"По твоей рефеальной сслыке зарегистрировался на событие"
-                                                      f" пользователь @{message.from_user.username}!")
                 user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
                 if user_x_event == 'not created':
                     await create_user_x_event_row(message.from_user.id, event_name, str(user_id))
@@ -115,6 +100,18 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                     await safe_send_message(bot, message, f'Хотите зарегистрироваться на мероприятие {event.desc},'
                                                           f'которое пройдет {event.date} в {event.time}',
                                             reply_markup=yes_no_ikb())
+                    hosts_ids = await get_all_hosts_in_event_ids(event_name)
+                    if hosts_ids and user_id in hosts_ids:
+                        ref_give_away = await get_ref_give_away(message.from_user.id, event_name)
+                        if not ref_give_away:
+                            await create_ref_give_away(message.from_user.id, event_name, user_id)
+                            host = await get_host(user_id, event_name)
+                            await safe_send_message(bot, message,
+                                                    f'Поздравляю, вы учавствуете в розыгрыше, предназначенным только для подписчиков @{host.org_name}')
+                        else:
+                            await safe_send_message(bot, message, 'Вы уже учавствуете в чьем то розыгрыше')
+                    await safe_send_message(bot, user_id, f"По твоей рефеальной сслыке зарегистрировался на событие"
+                                                          f" пользователь @{message.from_user.username}!")
                 else:
                     await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие', reply_markup=get_ref_ikb(event_name))
         elif hash_value == 'otbor':
