@@ -1,7 +1,7 @@
 from sqlalchemy import select, desc, distinct, and_, func, delete, over
 from sqlalchemy.exc import NoResultFound
 
-from database.models import User, async_session, UserXEvent, Event, Questionary, Vacancy, RegEvent, RefGiveAway, GiveAwayHost
+from database.models import User, async_session, UserXEvent, Event, Questionary, Vacancy, RegEvent, RefGiveAway, GiveAwayHost, Networking
 from errors.errors import Error409, Error404, EventNameError, VacancyNameError
 from errors.handlers import db_error_handler
 
@@ -693,3 +693,32 @@ async def get_top_10_users_by_money() -> list[User]:
         result = await session.execute(query)
         top_users = result.scalars().all()
         return top_users
+
+
+@db_error_handler
+async def add_user_to_networking(tg_id: int):
+    async with async_session() as session:
+        existing_user = await session.scalar(select(Networking).where(Networking.id == tg_id))
+        if existing_user:
+            raise Error409
+        networking = Networking(id=tg_id)
+        session.add(networking)
+        await session.commit()
+        return 'ok'
+
+
+@db_error_handler
+async def get_all_for_networking():
+    async with async_session() as session:
+        networking = await session.execute(select(Networking.id))
+        networking_data = networking.scalars().all()
+        if not networking_data:
+            raise Error404
+        return networking_data
+
+
+@db_error_handler
+async def delete_all_from_networking():
+    async with async_session() as session:
+        await session.execute(delete(Networking))
+        await session.commit()

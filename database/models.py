@@ -106,6 +106,12 @@ class GiveAwayHost(Base):
     org_name = Column(String, default='')
 
 
+class Networking(Base):
+    __tablename__ = "networking"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+
+
 async def async_main():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

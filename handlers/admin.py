@@ -1,3 +1,4 @@
+import random
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram import Router, F
@@ -16,7 +17,7 @@ from database.req import (get_user, create_user, add_vacancy, delete_vacancy, ge
                           get_random_user_from_event_wth_bad, get_all_vacancy_names, get_event, get_all_events_in_p,
                           create_event, get_users_tg_id_in_event_bad, update_user_x_event_row_status, get_add_winner,
                           get_users_unreg_tg_id, get_host, get_all_hosts_in_event_orgs, create_host,
-                          get_host_by_org_name, update_strick)
+                          get_host_by_org_name, update_strick, get_all_for_networking, delete_all_from_networking)
 from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner, vacancy_selection_keyboard, \
     single_command_button_keyboard, link_ikb, yes_no_link_ikb, unreg_yes_no_link_ikb, get_ref_ikb
 from statistics.stat import get_stat_all, get_stat_all_in_ev, get_stat_quest, get_stat_ad_give_away, get_stat_reg_out, \
@@ -114,9 +115,9 @@ async def add_event_part_6(message: Message, state: FSMContext):
         return
     for i in range(1, int(message.text) + 1):
         data1 = f'reg_{name}_{i}'
-        links += f"https://t.me/brewbegtbot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
+        links += f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
     data2 = name
-    url2 = f"https://t.me/brewbegtbot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
+    url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
     await safe_send_message(bot, message, f"все круто, все создано!!\nсслыки для регистрации:"
                                           f"\n{links}"
                                           f"\nссылка для подтверждения:"
@@ -160,9 +161,9 @@ async def make_link(message: Message, state: FSMContext):
         return
     for i in range(1, int(message.text) + 1):
         data1 = f'reg_{name}_{i}'
-        links += f"https://t.me/brewbegtbot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
+        links += f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
     data2 = name
-    url2 = f"https://t.me/brewbegtbot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
+    url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
     await safe_send_message(bot, message, f"все круто, все создано!!\nсслыки для регистрации:"
                                           f"\n{links}"
                                           f"\nссылка для подтверждения:"
@@ -482,8 +483,7 @@ async def process_post_to_all(message: Message, state: FSMContext):
                                 reply_markup=single_command_button_keyboard())
         return
     for user_id in user_ids:
-        if flag:
-            await safe_send_message(bot, user_id, text=message.text, reply_markup=(single_command_button_keyboard() if not flag else link_ikb(text, link)))
+        await safe_send_message(bot, user_id, text=message.text, reply_markup=(single_command_button_keyboard() if not flag else link_ikb(text, link)))
     await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
     await state.clear()
 
@@ -790,3 +790,22 @@ async def cmd_create_give_away4(message: Message, state: FSMContext):
     await create_host(user_id, event_name, org_name)
     await safe_send_message(bot, message, 'Готово!', reply_markup=get_ref_ikb(event_name))
     await state.clear()
+
+
+@router.message(Command("give_colors"))
+async def give_colors(message: Message):
+    user = await get_user(message.from_user.id)
+    if not user.is_superuser:
+        return
+    users = await get_all_for_networking()
+    if not users:
+        await safe_send_message(bot, message.from_user.id, "Пока никто не зарегистрировался на нетворкинг")
+        return
+    for user in users:
+        colors = ['белый', 'синий', 'красный', 'зелёный']
+        color = random.choice(colors)
+        await safe_send_message(bot, user, f"Ваш цвет - {color}!")
+    await delete_all_from_networking()
+    await safe_send_message(bot, message.from_user.id, "Готово")
+
+# постоянная ссылка на нетворкинг, по который пользователь добаляется в бд с нетворкингом, когда виталя нажимает раздачу цветов, все поулчают по цвету а бд сносится (все внутри)

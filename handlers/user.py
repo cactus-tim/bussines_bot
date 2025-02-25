@@ -15,7 +15,7 @@ from database.req import get_user, create_user, create_user_x_event_row, update_
     update_user_x_event_row_status, update_reg_event, check_completly_reg_event, create_reg_event, get_reg_event, \
     get_user_x_event_row, get_ref_give_away, create_ref_give_away, delete_user_x_event_row, delete_ref_give_away_row, \
     get_all_hosts_in_event_ids, get_host, add_money, one_more_event, get_user_rank_by_money, get_top_10_users_by_money, \
-    add_referal_cnt, update_strick
+    add_referal_cnt, update_strick, add_user_to_networking
 from keyboards.keyboards import single_command_button_keyboard, events_ikb, yes_no_ikb, yes_no_hse_ikb, get_ref_ikb, \
     top_ikb
 from handlers.quest import start
@@ -60,7 +60,17 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
     hash_value = command.args  # TODO: after 04_12 event hash_value = decode_payload(command.args)
     user = await get_user(message.from_user.id)
     if hash_value:
-        if hash_value[:3] == 'reg':
+        if hash_value == 'networking':
+            if user == "not created":
+                user = await create_user(message.from_user.id,
+                                  {'handler': message.from_user.username, 'first_contact': hash_value})
+            flag = await add_user_to_networking(message.from_user.id)
+            if not flag:
+                await safe_send_message(bot, message.from_user.id, 'Вы уже учавствуете в нетворкинге')
+            else:
+                await safe_send_message(bot, message.from_user.id, 'Поздравляем! Вы учавствуете в нетворкинге')
+            await bot.delete_message(message.from_user.id, message.message_id-1)
+        elif hash_value[:3] == 'reg':
             if user == "not created":
                 user = await create_user(message.from_user.id,
                                   {'handler': message.from_user.username, 'first_contact': hash_value[4:]})
@@ -356,7 +366,7 @@ async def get_ref_v2_part1(message: Message):
 async def get_ref_v2_part2(callback: CallbackQuery):
     event = await get_event(callback.data)
     data = f'ref_{event.name}__{callback.from_user.id}'
-    url = f"https://t.me/brewbegtbot?start={data}"  # TODO: after 04_12 event url = await create_start_link(bot, data, encode=True)
+    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data}"  # TODO: after 04_12 event url = await create_start_link(bot, data, encode=True)
     # short_url = await make_short_link(url)
     # if short_url:
     await safe_send_message(bot, callback, f"Вот твоя реферальная ссылка для событие {event.desc}:\n"
