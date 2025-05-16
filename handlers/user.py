@@ -66,9 +66,9 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                                   {'handler': message.from_user.username, 'first_contact': hash_value})
             flag = await add_user_to_networking(message.from_user.id)
             if not flag:
-                await safe_send_message(bot, message.from_user.id, 'Вы уже учавствуете в нетворкинге')
+                await safe_send_message(bot, message.from_user.id, 'Вы уже участвуете в нетворкинге')
             else:
-                await safe_send_message(bot, message.from_user.id, 'Поздравляем! Вы учавствуете в нетворкинге')
+                await safe_send_message(bot, message.from_user.id, 'Поздравляем! Вы участвуете в нетворкинге')
             await bot.delete_message(message.from_user.id, message.message_id-1)
         elif hash_value[:3] == 'reg':
             if user == "not created":
@@ -117,10 +117,10 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                             await create_ref_give_away(message.from_user.id, event_name, user_id)
                             host = await get_host(user_id, event_name)
                             await safe_send_message(bot, message,
-                                                    f'Поздравляю, вы учавствуете в розыгрыше, предназначенным только для подписчиков @{host.org_name}')
+                                                    f'Поздравляю, вы участвуете в розыгрыше, предназначенным только для подписчиков @{host.org_name}')
                         else:
-                            await safe_send_message(bot, message, 'Вы уже учавствуете в чьем то розыгрыше')
-                    await safe_send_message(bot, user_id, f"По твоей рефеальной сслыке зарегистрировался на событие"
+                            await safe_send_message(bot, message, 'Вы уже участвуете в чьем то розыгрыше')
+                    await safe_send_message(bot, user_id, f"По твоей реферальной ссылке зарегистрировался на событие"
                                                           f" пользователь @{message.from_user.username}!")
                 else:
                     await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие', reply_markup=get_ref_ikb(event_name))
@@ -162,10 +162,10 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                                     reply_markup=single_command_button_keyboard())
             hosts_ids = await get_all_hosts_in_event_ids(hash_value)
             if (not hosts_ids and ref_giver != 'not created') or (hosts_ids and ref_giver != 'not created' and ref_giver.id not in hosts_ids):
-                await safe_send_message(bot, ref_giver.id, f'Вы получили 2 монетки за то что пришлашенный вами человек @{user.handler} посетил событие!')
+                await safe_send_message(bot, ref_giver.id, f'Вы получили 2 монетки за то что приглашенный вами человек @{user.handler} посетил событие!')
                 await add_money(ref_giver.id, 2)
                 await add_referal_cnt(ref_giver.id)
-                await safe_send_message(bot, message.from_user.id, f'Вы получили монетку за то что вы зарегестрировались по реферальной ссылке @{ref_giver.handler}!')
+                await safe_send_message(bot, message.from_user.id, f'Вы получили монетку за то что вы зарегистрировались по реферальной ссылке @{ref_giver.handler}!')
                 await add_money(message.from_user.id, 1)
     else:
         if user == "not created":
@@ -284,7 +284,7 @@ async def reg_event_part3(message: Message, state: FSMContext):
                                 reply_markup=get_ref_ikb(name))
     else:
         await safe_send_message(bot, message, 'Что то пошло не так, начните регистрацию заново, пожалуйста\n'
-                                              'Для этого повтороно перейдите по ссылке')
+                                              'Для этого повторно перейдите по ссылке')
     await state.clear()
 
 
@@ -294,11 +294,11 @@ async def cmd_info(message: Message):
     if user.is_superuser:
         await safe_send_message(bot, message, text="Список доступных команд:\n"
                                                    "/start - перезапуск бота\n"
-                                                   "/info - информация о доступных комнадах\n"
+                                                   "/info - информация о доступных командах\n"
                                                    "/quest - пройти анкетирование для отбора в команду\n"
                                                    "/get_ref - получить реферальную ссылку на событие\n"
                                                    "/profile - ваш профиль со всей информацией о вас\n"
-                                                   "/top - топ 10 по владению монеткаим\n"
+                                                   "/top - топ 10 по владению монетками\n"
                                                    "/send_stat - получить статистику о пользователях\n"
                                                    "/send_post - отправить пост пользователям\n"
                                                    "/add_event - создает новое событие\n"
@@ -311,11 +311,11 @@ async def cmd_info(message: Message):
     else:
         await safe_send_message(bot, message, text="Список доступных команд:\n"
                                                    "/start - перезапуск бота\n"
-                                                   "/info - информация о доступных комнадах\n"
+                                                   "/info - информация о доступных командах\n"
                                                    "/quest - пройти анкетирование для отбора в команду\n"
                                                    "/get_ref - получить реферальную ссылку на событие\n"
                                                    "/profile - ваш профиль со всей информацией о вас\n"
-                                                   "/top - топ 10 по владению монеткаим",
+                                                   "/top - топ 10 по владению монетками",
                                 reply_markup=single_command_button_keyboard())
 
 
@@ -355,10 +355,10 @@ async def cmd_top(message: Message):
 async def get_ref_v2_part1(message: Message):
     events = await get_all_user_events(message.from_user.id)
     if not events:
-        await safe_send_message(bot, message, "Вы не зарегестрированны ни на одно событие и не можете никого никуда "
+        await safe_send_message(bot, message, "Вы не зарегистрированы ни на одно событие и не можете никого никуда "
                                               "пригласить", reply_markup=single_command_button_keyboard())
         return
-    await safe_send_message(bot, message, "Выберети событие, на которое хотите пригласить друга",
+    await safe_send_message(bot, message, "Выберете событие, на которое хотите пригласить друга",
                             reply_markup=events_ikb(events))
 
 
