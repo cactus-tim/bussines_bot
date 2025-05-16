@@ -74,9 +74,9 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
             if user == "not created":
                 user = await create_user(message.from_user.id,
                                   {'handler': message.from_user.username, 'first_contact': hash_value[4:]})
-            await safe_send_message(bot, message.from_user.id,
-                                    text=mmsg,
-                                    reply_markup=single_command_button_keyboard())
+            # await safe_send_message(bot, message.from_user.id,
+            #                         text=mmsg,
+            #                         reply_markup=single_command_button_keyboard())
             event_name = hash_value.split('_')[1] + '_' + hash_value.split('_')[2] + '_' + hash_value.split('_')[3]
             user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
             if user_x_event == 'not created':
@@ -97,9 +97,9 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 if user == "not created":
                     user = await create_user(message.from_user.id,
                                       {'handler': message.from_user.username, 'first_contact': str(user_id)})
-                await safe_send_message(bot, message.from_user.id,
-                                        text=mmsg,
-                                        reply_markup=single_command_button_keyboard())
+                # await safe_send_message(bot, message.from_user.id,
+                #                         text=mmsg,
+                #                         reply_markup=single_command_button_keyboard())
                 user_x_event = await get_user_x_event_row(message.from_user.id, event_name)
                 if user_x_event == 'not created':
                     await create_user_x_event_row(message.from_user.id, event_name, str(user_id))
