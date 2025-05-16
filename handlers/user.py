@@ -85,7 +85,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 if event == 'not created':
                     await safe_send_message(bot, message, 'Такого события не существует..')
                 await state.update_data({'name': event_name})
-                await safe_send_message(bot, message, f'Хотите зарегистрироваться на мероприятие {event.desc},'
+                await safe_send_message(bot, message, f'Хотите зарегистрироваться на мероприятие "{event.desc}",'
                                                       f'которое пройдет {event.date} в {event.time}', reply_markup=yes_no_ikb())
             else:
                 await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие', reply_markup=get_ref_ikb(event_name))
@@ -107,7 +107,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                     if event == 'not created':
                         await safe_send_message(bot, message, 'Такого события не существует..')
                     await state.update_data({'name': event_name})
-                    await safe_send_message(bot, message, f'Хотите зарегистрироваться на мероприятие {event.desc},'
+                    await safe_send_message(bot, message, f'Хотите зарегистрироваться на мероприятие "{event.desc}",'
                                                           f'которое пройдет {event.date} в {event.time}',
                                             reply_markup=yes_no_ikb())
                     hosts_ids = await get_all_hosts_in_event_ids(event_name)

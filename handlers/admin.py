@@ -39,7 +39,7 @@ async def cmd_add_event(message: Message, state: FSMContext):
     user = await get_user(message.from_user.id)
     if not user.is_superuser:
         return
-    await safe_send_message(bot, message, "Введите полное названиве события")
+    await safe_send_message(bot, message, "Введите полное название события")
     await state.set_state(EventCreateState.waiting_event_name)
 
 
@@ -118,7 +118,7 @@ async def add_event_part_6(message: Message, state: FSMContext):
         links += f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
     data2 = name
     url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
-    await safe_send_message(bot, message, f"все круто, все создано!!\nсслыки для регистрации:"
+    await safe_send_message(bot, message, f"все круто, все создано!!\nссылки для регистрации:"
                                           f"\n{links}"
                                           f"\nссылка для подтверждения:"
                                           f"\n{url2}",
@@ -164,7 +164,7 @@ async def make_link(message: Message, state: FSMContext):
         links += f"https://t.me/HSE_SPB_Business_Club_Bot?start={data1}\n"  # TODO: after 04_12 event links += await create_start_link(bot, data1, encode=True) + '\n'
     data2 = name
     url2 = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data2}"  # TODO: after 04_12 event url2 = await create_start_link(bot, data2, encode=True)
-    await safe_send_message(bot, message, f"все круто, все создано!!\nсслыки для регистрации:"
+    await safe_send_message(bot, message, f"все круто, все создано!!\nссылки для регистрации:"
                                           f"\n{links}"
                                           f"\nссылка для подтверждения:"
                                           f"\n{url2}",
@@ -179,7 +179,7 @@ async def cmd_end_event(message: Message, state: FSMContext):
         return
     events = await get_all_events_in_p()
     if not events:
-        await safe_send_message(bot, message, "Нет актиыных событий(")
+        await safe_send_message(bot, message, "Нет активных событий(")
         return
     await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_tagret(events))
     await state.set_state(EventState.waiting_ev)
@@ -231,7 +231,7 @@ async def confirm_end_event(callback: CallbackQuery, state: FSMContext):
     user = await get_user(user_id)
     user_ids = await get_users_tg_id_in_event(event_name)
     if not user_ids:
-        await safe_send_message(bot, user_id, text=f"У вас нет пользоватеkей))",
+        await safe_send_message(bot, user_id, text=f"У вас нет пользователей))",
                                 reply_markup=single_command_button_keyboard())
     else:
         for user_id in user_ids:
