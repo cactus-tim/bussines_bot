@@ -181,7 +181,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                                                    "бизнеса.\n"
                                                    "Подписывайся: @HSE_SPB_Business_Club",
                                 reply_markup=single_command_button_keyboard())
-    await safe_send_message(bot, message, 'Используйте /info что бы получить информацию о доступных командах')
+    await safe_send_message(bot, message, 'Используйте /info чтобы получить информацию о доступных командах')
     # TODO: to del after bets
 
 
@@ -209,7 +209,7 @@ async def reg_event_part1_5(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     name = data.get('name')
     event = await get_event(name)
-    await safe_send_message(bot, callback, f"Мы вас ждем на мероприятии {event.desc}, которое пройдет {event.date} в {event.time}\n"
+    await safe_send_message(bot, callback, f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
                                                 f"Место проведение - {event.place}\n\n", reply_markup=get_ref_ikb(name))
     await state.clear()
 
@@ -227,7 +227,7 @@ async def reg_event_part2(callback: CallbackQuery, state: FSMContext):
         name = data.get('name')
         event = await get_event(name)
         await safe_send_message(bot, callback, "Ваши данные уже сохранены!\n"
-                                               f"Мы вас ждем на мероприятии {event.desc}, которое пройдет {event.date} в {event.time}\n"
+                                               f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
                                                f"Место проведение - {event.place}\n\n"
                                                f"⚠ Обязательно возьмите с собой паспорт!", reply_markup=get_ref_ikb(name))
         await state.clear()
@@ -278,7 +278,7 @@ async def reg_event_part3(message: Message, state: FSMContext):
         data = await state.get_data()
         name = data.get('name')
         event = await get_event(name)
-        await safe_send_message(bot, message, f"Мы вас ждем на мероприятии {event.desc}, которое пройдет {event.date} в {event.time}\n"
+        await safe_send_message(bot, message, f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
                                                f"Место проведение - {event.place}\n\n"
                                                f"⚠ Обязательно возьмите с собой паспорт!",
                                 reply_markup=get_ref_ikb(name))
