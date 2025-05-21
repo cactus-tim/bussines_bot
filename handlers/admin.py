@@ -398,39 +398,85 @@ async def process_post_to_all_media_unreg(message: Message, state: FSMContext):
                                 reply_markup=single_command_button_keyboard())
         return
 
+    # Send initial status message
+    status_message = await safe_send_message(bot, message, 
+        f"🚀 Начинаю рассылку для незарегистрированных пользователей события {event_name}...\n"
+        f"Всего получателей: {len(user_ids)}\nОтправлено: 0\nОшибок: 0")
+
     reply_markup = None
     if flag:
         link = data.get('link')
         text = data.get('text')
         reply_markup = link_ikb(text, link)
 
-    for user_id in user_ids:
-        if message.photo:
-            # Send photo with caption if exists
-            await bot.send_photo(
-                chat_id=user_id,
-                photo=message.photo[-1].file_id,
-                caption=message.caption,
-                reply_markup=reply_markup or single_command_button_keyboard()
-            )
-        elif message.video:
-            # Send video with caption if exists
-            await bot.send_video(
-                chat_id=user_id,
-                video=message.video.file_id,
-                caption=message.caption,
-                reply_markup=reply_markup or single_command_button_keyboard()
-            )
-        else:
-            # Send text message
-            await safe_send_message(
-                bot, 
-                user_id, 
-                text=message.text,
-                reply_markup=reply_markup or single_command_button_keyboard()
-            )
+    failed_users = []
+    success_count = 0
+    total = len(user_ids)
 
-    await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
+    async def update_status(text: str):
+        nonlocal status_message
+        try:
+            await bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=status_message.message_id,
+                text=text
+            )
+        except Exception:
+            try:
+                await bot.delete_message(message.chat.id, status_message.message_id)
+            except Exception:
+                pass
+            status_message = await safe_send_message(bot, message, text)
+
+    for i, user_id in enumerate(user_ids, 1):
+        try:
+            if message.photo:
+                await bot.send_photo(
+                    chat_id=user_id,
+                    photo=message.photo[-1].file_id,
+                    caption=message.caption,
+                    reply_markup=reply_markup or single_command_button_keyboard()
+                )
+            elif message.video:
+                await bot.send_video(
+                    chat_id=user_id,
+                    video=message.video.file_id,
+                    caption=message.caption,
+                    reply_markup=reply_markup or single_command_button_keyboard()
+                )
+            else:
+                await safe_send_message(
+                    bot, 
+                    user_id, 
+                    text=message.text,
+                    reply_markup=reply_markup or single_command_button_keyboard()
+                )
+            success_count += 1
+            
+            # Update status every 10 messages or on last message
+            if i % 10 == 0 or i == total:
+                await update_status(
+                    f"📨 Рассылка в процессе...\n"
+                    f"Событие: {event_name}\n"
+                    f"Всего получателей: {total}\n"
+                    f"Отправлено: {success_count}\n"
+                    f"Ошибок: {len(failed_users)}\n"
+                    f"Прогресс: {i}/{total} ({int(i/total*100)}%)"
+                )
+                
+        except Exception as e:
+            failed_users.append(user_id)
+            continue
+
+    # Send final status
+    await update_status(
+        f"✅ Рассылка завершена!\n"
+        f"Событие: {event_name}\n"
+        f"Всего получателей: {total}\n"
+        f"Успешно отправлено: {success_count}\n"
+        f"Ошибок: {len(failed_users)}"
+    )
+    
     await state.clear()
 
 
@@ -465,6 +511,10 @@ async def process_post_to_all_media(message: Message, state: FSMContext):
                                 reply_markup=single_command_button_keyboard())
         return
 
+    # Send initial status message
+    status_message = await safe_send_message(bot, message, 
+        f"🚀 Начинаю рассылку...\nВсего получателей: {len(user_ids)}\nОтправлено: 0\nОшибок: 0")
+    
     data = await state.get_data()
     flag = data.get('flag', False)
     reply_markup = None
@@ -473,33 +523,72 @@ async def process_post_to_all_media(message: Message, state: FSMContext):
         text = data.get('text')
         reply_markup = link_ikb(text, link)
 
-    for user_id in user_ids:
-        if message.photo:
-            # Send photo with caption if exists
-            await bot.send_photo(
-                chat_id=user_id,
-                photo=message.photo[-1].file_id,
-                caption=message.caption,
-                reply_markup=reply_markup or single_command_button_keyboard()
-            )
-        elif message.video:
-            # Send video with caption if exists
-            await bot.send_video(
-                chat_id=user_id,
-                video=message.video.file_id,
-                caption=message.caption,
-                reply_markup=reply_markup or single_command_button_keyboard()
-            )
-        else:
-            # Send text message
-            await safe_send_message(
-                bot, 
-                user_id, 
-                text=message.text,
-                reply_markup=reply_markup or single_command_button_keyboard()
-            )
+    failed_users = []
+    success_count = 0
+    total = len(user_ids)
 
-    await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
+    async def update_status(text: str):
+        nonlocal status_message
+        try:
+            await bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=status_message.message_id,
+                text=text
+            )
+        except Exception:
+            try:
+                await bot.delete_message(message.chat.id, status_message.message_id)
+            except Exception:
+                pass
+            status_message = await safe_send_message(bot, message, text)
+
+    for i, user_id in enumerate(user_ids, 1):
+        try:
+            if message.photo:
+                await bot.send_photo(
+                    chat_id=user_id,
+                    photo=message.photo[-1].file_id,
+                    caption=message.caption,
+                    reply_markup=reply_markup or single_command_button_keyboard()
+                )
+            elif message.video:
+                await bot.send_video(
+                    chat_id=user_id,
+                    video=message.video.file_id,
+                    caption=message.caption,
+                    reply_markup=reply_markup or single_command_button_keyboard()
+                )
+            else:
+                await safe_send_message(
+                    bot, 
+                    user_id, 
+                    text=message.text,
+                    reply_markup=reply_markup or single_command_button_keyboard()
+                )
+            success_count += 1
+            
+            # Update status every 10 messages or on last message
+            if i % 10 == 0 or i == total:
+                await update_status(
+                    f"📨 Рассылка в процессе...\n"
+                    f"Всего получателей: {total}\n"
+                    f"Отправлено: {success_count}\n"
+                    f"Ошибок: {len(failed_users)}\n"
+                    f"Прогресс: {i}/{total} ({int(i/total*100)}%)"
+                )
+                
+        except Exception as e:
+            failed_users.append(user_id)
+            continue
+
+    # Send final status
+    await update_status(
+        f"✅ Рассылка завершена!\n"
+        f"Всего получателей: {total}\n"
+        f"Успешно отправлено: {success_count}\n"
+        f"Ошибок: {len(failed_users)}"
+    )
+    
     await state.clear()
 
 
@@ -585,33 +674,78 @@ async def process_post_to_ev_media(message: Message, state: FSMContext):
                                 reply_markup=single_command_button_keyboard())
         return
 
-    for user_id in user_ids:
-        if message.photo:
-            # Send photo with caption if exists
-            await bot.send_photo(
-                chat_id=user_id,
-                photo=message.photo[-1].file_id,
-                caption=message.caption,
-                reply_markup=single_command_button_keyboard()
-            )
-        elif message.video:
-            # Send video with caption if exists
-            await bot.send_video(
-                chat_id=user_id,
-                video=message.video.file_id,
-                caption=message.caption,
-                reply_markup=single_command_button_keyboard()
-            )
-        else:
-            # Send text message
-            await safe_send_message(
-                bot, 
-                user_id, 
-                text=message.text,
-                reply_markup=single_command_button_keyboard()
-            )
+    # Send initial status message
+    status_message = await safe_send_message(bot, message, 
+        f"🚀 Начинаю рассылку для события {event_name}...\nВсего получателей: {len(user_ids)}\nОтправлено: 0\nОшибок: 0")
 
-    await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
+    failed_users = []
+    success_count = 0
+    total = len(user_ids)
+
+    async def update_status(text: str):
+        nonlocal status_message
+        try:
+            await bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=status_message.message_id,
+                text=text
+            )
+        except Exception:
+            try:
+                await bot.delete_message(message.chat.id, status_message.message_id)
+            except Exception:
+                pass
+            status_message = await safe_send_message(bot, message, text)
+
+    for i, user_id in enumerate(user_ids, 1):
+        try:
+            if message.photo:
+                await bot.send_photo(
+                    chat_id=user_id,
+                    photo=message.photo[-1].file_id,
+                    caption=message.caption,
+                    reply_markup=single_command_button_keyboard()
+                )
+            elif message.video:
+                await bot.send_video(
+                    chat_id=user_id,
+                    video=message.video.file_id,
+                    caption=message.caption,
+                    reply_markup=single_command_button_keyboard()
+                )
+            else:
+                await safe_send_message(
+                    bot, 
+                    user_id, 
+                    text=message.text,
+                    reply_markup=single_command_button_keyboard()
+                )
+            success_count += 1
+            
+            # Update status every 10 messages or on last message
+            if i % 10 == 0 or i == total:
+                await update_status(
+                    f"📨 Рассылка в процессе...\n"
+                    f"Событие: {event_name}\n"
+                    f"Всего получателей: {total}\n"
+                    f"Отправлено: {success_count}\n"
+                    f"Ошибок: {len(failed_users)}\n"
+                    f"Прогресс: {i}/{total} ({int(i/total*100)}%)"
+                )
+                
+        except Exception as e:
+            failed_users.append(user_id)
+            continue
+
+    # Send final status
+    await update_status(
+        f"✅ Рассылка завершена!\n"
+        f"Событие: {event_name}\n"
+        f"Всего получателей: {total}\n"
+        f"Успешно отправлено: {success_count}\n"
+        f"Ошибок: {len(failed_users)}"
+    )
+    
     await state.clear()
 
 
