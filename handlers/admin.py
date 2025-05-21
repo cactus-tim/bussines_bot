@@ -1,24 +1,20 @@
 import random
-from aiogram.filters import Command, CommandStart
-from aiogram.fsm.context import FSMContext
+
 from aiogram import Router, F
-from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from datetime import date
+from aiogram.types import Message, CallbackQuery
 
-from aiogram.utils.deep_linking import create_start_link
-from cryptography.fernet import Fernet
-
-from handlers.error import safe_send_message, make_short_link
 from bot_instance import bot
-from database.req import (get_user, create_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,
+from database.req import (get_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,
                           get_users_tg_id_in_event, get_random_user_from_event, update_event,
-                          get_random_user_from_event_wth_bad, get_all_vacancy_names, get_event, get_all_events_in_p,
+                          get_random_user_from_event_wth_bad, get_all_vacancy_names, get_all_events_in_p,
                           create_event, get_users_tg_id_in_event_bad, update_user_x_event_row_status, get_add_winner,
-                          get_users_unreg_tg_id, get_host, get_all_hosts_in_event_orgs, create_host,
+                          get_users_unreg_tg_id, get_all_hosts_in_event_orgs, create_host,
                           get_host_by_org_name, update_strick, get_all_for_networking, delete_all_from_networking)
-from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner, vacancy_selection_keyboard, \
+from handlers.error import safe_send_message
+from keyboards.keyboards import post_target, post_ev_target, stat_target, apply_winner, vacancy_selection_keyboard, \
     single_command_button_keyboard, link_ikb, yes_no_link_ikb, unreg_yes_no_link_ikb, get_ref_ikb
 from statistics.stat import get_stat_all, get_stat_all_in_ev, get_stat_quest, get_stat_ad_give_away, get_stat_reg_out, \
     get_stat_reg
@@ -71,7 +67,9 @@ async def add_event_part_3(message: Message, state: FSMContext):
     data = await state.get_data()
     desc = data.get('desc')
     name = "event" + message.text.replace('.', '_')
-    dat = (message.text.split('.')[0] if message.text.split('.')[0][0] != '0' else message.text.split('.')[0][1]) + '' + month[int((message.text.split('.')[1] if message.text.split('.')[1][0] != '0' else message.text.split('.')[1][1]))]
+    dat = (message.text.split('.')[0] if message.text.split('.')[0][0] != '0' else message.text.split('.')[0][1]) + '' + \
+          month[int((message.text.split('.')[1] if message.text.split('.')[1][0] != '0' else message.text.split('.')[1][
+              1]))]
     # dat = date(int(message.text.split('.')[2]), int(message.text.split('.')[1]), int(message.text.split('.')[0]))
     await create_event(name, {'desc': desc, 'date': dat})
     await safe_send_message(bot, message, 'Отправьте время проведение мероприятия')
@@ -140,7 +138,7 @@ async def get_link(message: Message, state: FSMContext):
     events = await get_all_events_in_p()
     if not events:
         await safe_send_message(bot, message, 'У вас нет событий((')
-    await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_target(events))
     await state.set_state(EventState.waiting_ev_for_link)
 
 
@@ -181,7 +179,7 @@ async def cmd_end_event(message: Message, state: FSMContext):
     if not events:
         await safe_send_message(bot, message, "Нет активных событий(")
         return
-    await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_target(events))
     await state.set_state(EventState.waiting_ev)
 
 
@@ -332,6 +330,9 @@ class PostState(StatesGroup):
     waiting_for_post_to_ev_text = State()
     waiting_for_post_wth_op_to_ev_ev = State()
     waiting_for_post_wth_op_to_ev_text = State()
+    waiting_for_post_to_all_media = State()
+    waiting_for_post_to_ev_media = State()
+    waiting_for_post_to_all_media_unreg = State()
 
 
 @router.message(Command("send_post"))
@@ -357,7 +358,7 @@ async def choose_event(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий")
         return
     await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit",
-                            reply_markup=post_ev_tagret(events))
+                            reply_markup=post_ev_target(events))
     await state.set_state(PostState.waiting_for_post_to_ev_ev_unreg)
 
 
@@ -370,8 +371,8 @@ async def mb_add_link_unreg(message: Message, state: FSMContext):
 @router.callback_query(F.data == "unreg_link_no")
 async def link_no_unreg(callback: CallbackQuery, state: FSMContext):
     await state.update_data({'flag': False})
-    await safe_send_message(bot, callback, text="Отправьте мне пост")
-    await state.set_state(PostState.waiting_for_post_to_all_text_unreg)
+    await safe_send_message(bot, callback, text="Отправьте мне пост (текст, фото или видео)\n\nДля отмены введите quit")
+    await state.set_state(PostState.waiting_for_post_to_all_media_unreg)
 
 
 @router.callback_query(F.data == "unreg_link_yes")
@@ -380,48 +381,55 @@ async def link_yes_unreg(callback: CallbackQuery, state: FSMContext):
     await state.set_state(PostState.waiting_for_post_to_all_text05_unreg)
 
 
-@router.message(PostState.waiting_for_post_to_all_text05_unreg)
-async def cmd_post_to_all_unreg(message: Message, state: FSMContext):
-    if message.text.lower() == 'quit':
+@router.message(PostState.waiting_for_post_to_all_media_unreg)
+async def process_post_to_all_media_unreg(message: Message, state: FSMContext):
+    if message.text and message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
-    await state.update_data({'link': message.text, 'flag': True})
-    await safe_send_message(bot, message, text="Отправь надпись на кнопке\n\nДля отмены введите quit")
-    await state.set_state(PostState.waiting_for_post_to_all_text1_unreg)
-
-
-@router.message(PostState.waiting_for_post_to_all_text1_unreg)
-async def cmd_post_to_all_unreg(message: Message, state: FSMContext):
-    if message.text.lower() == 'quit':
-        await safe_send_message(bot, message, 'Вы вышли')
-        await state.clear()
-        return
-    await state.update_data({'text': message.text})
-    await safe_send_message(bot, message, text="Отправьте мне пост\n\nДля отмены введите quit")
-    await state.set_state(PostState.waiting_for_post_to_all_text_unreg)
-
-
-@router.message(PostState.waiting_for_post_to_all_text_unreg)
-async def process_post_to_all_unreg(message: Message, state: FSMContext):
-    if message.text.lower() == 'quit':
-        await safe_send_message(bot, message, 'Вы вышли')
-        await state.clear()
-        return
+    
     data = await state.get_data()
     event_name = data.get('event_name')
-    flag = data.get('flag')
+    flag = data.get('flag', False)
     user_ids = await get_users_unreg_tg_id(event_name)
-    if flag:
-        link = data.get('link')
-        text = data.get('text')
+    
     if not user_ids:
         await safe_send_message(bot, message, text="У вас нет пользователей((",
                                 reply_markup=single_command_button_keyboard())
         return
+
+    reply_markup = None
+    if flag:
+        link = data.get('link')
+        text = data.get('text')
+        reply_markup = link_ikb(text, link)
+
     for user_id in user_ids:
-        if flag:
-            await safe_send_message(bot, user_id, text=message.text, reply_markup=(single_command_button_keyboard() if not flag else link_ikb(text, link)))
+        if message.photo:
+            # Send photo with caption if exists
+            await bot.send_photo(
+                chat_id=user_id,
+                photo=message.photo[-1].file_id,
+                caption=message.caption,
+                reply_markup=reply_markup or single_command_button_keyboard()
+            )
+        elif message.video:
+            # Send video with caption if exists
+            await bot.send_video(
+                chat_id=user_id,
+                video=message.video.file_id,
+                caption=message.caption,
+                reply_markup=reply_markup or single_command_button_keyboard()
+            )
+        else:
+            # Send text message
+            await safe_send_message(
+                bot, 
+                user_id, 
+                text=message.text,
+                reply_markup=reply_markup or single_command_button_keyboard()
+            )
+
     await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
     await state.clear()
 
@@ -434,14 +442,65 @@ async def mb_add_link(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "link_no")
 async def link_no(callback: CallbackQuery, state: FSMContext):
     await state.update_data({'flag': False})
-    await safe_send_message(bot, callback, text="Отправьте мне пост")
-    await state.set_state(PostState.waiting_for_post_to_all_text)
+    await safe_send_message(bot, callback, text="Отправьте мне пост (текст, фото или видео)\n\nДля отмены введите quit")
+    await state.set_state(PostState.waiting_for_post_to_all_media)
 
 
 @router.callback_query(F.data == "link_yes")
 async def link_yes(callback: CallbackQuery, state: FSMContext):
     await safe_send_message(bot, callback, text="Отправь мне ссылку\n\nДля отмены введите quit")
     await state.set_state(PostState.waiting_for_post_to_all_text05)
+
+
+@router.message(PostState.waiting_for_post_to_all_media)
+async def process_post_to_all_media(message: Message, state: FSMContext):
+    if message.text and message.text.lower() == 'quit':
+        await safe_send_message(bot, message, 'Вы вышли')
+        await state.clear()
+        return
+    
+    user_ids = await get_users_tg_id()
+    if not user_ids:
+        await safe_send_message(bot, message, text="У вас нет пользователей((",
+                                reply_markup=single_command_button_keyboard())
+        return
+
+    data = await state.get_data()
+    flag = data.get('flag', False)
+    reply_markup = None
+    if flag:
+        link = data.get('link')
+        text = data.get('text')
+        reply_markup = link_ikb(text, link)
+
+    for user_id in user_ids:
+        if message.photo:
+            # Send photo with caption if exists
+            await bot.send_photo(
+                chat_id=user_id,
+                photo=message.photo[-1].file_id,
+                caption=message.caption,
+                reply_markup=reply_markup or single_command_button_keyboard()
+            )
+        elif message.video:
+            # Send video with caption if exists
+            await bot.send_video(
+                chat_id=user_id,
+                video=message.video.file_id,
+                caption=message.caption,
+                reply_markup=reply_markup or single_command_button_keyboard()
+            )
+        else:
+            # Send text message
+            await safe_send_message(
+                bot, 
+                user_id, 
+                text=message.text,
+                reply_markup=reply_markup or single_command_button_keyboard()
+            )
+
+    await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
+    await state.clear()
 
 
 @router.message(PostState.waiting_for_post_to_all_text05)
@@ -462,8 +521,8 @@ async def cmd_post_to_all(message: Message, state: FSMContext):
         await state.clear()
         return
     await state.update_data({'text': message.text})
-    await safe_send_message(bot, message, text="Отправьте мне пост\n\nДля отмены введите quit")
-    await state.set_state(PostState.waiting_for_post_to_all_text)
+    await safe_send_message(bot, message, text="Отправьте мне пост (текст, фото или видео)\n\nДля отмены введите quit")
+    await state.set_state(PostState.waiting_for_post_to_all_media)
 
 
 @router.message(PostState.waiting_for_post_to_all_text)
@@ -483,7 +542,8 @@ async def process_post_to_all(message: Message, state: FSMContext):
                                 reply_markup=single_command_button_keyboard())
         return
     for user_id in user_ids:
-        await safe_send_message(bot, user_id, text=message.text, reply_markup=(single_command_button_keyboard() if not flag else link_ikb(text, link)))
+        await safe_send_message(bot, user_id, text=message.text,
+                                reply_markup=(single_command_button_keyboard() if not flag else link_ikb(text, link)))
     await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
     await state.clear()
 
@@ -494,7 +554,8 @@ async def cmd_post_to_ev(callback: CallbackQuery, state: FSMContext):
     if not events:
         await safe_send_message(bot, callback, text="У вас нет событий")
         return
-    await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit",
+                            reply_markup=post_ev_target(events))
     await state.set_state(PostState.waiting_for_post_to_ev_ev)
 
 
@@ -504,17 +565,18 @@ async def pre_process_post_to_ev(message: Message, state: FSMContext):
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
-    await safe_send_message(bot, message, text="Отправьте мне пост\n\nДля отмены введите quit")
+    await safe_send_message(bot, message, text="Отправьте мне пост (текст, фото или видео)\n\nДля отмены введите quit")
     await state.update_data(event_name=message.text)
-    await state.set_state(PostState.waiting_for_post_to_ev_text)
+    await state.set_state(PostState.waiting_for_post_to_ev_media)
 
 
-@router.message(PostState.waiting_for_post_to_ev_text)
-async def process_post_to_ev(message: Message, state: FSMContext):
-    if message.text.lower() == 'quit':
+@router.message(PostState.waiting_for_post_to_ev_media)
+async def process_post_to_ev_media(message: Message, state: FSMContext):
+    if message.text and message.text.lower() == 'quit':
         await safe_send_message(bot, message, 'Вы вышли')
         await state.clear()
         return
+
     data = await state.get_data()
     event_name = data.get("event_name")
     user_ids = await get_users_tg_id_in_event(event_name)
@@ -522,20 +584,45 @@ async def process_post_to_ev(message: Message, state: FSMContext):
         await safe_send_message(bot, message, text="У вас нет пользователей принявших участие в этом событии",
                                 reply_markup=single_command_button_keyboard())
         return
+
     for user_id in user_ids:
-        await safe_send_message(bot, user_id, text=message.text, reply_markup=single_command_button_keyboard())
+        if message.photo:
+            # Send photo with caption if exists
+            await bot.send_photo(
+                chat_id=user_id,
+                photo=message.photo[-1].file_id,
+                caption=message.caption,
+                reply_markup=single_command_button_keyboard()
+            )
+        elif message.video:
+            # Send video with caption if exists
+            await bot.send_video(
+                chat_id=user_id,
+                video=message.video.file_id,
+                caption=message.caption,
+                reply_markup=single_command_button_keyboard()
+            )
+        else:
+            # Send text message
+            await safe_send_message(
+                bot, 
+                user_id, 
+                text=message.text,
+                reply_markup=single_command_button_keyboard()
+            )
+
     await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
     await state.clear()
 
 
-# https://chatgpt.com/share/673d7302-fcc0-8004-877f-11760ff426f4
 @router.callback_query(F.data == "post_wth_op_to_ev")
 async def cmd_post_to_ev(callback: CallbackQuery, state: FSMContext):
     events = await get_all_events()
     if not events:
         await safe_send_message(bot, callback, text="У вас нет событий")
         return
-    await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit",
+                            reply_markup=post_ev_target(events))
     await state.set_state(PostState.waiting_for_post_wth_op_to_ev_ev)
 
 
@@ -608,7 +695,7 @@ async def cmd_stat_ev(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(StatState.waiting_for_ev)
 
 
@@ -630,7 +717,7 @@ async def cmd_stat_give_away(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(StatState.waiting_for_give_away_ev)
 
 
@@ -640,7 +727,8 @@ async def cmd_stat_give_away2(message: Message, state: FSMContext):
         await state.clear()
         return
     await state.update_data({'event_name': message.text})
-    await safe_send_message(bot, message, 'Введите юзер id организатора дополнительного розыгрыша\n\nДля отмены введите quit')
+    await safe_send_message(bot, message,
+                            'Введите юзер id организатора дополнительного розыгрыша\n\nДля отмены введите quit')
     await state.set_state(StatState.waiting_user_id)
 
 
@@ -662,7 +750,7 @@ async def cmd_stat_reg(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(StatState.waiting_for_ev1)
 
 
@@ -679,7 +767,7 @@ async def cmd_stat_reg(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(StatState.waiting_for_ev2)
 
 
@@ -704,7 +792,7 @@ async def cmd_get_result(message: Message, state: FSMContext):
         await safe_send_message(bot, message, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, message, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, message, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(WinnerState.wait_give_away_event)
 
 
@@ -713,10 +801,12 @@ async def get_result(message: Message, state: FSMContext):
     await state.update_data({'event_name': message.text})
     hosts_orgs = await get_all_hosts_in_event_orgs(message.text)
     if not hosts_orgs:
-        await safe_send_message(bot, message, text="У вас нет организаторов дополнительных розыгрышей", reply_markup=single_command_button_keyboard())
+        await safe_send_message(bot, message, text="У вас нет организаторов дополнительных розыгрышей",
+                                reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, message, text="Выберете организатора:\n\nДля отмены введите quit'", reply_markup=post_ev_tagret(hosts_orgs))
+    await safe_send_message(bot, message, text="Выберете организатора:\n\nДля отмены введите quit'",
+                            reply_markup=post_ev_target(hosts_orgs))
     await state.set_state(WinnerState.wait_give_away_id)
 
 
@@ -753,7 +843,7 @@ async def cmd_create_give_away(message: Message, state: FSMContext):
         await safe_send_message(bot, message, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, message, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, message, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(GiveAwayState.waiting_event)
 
 
@@ -770,7 +860,8 @@ async def cmd_create_give_away3(message: Message, state: FSMContext):
         await state.clear()
         return
     await state.update_data({'org_name': message.text})
-    await safe_send_message(bot, message, 'Введите айди организатора\n\nЕсли хотите использовать свое айди = отправьте Я\n\nДля отмены введите quit')
+    await safe_send_message(bot, message,
+                            'Введите айди организатора\n\nЕсли хотите использовать свое айди = отправьте Я\n\nДля отмены введите quit')
     await state.set_state(GiveAwayState.waiting_id)
 
 
@@ -802,9 +893,9 @@ async def give_colors(message: Message):
         await safe_send_message(bot, message.from_user.id, "Пока никто не зарегистрировался на нетворкинг")
         return
     for user in users:
-        colors = ['белый', 'синий', 'красный', 'зелёный']
+        colors = ["Локация", "Меню", "Команда", "Маркетинг"]
         color = random.choice(colors)
-        await safe_send_message(bot, user, f"Ваш цвет - {color}!")
+        await safe_send_message(bot, user, f"Ваша тема - {color}!")
     await delete_all_from_networking()
     await safe_send_message(bot, message.from_user.id, "Готово")
 
