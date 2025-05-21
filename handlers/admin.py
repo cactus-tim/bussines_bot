@@ -1,23 +1,19 @@
 import random
-from aiogram.filters import Command, CommandStart
-from aiogram.fsm.context import FSMContext
+
 from aiogram import Router, F
-from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from datetime import date
+from aiogram.types import Message, CallbackQuery
 
-from aiogram.utils.deep_linking import create_start_link
-from cryptography.fernet import Fernet
-
-from handlers.error import safe_send_message, make_short_link
 from bot_instance import bot
-from database.req import (get_user, create_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,
+from database.req import (get_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,
                           get_users_tg_id_in_event, get_random_user_from_event, update_event,
-                          get_random_user_from_event_wth_bad, get_all_vacancy_names, get_event, get_all_events_in_p,
+                          get_random_user_from_event_wth_bad, get_all_vacancy_names, get_all_events_in_p,
                           create_event, get_users_tg_id_in_event_bad, update_user_x_event_row_status, get_add_winner,
-                          get_users_unreg_tg_id, get_host, get_all_hosts_in_event_orgs, create_host,
+                          get_users_unreg_tg_id, get_all_hosts_in_event_orgs, create_host,
                           get_host_by_org_name, update_strick, get_all_for_networking, delete_all_from_networking)
+from handlers.error import safe_send_message
 from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner, vacancy_selection_keyboard, \
     single_command_button_keyboard, link_ikb, yes_no_link_ikb, unreg_yes_no_link_ikb, get_ref_ikb
 from statistics.stat import get_stat_all, get_stat_all_in_ev, get_stat_quest, get_stat_ad_give_away, get_stat_reg_out, \
@@ -71,7 +67,9 @@ async def add_event_part_3(message: Message, state: FSMContext):
     data = await state.get_data()
     desc = data.get('desc')
     name = "event" + message.text.replace('.', '_')
-    dat = (message.text.split('.')[0] if message.text.split('.')[0][0] != '0' else message.text.split('.')[0][1]) + '' + month[int((message.text.split('.')[1] if message.text.split('.')[1][0] != '0' else message.text.split('.')[1][1]))]
+    dat = (message.text.split('.')[0] if message.text.split('.')[0][0] != '0' else message.text.split('.')[0][1]) + '' + \
+          month[int((message.text.split('.')[1] if message.text.split('.')[1][0] != '0' else message.text.split('.')[1][
+              1]))]
     # dat = date(int(message.text.split('.')[2]), int(message.text.split('.')[1]), int(message.text.split('.')[0]))
     await create_event(name, {'desc': desc, 'date': dat})
     await safe_send_message(bot, message, 'Отправьте время проведение мероприятия')
@@ -421,7 +419,8 @@ async def process_post_to_all_unreg(message: Message, state: FSMContext):
         return
     for user_id in user_ids:
         if flag:
-            await safe_send_message(bot, user_id, text=message.text, reply_markup=(single_command_button_keyboard() if not flag else link_ikb(text, link)))
+            await safe_send_message(bot, user_id, text=message.text, reply_markup=(
+                single_command_button_keyboard() if not flag else link_ikb(text, link)))
     await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
     await state.clear()
 
@@ -483,7 +482,8 @@ async def process_post_to_all(message: Message, state: FSMContext):
                                 reply_markup=single_command_button_keyboard())
         return
     for user_id in user_ids:
-        await safe_send_message(bot, user_id, text=message.text, reply_markup=(single_command_button_keyboard() if not flag else link_ikb(text, link)))
+        await safe_send_message(bot, user_id, text=message.text,
+                                reply_markup=(single_command_button_keyboard() if not flag else link_ikb(text, link)))
     await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
     await state.clear()
 
@@ -494,7 +494,8 @@ async def cmd_post_to_ev(callback: CallbackQuery, state: FSMContext):
     if not events:
         await safe_send_message(bot, callback, text="У вас нет событий")
         return
-    await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit",
+                            reply_markup=post_ev_tagret(events))
     await state.set_state(PostState.waiting_for_post_to_ev_ev)
 
 
@@ -535,7 +536,8 @@ async def cmd_post_to_ev(callback: CallbackQuery, state: FSMContext):
     if not events:
         await safe_send_message(bot, callback, text="У вас нет событий")
         return
-    await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit",
+                            reply_markup=post_ev_tagret(events))
     await state.set_state(PostState.waiting_for_post_wth_op_to_ev_ev)
 
 
@@ -640,7 +642,8 @@ async def cmd_stat_give_away2(message: Message, state: FSMContext):
         await state.clear()
         return
     await state.update_data({'event_name': message.text})
-    await safe_send_message(bot, message, 'Введите юзер id организатора дополнительного розыгрыша\n\nДля отмены введите quit')
+    await safe_send_message(bot, message,
+                            'Введите юзер id организатора дополнительного розыгрыша\n\nДля отмены введите quit')
     await state.set_state(StatState.waiting_user_id)
 
 
@@ -713,10 +716,12 @@ async def get_result(message: Message, state: FSMContext):
     await state.update_data({'event_name': message.text})
     hosts_orgs = await get_all_hosts_in_event_orgs(message.text)
     if not hosts_orgs:
-        await safe_send_message(bot, message, text="У вас нет организаторов дополнительных розыгрышей", reply_markup=single_command_button_keyboard())
+        await safe_send_message(bot, message, text="У вас нет организаторов дополнительных розыгрышей",
+                                reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, message, text="Выберете организатора:\n\nДля отмены введите quit'", reply_markup=post_ev_tagret(hosts_orgs))
+    await safe_send_message(bot, message, text="Выберете организатора:\n\nДля отмены введите quit'",
+                            reply_markup=post_ev_tagret(hosts_orgs))
     await state.set_state(WinnerState.wait_give_away_id)
 
 
@@ -770,7 +775,8 @@ async def cmd_create_give_away3(message: Message, state: FSMContext):
         await state.clear()
         return
     await state.update_data({'org_name': message.text})
-    await safe_send_message(bot, message, 'Введите айди организатора\n\nЕсли хотите использовать свое айди = отправьте Я\n\nДля отмены введите quit')
+    await safe_send_message(bot, message,
+                            'Введите айди организатора\n\nЕсли хотите использовать свое айди = отправьте Я\n\nДля отмены введите quit')
     await state.set_state(GiveAwayState.waiting_id)
 
 

@@ -1,24 +1,20 @@
-import base64
-from aiogram.utils.deep_linking import create_start_link, decode_payload
-import requests
-from aiogram.filters import Command, CommandStart
 from aiogram import Router, F
+from aiogram.filters import Command, CommandStart
 from aiogram.filters.command import CommandObject
-from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-import urllib.parse
+from aiogram.types import Message, CallbackQuery
 
-from handlers.error import safe_send_message, make_short_link
 from bot_instance import bot
-from database.req import get_user, create_user, create_user_x_event_row, update_user, get_all_user_events, get_event, \
+from database.req import get_user, create_user, create_user_x_event_row, get_all_user_events, get_event, \
     update_user_x_event_row_status, update_reg_event, check_completly_reg_event, create_reg_event, get_reg_event, \
     get_user_x_event_row, get_ref_give_away, create_ref_give_away, delete_user_x_event_row, delete_ref_give_away_row, \
     get_all_hosts_in_event_ids, get_host, add_money, one_more_event, get_user_rank_by_money, get_top_10_users_by_money, \
     add_referal_cnt, update_strick, add_user_to_networking
+from handlers.error import safe_send_message
+from handlers.quest import start
 from keyboards.keyboards import single_command_button_keyboard, events_ikb, yes_no_ikb, yes_no_hse_ikb, get_ref_ikb, \
     top_ikb
-from handlers.quest import start
 
 router = Router()
 
@@ -35,7 +31,6 @@ class EventReg(StatesGroup):
 give_away_ids = {1568674379: 'hsespbcareer',
                  1426453089: 'Коляна',
                  483458201: 'Me. Only for tests'}
-
 
 mmsg = """
 🥞 Встреча с совладельцем «Теремка» в НИУ ВШЭ
@@ -63,17 +58,17 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
         if hash_value == 'networking':
             if user == "not created":
                 user = await create_user(message.from_user.id,
-                                  {'handler': message.from_user.username, 'first_contact': hash_value})
+                                         {'handler': message.from_user.username, 'first_contact': hash_value})
             flag = await add_user_to_networking(message.from_user.id)
             if not flag:
                 await safe_send_message(bot, message.from_user.id, 'Вы уже участвуете в нетворкинге')
             else:
                 await safe_send_message(bot, message.from_user.id, 'Поздравляем! Вы участвуете в нетворкинге')
-            await bot.delete_message(message.from_user.id, message.message_id-1)
+            await bot.delete_message(message.from_user.id, message.message_id - 1)
         elif hash_value[:3] == 'reg':
             if user == "not created":
                 user = await create_user(message.from_user.id,
-                                  {'handler': message.from_user.username, 'first_contact': hash_value[4:]})
+                                         {'handler': message.from_user.username, 'first_contact': hash_value[4:]})
             # await safe_send_message(bot, message.from_user.id,
             #                         text=mmsg,
             #                         reply_markup=single_command_button_keyboard())
@@ -86,9 +81,11 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                     await safe_send_message(bot, message, 'Такого события не существует..')
                 await state.update_data({'name': event_name})
                 await safe_send_message(bot, message, f'Хотите зарегистрироваться на мероприятие "{event.desc}",'
-                                                      f'которое пройдет {event.date} в {event.time}', reply_markup=yes_no_ikb())
+                                                      f'которое пройдет {event.date} в {event.time}',
+                                        reply_markup=yes_no_ikb())
             else:
-                await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие', reply_markup=get_ref_ikb(event_name))
+                await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие',
+                                        reply_markup=get_ref_ikb(event_name))
         elif hash_value[:3] == 'ref':
             if hash_value[3] == '_':
                 event_part, user_id = hash_value.split("__")
@@ -96,7 +93,7 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                 user_id = int(user_id)
                 if user == "not created":
                     user = await create_user(message.from_user.id,
-                                      {'handler': message.from_user.username, 'first_contact': str(user_id)})
+                                             {'handler': message.from_user.username, 'first_contact': str(user_id)})
                 # await safe_send_message(bot, message.from_user.id,
                 #                         text=mmsg,
                 #                         reply_markup=single_command_button_keyboard())
@@ -123,18 +120,19 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
                     await safe_send_message(bot, user_id, f"По твоей реферальной ссылке зарегистрировался на событие"
                                                           f" пользователь @{message.from_user.username}!")
                 else:
-                    await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие', reply_markup=get_ref_ikb(event_name))
+                    await safe_send_message(bot, message, 'Вы уже зарегистрировались на это мероприятие',
+                                            reply_markup=get_ref_ikb(event_name))
         elif hash_value == 'otbor':
             if user == "not created":
                 user = await create_user(message.from_user.id,
-                                  {'handler': message.from_user.username, 'first_contact': hash_value})
+                                         {'handler': message.from_user.username, 'first_contact': hash_value})
             name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
             await safe_send_message(bot, message, f'Привет, {name}!', reply_markup=single_command_button_keyboard())
             await start(message)
         else:
             if user == "not created":
                 user = await create_user(message.from_user.id,
-                                  {'handler': message.from_user.username, 'first_contact': hash_value})
+                                         {'handler': message.from_user.username, 'first_contact': hash_value})
                 name = message.from_user.first_name if message.from_user.first_name else message.from_user.username
                 await safe_send_message(bot, message.from_user.id,
                                         text=f"{name}, привет от команды HSE SPB Business Club 🎉\n\n"
@@ -161,11 +159,14 @@ async def cmd_start(message: Message, command: CommandObject, state: FSMContext)
             await safe_send_message(bot, message, text="QR-код удачно отсканирован!",
                                     reply_markup=single_command_button_keyboard())
             hosts_ids = await get_all_hosts_in_event_ids(hash_value)
-            if (not hosts_ids and ref_giver != 'not created') or (hosts_ids and ref_giver != 'not created' and ref_giver.id not in hosts_ids):
-                await safe_send_message(bot, ref_giver.id, f'Вы получили 2 монетки за то что приглашенный вами человек @{user.handler} посетил событие!')
+            if (not hosts_ids and ref_giver != 'not created') or (
+                    hosts_ids and ref_giver != 'not created' and ref_giver.id not in hosts_ids):
+                await safe_send_message(bot, ref_giver.id,
+                                        f'Вы получили 2 монетки за то что приглашенный вами человек @{user.handler} посетил событие!')
                 await add_money(ref_giver.id, 2)
                 await add_referal_cnt(ref_giver.id)
-                await safe_send_message(bot, message.from_user.id, f'Вы получили монетку за то что вы зарегистрировались по реферальной ссылке @{ref_giver.handler}!')
+                await safe_send_message(bot, message.from_user.id,
+                                        f'Вы получили монетку за то что вы зарегистрировались по реферальной ссылке @{ref_giver.handler}!')
                 await add_money(message.from_user.id, 1)
     else:
         if user == "not created":
@@ -209,8 +210,9 @@ async def reg_event_part1_5(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     name = data.get('name')
     event = await get_event(name)
-    await safe_send_message(bot, callback, f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
-                                                f"Место проведение - {event.place}\n\n", reply_markup=get_ref_ikb(name))
+    await safe_send_message(bot, callback,
+                            f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
+                            f"Место проведение - {event.place}\n\n", reply_markup=get_ref_ikb(name))
     await state.clear()
 
 
@@ -229,10 +231,12 @@ async def reg_event_part2(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, "Ваши данные уже сохранены!\n"
                                                f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
                                                f"Место проведение - {event.place}\n\n"
-                                               f"⚠ Обязательно возьмите с собой паспорт!", reply_markup=get_ref_ikb(name))
+                                               f"⚠ Обязательно возьмите с собой паспорт!",
+                                reply_markup=get_ref_ikb(name))
         await state.clear()
     else:
-        await safe_send_message(bot, callback, "Для пропуска на мероприятие нужно будет сообщить ваши данные. Напишите, пожалуйста, ваше имя")
+        await safe_send_message(bot, callback,
+                                "Для пропуска на мероприятие нужно будет сообщить ваши данные. Напишите, пожалуйста, ваше имя")
         await state.set_state(EventReg.waiting_name)
 
 
@@ -278,9 +282,10 @@ async def reg_event_part3(message: Message, state: FSMContext):
         data = await state.get_data()
         name = data.get('name')
         event = await get_event(name)
-        await safe_send_message(bot, message, f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
-                                               f"Место проведение - {event.place}\n\n"
-                                               f"⚠ Обязательно возьмите с собой паспорт!",
+        await safe_send_message(bot, message,
+                                f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
+                                f"Место проведение - {event.place}\n\n"
+                                f"⚠ Обязательно возьмите с собой паспорт!",
                                 reply_markup=get_ref_ikb(name))
     else:
         await safe_send_message(bot, message, 'Что то пошло не так, начните регистрацию заново, пожалуйста\n'
@@ -341,9 +346,9 @@ async def cmd_top(message: Message):
     for i in range(len(top)):
         if top[i].id == message.from_user.id:
             flag = False
-            msg += f'{i+1}. Вы - {top[i].money}\n'
+            msg += f'{i + 1}. Вы - {top[i].money}\n'
         else:
-            msg += f'{i+1}. {top[i].handler} - {top[i].money}\n'
+            msg += f'{i + 1}. {top[i].handler} - {top[i].money}\n'
     if flag:
         rank = await get_user_rank_by_money(message.from_user.id)
         user = await get_user(message.from_user.id)
@@ -374,4 +379,3 @@ async def get_ref_v2_part2(callback: CallbackQuery):
                             )
     # else:
     #     await safe_send_message(bot, callback, "Какая то ошибка. Попробуйте еще раз позже", reply_markup=single_command_button_keyboard())
-
