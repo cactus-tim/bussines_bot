@@ -16,6 +16,7 @@ from handlers.qr_utils import create_styled_qr_code
 from handlers.quest import start
 from keyboards.keyboards import single_command_button_keyboard, events_ikb, yes_no_ikb, yes_no_hse_ikb, get_ref_ikb, \
     top_ikb
+from errors.errors import Error404
 
 router = Router()
 
@@ -557,9 +558,68 @@ async def process_verification(callback: CallbackQuery):
         await callback.answer("Произошла ошибка при обработке верификации")
 
 
+@router.callback_query(lambda c: c.data.startswith("qr_"))
+async def process_qr_event_selection(callback: CallbackQuery):
+    """Handle event selection for QR code generation."""
+    try:
+        event_name = callback.data
+        event = await get_event(event_name.replace('qr_', ''))
+        
+        if event == "not created":
+            await callback.answer("Мероприятие не найдено")
+            return
+
+        # Verify that user is registered for this event
+        user_x_event = await get_user_x_event_row(callback.from_user.id, event_name.replace('qr_', ''))
+        if user_x_event == "not created":
+            await callback.answer("Вы не зарегистрированы на это мероприятие")
+            return
+
+        # Generate QR code
+        bot_username = (await bot.get_me()).username
+        qr_data = f"https://t.me/{bot_username}?start=qr_{callback.from_user.id}_{event_name.replace('qr_', '')}"
+        qr_image = create_styled_qr_code(qr_data)
+
+        # Create QR code record
+        await create_qr_code(callback.from_user.id, event_name.replace('qr_', ''))
+
+        # Save QR code to a temporary file
+        temp_file = "temp_qr.png"
+        with open(temp_file, "wb") as f:
+            f.write(qr_image.getvalue())
+
+        try:
+            # Send QR code with detailed caption
+            await callback.message.answer_photo(
+                photo=FSInputFile(temp_file),
+                caption=f"⚠️ ВАЖНО: Сохраните этот QR код!\n\n"
+                        f"Это ваш пропуск на мероприятие:\n"
+                        f"Название: {event.desc}\n"
+                        f"Дата: {event.date}\n"
+                        f"Время: {event.time}\n"
+                        f"Место: {event.place}\n\n"
+                        f"Покажите этот QR код при входе на мероприятие. Без него вас могут не пропустить!"
+            )
+            # Delete the keyboard message
+            await callback.message.delete()
+        finally:
+            # Clean up temporary file
+            import os
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+    except Exception as e:
+        print(f"QR code generation error: {e}")
+        await callback.answer("Произошла ошибка при генерации QR кода")
+
+
 @router.callback_query()
 async def get_ref_v2_part2(callback: CallbackQuery):
     """Handle event selection for referral link generation."""
+    # Skip if this is a QR code callback
+    if callback.data.startswith("qr_"):
+        print("Skipping QR callback in general handler")  # Debug print
+        return
+        
     try:
         event = await get_event(callback.data)
         if event == "not created":
@@ -578,52 +638,87 @@ async def get_ref_v2_part2(callback: CallbackQuery):
         await callback.answer("Произошла ошибка при создании реферальной ссылки")
 
 
+async def is_user_event(callback: CallbackQuery) -> bool:
+    """Check if the callback data corresponds to one of user's events."""
+    events = await get_all_user_events(callback.from_user.id)
+    return callback.data in [ev.name for ev in events]
+
+
 @router.message(Command("my_qr"))
 async def cmd_my_qr(message: Message):
-    """Handle /my_qr command to get QR code for latest event registration."""
+    """Handle /my_qr command to get QR code for event registration."""
     user = await get_user(message.from_user.id)
     if user == "not created":
         await safe_send_message(bot, message, "Вы не зарегистрированы в боте")
         return
 
-    # Get latest event registration
+    # Get all user's events
     events = await get_all_user_events(message.from_user.id)
     if not events:
         await safe_send_message(bot, message, "У вас нет активных регистраций на мероприятия")
         return
 
-    latest_event = events[0]  # Events are ordered by registration time
+    # Show keyboard with event selection
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=ev.desc, callback_data=f"qr_{ev.name}")]
+        for ev in events
+    ])
+    await safe_send_message(bot, message, "Выберите мероприятие, для которого хотите получить QR код:",
+                          reply_markup=keyboard)
 
-    # Generate QR code
-    bot_username = (await bot.get_me()).username
-    qr_data = f"https://t.me/{bot_username}?start=qr_{message.from_user.id}_{latest_event.name}"
-    qr_image = create_styled_qr_code(qr_data)
 
-    # Create QR code record
-    await create_qr_code(message.from_user.id, latest_event.name)
-
-    # Save QR code to a temporary file
-    temp_file = "temp_qr.png"
-    with open(temp_file, "wb") as f:
-        f.write(qr_image.getvalue())
-
+@router.callback_query(lambda c: c.data.startswith("qr_"))
+async def process_qr_event_selection(callback: CallbackQuery):
+    """Handle event selection for QR code generation."""
     try:
-        # Send QR code with detailed caption
-        await message.answer_photo(
-            photo=FSInputFile(temp_file),
-            caption=f"⚠️ ВАЖНО: Сохраните этот QR код!\n\n"
-                    f"Это ваш пропуск на мероприятие:\n"
-                    f"Название: {latest_event.desc}\n"
-                    f"Дата: {latest_event.date}\n"
-                    f"Время: {latest_event.time}\n"
-                    f"Место: {latest_event.place}\n\n"
-                    f"Покажите этот QR код при входе на мероприятие. Без него вас могут не пропустить!"
-        )
-    finally:
-        # Clean up temporary file
-        import os
-        if os.path.exists(temp_file):
-            os.remove(temp_file)
+        event_name = callback.data
+        event = await get_event(event_name.replace('qr_', ''))
+        
+        if event == "not created":
+            await callback.answer("Мероприятие не найдено")
+            return
+
+        # Verify that user is registered for this event
+        user_x_event = await get_user_x_event_row(callback.from_user.id, event_name)
+        if user_x_event == "not created":
+            await callback.answer("Вы не зарегистрированы на это мероприятие")
+            return
+
+        # Generate QR code
+        bot_username = (await bot.get_me()).username
+        qr_data = f"https://t.me/{bot_username}?start=qr_{callback.from_user.id}_{event_name}"
+        qr_image = create_styled_qr_code(qr_data)
+
+        # Create QR code record
+        await create_qr_code(callback.from_user.id, event_name)
+
+        # Save QR code to a temporary file
+        temp_file = "temp_qr.png"
+        with open(temp_file, "wb") as f:
+            f.write(qr_image.getvalue())
+
+        try:
+            # Send QR code with detailed caption
+            await callback.message.answer_photo(
+                photo=FSInputFile(temp_file),
+                caption=f"⚠️ ВАЖНО: Сохраните этот QR код!\n\n"
+                        f"Это ваш пропуск на мероприятие:\n"
+                        f"Название: {event.desc}\n"
+                        f"Дата: {event.date}\n"
+                        f"Время: {event.time}\n"
+                        f"Место: {event.place}\n\n"
+                        f"Покажите этот QR код при входе на мероприятие. Без него вас могут не пропустить!"
+            )
+            # Delete the keyboard message
+            await callback.message.delete()
+        finally:
+            # Clean up temporary file
+            import os
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+    except Exception as e:
+        print(f"QR code generation error: {e}")
+        await callback.answer("Произошла ошибка при генерации QR кода")
 
 
 @router.callback_query(F.data == "yes")
