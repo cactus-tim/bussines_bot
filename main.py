@@ -11,7 +11,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from bot_instance import bot
 from confige import BotConfig
 from database.models import async_main
-from handlers import admin, error, quest, user  # Router modules
+from handlers import admin, error, quest, user
 
 
 # --------------------------------------------------------------------------------
@@ -25,7 +25,12 @@ def register_routers(dp: Dispatcher) -> None:
     Returns:
         None
     """
-    dp.include_routers(admin.router, quest.router, error.router, user.router)
+    dp.include_routers(
+        admin.router,
+        quest.router,
+        error.router,
+        user.router,
+    )
 
 
 # --------------------------------------------------------------------------------

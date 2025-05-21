@@ -16,12 +16,14 @@ from bot_instance import SQL_URL_RC
 engine = create_async_engine(url=SQL_URL_RC, echo=True)
 async_session = async_sessionmaker(engine)
 
+
 # --------------------------------------------------------------------------------
 
 
 class Base(AsyncAttrs, DeclarativeBase):
     """Base class for SQLAlchemy models."""
     pass
+
 
 # --------------------------------------------------------------------------------
 
@@ -52,6 +54,7 @@ class User(Base):
     first_contact = Column(String, default='')
     money = Column(Integer, nullable=False, default=1)
     ref_cnt = Column(Integer, nullable=False, default=0)
+
 
 # --------------------------------------------------------------------------------
 
@@ -100,6 +103,7 @@ class Questionary(Base):
     found_info = Column(String, default='')
     resume = Column(String, default='')
 
+
 # --------------------------------------------------------------------------------
 
 
@@ -128,6 +132,7 @@ class Event(Base):
     place = Column(String, default='')
     winner = Column(BigInteger)
 
+
 # --------------------------------------------------------------------------------
 
 
@@ -151,6 +156,7 @@ class UserXEvent(Base):
     status = Column(String, default='')
     first_contact = Column(String, default='')
 
+
 # --------------------------------------------------------------------------------
 
 
@@ -166,6 +172,7 @@ class Vacancy(Base):
     __tablename__ = "vacancy"
 
     name = Column(String, primary_key=True)
+
 
 # --------------------------------------------------------------------------------
 
@@ -195,6 +202,7 @@ class RegEvent(Base):
     phone = Column(String, default='')
     org = Column(String, default='')
 
+
 # --------------------------------------------------------------------------------
 
 
@@ -215,6 +223,7 @@ class RefGiveAway(Base):
     user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
     event_name = Column(String, ForeignKey("event.name"), nullable=False)
     host_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+
 
 # --------------------------------------------------------------------------------
 
@@ -237,6 +246,7 @@ class GiveAwayHost(Base):
     event_name = Column(String, ForeignKey("event.name"), nullable=False)
     org_name = Column(String, default='')
 
+
 # --------------------------------------------------------------------------------
 
 
@@ -252,6 +262,57 @@ class Networking(Base):
     __tablename__ = "networking"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
+
+
+# --------------------------------------------------------------------------------
+
+
+class EventAttendance(Base):
+    """EventAttendance model for tracking user attendance at events.
+
+    Args:
+        id (Integer): Primary key.
+        user_id (BigInteger): Foreign key to user.
+        event_name (String): Foreign key to event.
+        attended_at (String): Timestamp of attendance.
+        verified_by (BigInteger): Foreign key to user (superuser who verified).
+
+    Returns:
+        EventAttendance: SQLAlchemy attendance model instance.
+    """
+    __tablename__ = "event_attendance"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    event_name = Column(String, ForeignKey("event.name"), nullable=False)
+    attended_at = Column(String, nullable=False)  # Store as ISO format string
+    verified_by = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+
+
+# --------------------------------------------------------------------------------
+
+
+class QRCode(Base):
+    """QRCode model for storing QR code data.
+
+    Args:
+        id (Integer): Primary key.
+        user_id (BigInteger): Foreign key to user.
+        event_name (String): Foreign key to event.
+        created_at (String): Timestamp of creation.
+        is_used (Boolean): Whether the QR code has been used.
+
+    Returns:
+        QRCode: SQLAlchemy QR code model instance.
+    """
+    __tablename__ = "qr_code"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    event_name = Column(String, ForeignKey("event.name"), nullable=False)
+    created_at = Column(String, nullable=False)  # Store as ISO format string
+    is_used = Column(Boolean, nullable=False, default=False)
+
 
 # --------------------------------------------------------------------------------
 

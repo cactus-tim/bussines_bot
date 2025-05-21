@@ -8,8 +8,10 @@ from io import BytesIO
 
 import pandas as pd
 from aiogram.types import BufferedInputFile
+from sqlalchemy.sql import select
 
 from bot_instance import bot
+from database.models import async_session, UserXEvent, Event
 from database.req import (
     get_all_users,
     get_all_users_in_event,
@@ -18,6 +20,7 @@ from database.req import (
     get_reg_users_stat,
     get_reg_users,
 )
+from errors.errors import Error404
 from errors.handlers import stat_error_handler
 from handlers.error import safe_send_message
 
@@ -39,20 +42,67 @@ async def get_stat_all(user_id: int) -> None:
         await safe_send_message(
             bot, user_id, 'У вас нет подходящих пользователей((')
         return
-    data = [
-        {
+
+    # Get all events for each user
+    data = []
+    for user in users:
+        try:
+            # Get all events where user has status 'been'
+            async with async_session() as session:
+                result = await session.execute(
+                    select(
+                        Event,
+                        UserXEvent.status,
+                        UserXEvent.first_contact
+                    ).join(
+                        UserXEvent,
+                        Event.name == UserXEvent.event_name
+                    ).where(
+                        UserXEvent.user_id == user.id,
+                        UserXEvent.status == 'been'
+                    ).order_by(Event.date.desc())
+                )
+                visited_events = result.all()
+
+                # Format visited events info
+                visited_events_info = []
+                for event, status, first_contact in visited_events:
+                    visited_events_info.append(
+                        f"{event.desc} ({event.date} {event.time})"
+                    )
+
+                visited_events_str = "\n".join(
+                    visited_events_info) if visited_events_info else "Нет посещенных мероприятий"
+        except Error404:
+            visited_events_str = "Нет посещенных мероприятий"
+
+        data.append({
             "ID": user.id,
             "Handler": user.handler,
             "Is Superuser": user.is_superuser,
             "Event Count": user.event_cnt,
             "Strick": user.strick,
-        }
-        for user in users
-    ]
+            "Money": user.money,
+            "Referral Count": user.ref_cnt,
+            "Visited Events": visited_events_str
+        })
+
     df = pd.DataFrame(data)
+
+    # Adjust column widths for better readability
     with BytesIO() as buffer:
         with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
             df.to_excel(writer, index=False, sheet_name="Users")
+            worksheet = writer.sheets["Users"]
+            worksheet.set_column('A:A', 10)  # ID
+            worksheet.set_column('B:B', 20)  # Handler
+            worksheet.set_column('C:C', 12)  # Is Superuser
+            worksheet.set_column('D:D', 12)  # Event Count
+            worksheet.set_column('E:E', 10)  # Strick
+            worksheet.set_column('F:F', 10)  # Money
+            worksheet.set_column('G:G', 15)  # Referral Count
+            worksheet.set_column('H:H', 50)  # Visited Events
+
         buffer.seek(0)
         temp_file = BufferedInputFile(
             buffer.read(), filename="user_statistics.xlsx"
@@ -76,7 +126,7 @@ async def get_stat_all_in_ev(user_id: int, event_name: str) -> None:
     users = await get_all_users_in_event(event_name)
     if not users:
         await safe_send_message(
-            bot, user_id, 'У вас нет подходяших пользователей((')
+            bot, user_id, 'У вас нет подходящих пользователей((')
         return
     data = []
     cnt: dict[str, int] = {}
@@ -93,11 +143,11 @@ async def get_stat_all_in_ev(user_id: int, event_name: str) -> None:
         total += 1
     msg = ''.join(
         (
-            f'С потока {key} зарегистировалось человек: {value}, '
+            f'С потока {key} зарегистрировалось человек: {value}, '
             f'это {(value / total) * 100:.1f}% от общего трафика\n'
         ) for key, value in cnt.items()
     )
-    msg += f'Всего зарегистировалось человек: {total} человек'
+    msg += f'Всего зарегистрировалось человек: {total} человек'
     df = pd.DataFrame(data)
     with BytesIO() as buffer:
         with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
@@ -125,7 +175,7 @@ async def get_stat_quest(user_id: int) -> None:
     users = await get_all_quests()
     if not users:
         await safe_send_message(
-            bot, user_id, 'У вас нет подходяших пользователей((')
+            bot, user_id, 'У вас нет подходящих пользователей((')
         return
     data = [
         {
@@ -180,7 +230,7 @@ async def get_stat_ad_give_away(
     users = await get_all_from_give_away(host_id, event_name)
     if not users:
         await safe_send_message(
-            bot, user_id, 'У вас нет подходяших пользователей((')
+            bot, user_id, 'У вас нет подходящих пользователей((')
         return
     data = [
         {
@@ -217,7 +267,7 @@ async def get_stat_reg_out(user_id: int, event_name: str) -> None:
     users = await get_reg_users(event_name)
     if not users:
         await safe_send_message(
-            bot, user_id, 'У вас нет подходяших пользователей((')
+            bot, user_id, 'У вас нет подходящих пользователей((')
         return
     data = [
         {
@@ -259,7 +309,7 @@ async def get_stat_reg(user_id: int, event_name: str) -> None:
     users = await get_reg_users_stat(event_name)
     if not users:
         await safe_send_message(
-            bot, user_id, 'У вас нет подходяших пользователей((')
+            bot, user_id, 'У вас нет подходящих пользователей((')
         return
     data = []
     cnt: dict[str, int] = {}
@@ -276,11 +326,11 @@ async def get_stat_reg(user_id: int, event_name: str) -> None:
         total += 1
     msg = ''.join(
         (
-            f'С потока {key} зарегистировалось человек: {value}, '
+            f'С потока {key} зарегистрировалось человек: {value}, '
             f'это {(value / total) * 100:.1f}% от общего трафика\n'
         ) for key, value in cnt.items()
     )
-    msg += f'Всего зарегистировалось человек: {total}'
+    msg += f'Всего зарегистрировалось человек: {total}'
     df = pd.DataFrame(data)
     with BytesIO() as buffer:
         with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:

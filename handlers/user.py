@@ -3,15 +3,16 @@ from aiogram.filters import Command, CommandStart
 from aiogram.filters.command import CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
 
 from bot_instance import bot
 from database.req import get_user, create_user, create_user_x_event_row, get_all_user_events, get_event, \
     update_user_x_event_row_status, update_reg_event, check_completly_reg_event, create_reg_event, get_reg_event, \
     get_user_x_event_row, get_ref_give_away, create_ref_give_away, delete_user_x_event_row, delete_ref_give_away_row, \
     get_all_hosts_in_event_ids, get_host, add_money, one_more_event, get_user_rank_by_money, get_top_10_users_by_money, \
-    add_referal_cnt, update_strick, add_user_to_networking
+    add_referal_cnt, update_strick, add_user_to_networking, create_qr_code
 from handlers.error import safe_send_message
+from handlers.qr_utils import create_styled_qr_code
 from handlers.quest import start
 from keyboards.keyboards import single_command_button_keyboard, events_ikb, yes_no_ikb, yes_no_hse_ikb, get_ref_ikb, \
     top_ikb
@@ -52,7 +53,14 @@ mmsg = """
 
 @router.message(CommandStart())
 async def cmd_start(message: Message, command: CommandObject, state: FSMContext):
-    hash_value = command.args  # TODO: after 04_12 event hash_value = decode_payload(command.args)
+    hash_value = command.args
+
+    if hash_value and hash_value.startswith('qr_'):
+        # Create a new command object for check_qr
+        check_qr_command = CommandObject(command=message.text, args=hash_value)
+        await cmd_check_qr(message, check_qr_command)
+        return
+
     user = await get_user(message.from_user.id)
     if hash_value:
         if hash_value == 'networking':
@@ -202,22 +210,50 @@ async def reg_event_part0_5(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == "event_yes")
 async def reg_event_part1(callback: CallbackQuery, state: FSMContext):
+    """Handle event registration confirmation."""
     await safe_send_message(bot, callback, "Вы студент/сотрудник НИУ ВШЭ?", reply_markup=yes_no_hse_ikb())
 
 
 @router.callback_query(F.data == "hse_yes")
 async def reg_event_part1_5(callback: CallbackQuery, state: FSMContext):
+    """Handle HSE student/employee registration."""
     data = await state.get_data()
     name = data.get('name')
     event = await get_event(name)
-    await safe_send_message(bot, callback,
-                            f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
-                            f"Место проведение - {event.place}\n\n", reply_markup=get_ref_ikb(name))
+    await create_user_x_event_row(callback.from_user.id, name, callback.from_user.username)
+    bot_username = (await bot.get_me()).username
+    qr_data = f"https://t.me/{bot_username}?start=qr_{callback.from_user.id}_{name}"
+    qr_image = create_styled_qr_code(qr_data)
+    await create_qr_code(callback.from_user.id, name)
+    temp_file = "temp_qr.png"
+    with open(temp_file, "wb") as f:
+        f.write(qr_image.getvalue())
+    try:
+        await safe_send_message(bot, callback,
+                                f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
+                                f"Место проведение - {event.place}",
+                                reply_markup=get_ref_ikb(name)
+                                )
+        await callback.message.answer_photo(
+            photo=FSInputFile(temp_file),
+            caption=f"⚠️ ВАЖНО: Сохраните этот QR код!\n\n"
+                    f"Это ваш пропуск на мероприятие:\n"
+                    f"Название: {event.desc}\n"
+                    f"Дата: {event.date}\n"
+                    f"Время: {event.time}\n"
+                    f"Место: {event.place}\n\n"
+                    f"Покажите этот QR код при входе на мероприятие. Без него вас могут не пропустить!"
+        )
+    finally:
+        import os
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
     await state.clear()
 
 
 @router.callback_query(F.data == "hse_no")
 async def reg_event_part2(callback: CallbackQuery, state: FSMContext):
+    """Handle non-HSE user registration."""
     reg_event = await get_reg_event(callback.from_user.id)
     if not reg_event:
         await create_reg_event(callback.from_user.id)
@@ -228,11 +264,35 @@ async def reg_event_part2(callback: CallbackQuery, state: FSMContext):
         data = await state.get_data()
         name = data.get('name')
         event = await get_event(name)
-        await safe_send_message(bot, callback, "Ваши данные уже сохранены!\n"
-                                               f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
-                                               f"Место проведение - {event.place}\n\n"
-                                               f"⚠ Обязательно возьмите с собой паспорт!",
-                                reply_markup=get_ref_ikb(name))
+        await create_user_x_event_row(callback.from_user.id, name, callback.from_user.username)
+        bot_username = (await bot.get_me()).username
+        qr_data = f"https://t.me/{bot_username}?start=qr_{callback.from_user.id}_{name}"
+        qr_image = create_styled_qr_code(qr_data)
+        await create_qr_code(callback.from_user.id, name)
+        temp_file = "temp_qr.png"
+        with open(temp_file, "wb") as f:
+            f.write(qr_image.getvalue())
+        try:
+            await safe_send_message(bot, callback,
+                                    "Ваши данные уже сохранены!\n"
+                                    f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
+                                    f"Место проведение - {event.place}",
+                                    reply_markup=get_ref_ikb(name)
+                                    )
+            await callback.message.answer_photo(
+                photo=FSInputFile(temp_file),
+                caption=f"⚠️ ВАЖНО: Сохраните этот QR код!\n\n"
+                        f"Это ваш пропуск на мероприятие:\n"
+                        f"Название: {event.desc}\n"
+                        f"Дата: {event.date}\n"
+                        f"Время: {event.time}\n"
+                        f"Место: {event.place}\n\n"
+                        f"Покажите этот QR код при входе на мероприятие. Без него вас могут не пропустить!"
+            )
+        finally:
+            import os
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
         await state.clear()
     else:
         await safe_send_message(bot, callback,
@@ -277,16 +337,41 @@ async def reg_event_part3(message: Message, state: FSMContext):
 
 @router.message(EventReg.waiting_org)
 async def reg_event_part3(message: Message, state: FSMContext):
+    """Handle organization input and complete registration."""
     await update_reg_event(message.from_user.id, {'org': message.text})
     if await check_completly_reg_event(message.from_user.id):
         data = await state.get_data()
         name = data.get('name')
         event = await get_event(name)
-        await safe_send_message(bot, message,
-                                f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
-                                f"Место проведение - {event.place}\n\n"
-                                f"⚠ Обязательно возьмите с собой паспорт!",
-                                reply_markup=get_ref_ikb(name))
+        await create_user_x_event_row(message.from_user.id, name, message.from_user.username)
+        bot_username = (await bot.get_me()).username
+        qr_data = f"https://t.me/{bot_username}?start=qr_{message.from_user.id}_{name}"
+        qr_image = create_styled_qr_code(qr_data)
+        await create_qr_code(message.from_user.id, name)
+        temp_file = "temp_qr.png"
+        with open(temp_file, "wb") as f:
+            f.write(qr_image.getvalue())
+        try:
+            await safe_send_message(bot, message,
+                                    f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
+                                    f"Место проведение - {event.place}\n\n"
+                                    f"⚠ Обязательно возьмите с собой паспорт!",
+                                    reply_markup=get_ref_ikb(name)
+                                    )
+            await message.answer_photo(
+                photo=FSInputFile(temp_file),
+                caption=f"⚠️ ВАЖНО: Сохраните этот QR код!\n\n"
+                        f"Это ваш пропуск на мероприятие:\n"
+                        f"Название: {event.desc}\n"
+                        f"Дата: {event.date}\n"
+                        f"Время: {event.time}\n"
+                        f"Место: {event.place}\n\n"
+                        f"Покажите этот QR код при входе на мероприятие. Без него вас могут не пропустить!"
+            )
+        finally:
+            import os
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
     else:
         await safe_send_message(bot, message, 'Что то пошло не так, начните регистрацию заново, пожалуйста\n'
                                               'Для этого повторно перейдите по ссылке')
@@ -304,6 +389,7 @@ async def cmd_info(message: Message):
                                                    "/get_ref - получить реферальную ссылку на событие\n"
                                                    "/profile - ваш профиль со всей информацией о вас\n"
                                                    "/top - топ 10 по владению монетками\n"
+                                                   "/my_qr - получить QR код для последнего мероприятия\n"
                                                    "/send_stat - получить статистику о пользователях\n"
                                                    "/send_post - отправить пост пользователям\n"
                                                    "/add_event - создает новое событие\n"
@@ -320,8 +406,8 @@ async def cmd_info(message: Message):
                                                    "/quest - пройти анкетирование для отбора в команду\n"
                                                    "/get_ref - получить реферальную ссылку на событие\n"
                                                    "/profile - ваш профиль со всей информацией о вас\n"
-                                                   "/top - топ 10 по владению монетками",
-                                reply_markup=single_command_button_keyboard())
+                                                   "/top - топ 10 по владению монетками\n"
+                                                   "/my_qr - получить QR код для последнего мероприятия\n")
 
 
 @router.message(Command('profile'))
@@ -367,15 +453,324 @@ async def get_ref_v2_part1(message: Message):
                             reply_markup=events_ikb(events))
 
 
+@router.callback_query(F.data.startswith("verify_"))
+async def process_verification(callback: CallbackQuery):
+    """Handle QR code verification by admin."""
+    try:
+        # Print the callback data for debugging
+        print(f"Callback data: {callback.data}")
+
+        # Split the callback data to get user_id, event_name and action
+        parts = callback.data.split('_')
+        print(f"Split parts: {parts}")  # Debug print
+
+        if len(parts) < 4:
+            await callback.answer("Неверный формат данных")
+            return
+
+        # The first part is 'verify', then user_id, then event_name (which may contain underscores)
+        # and finally the action (allow/deny)
+        verify_prefix = parts[0]
+        user_id = parts[1]
+        action = parts[-1]  # Last part is always the action
+
+        # Everything in between is the event name
+        event_name = '_'.join(parts[2:-1])
+
+        print(
+            f"Parsed data: verify_prefix={verify_prefix}, user_id={user_id}, event_name={event_name}, action={action}")  # Debug print
+
+        user_id = int(user_id)
+
+        # Get user and event info
+        user = await get_user(user_id)
+        event = await get_event(event_name)
+
+        if user == "not created" or event == "not created":
+            await callback.answer("Пользователь или мероприятие не найдены")
+            return
+
+        # Get user registration details
+        reg_event = await get_reg_event(user_id)
+        user_info = ""
+        if reg_event:
+            user_info = f"\nФИО: {reg_event.surname} {reg_event.name} {reg_event.fathername}\nТелефон: {reg_event.phone}"
+
+        if action == "allow":
+            # Update user_x_event status to 'been'
+            await update_user_x_event_row_status(user_id, event_name, 'been')
+
+            # Add money and update event count
+            await add_money(user_id, 1)
+            await one_more_event(user_id)
+            await update_strick(user_id)
+
+            # Notify admin
+            await callback.answer("✅ Пользователь успешно пропущен")
+
+            # Notify user
+            await bot.send_message(
+                user_id,
+                f"Ваш QR код был успешно отсканирован на мероприятии {event.desc}!"
+            )
+
+            # Handle referral bonus if applicable
+            user_x_event = await get_user_x_event_row(user_id, event_name)
+            if user_x_event != "not created" and user_x_event.first_contact != '0':
+                ref_giver = await get_user(int(user_x_event.first_contact))
+                if ref_giver != "not created":
+                    hosts_ids = await get_all_hosts_in_event_ids(event_name)
+                    if (not hosts_ids and ref_giver != 'not created') or (
+                            hosts_ids and ref_giver != 'not created' and ref_giver.id not in hosts_ids):
+                        await safe_send_message(bot, ref_giver.id,
+                                                f'Вы получили 2 монетки за то что приглашенный вами человек @{user.handler} посетил событие!')
+                        await add_money(ref_giver.id, 2)
+                        await add_referal_cnt(ref_giver.id)
+                        await safe_send_message(bot, user_id,
+                                                f'Вы получили монетку за то что вы зарегистрировались по реферальной ссылке @{ref_giver.handler}!')
+                        await add_money(user_id, 1)
+
+            # Update the message with verification result
+            await callback.message.edit_text(
+                f"✅ Пользователь пропущен:\n"
+                f"Пользователь: @{user.handler}{user_info}\n"
+                f"Мероприятие: {event.desc}\n"
+                f"Дата: {event.date}\n"
+                f"Время: {event.time}\n"
+                f"Место: {event.place}"
+            )
+        else:
+            # Just notify admin for deny
+            await callback.answer("❌ Пользователь не пропущен")
+            # Update the message with verification result
+            await callback.message.edit_text(
+                f"❌ Пользователь не пропущен:\n"
+                f"Пользователь: @{user.handler}{user_info}\n"
+                f"Мероприятие: {event.desc}\n"
+                f"Дата: {event.date}\n"
+                f"Время: {event.time}\n"
+                f"Место: {event.place}"
+            )
+
+    except Exception as e:
+        print(f"Verification error: {e}")
+        await callback.answer("Произошла ошибка при обработке верификации")
+
+
 @router.callback_query()
 async def get_ref_v2_part2(callback: CallbackQuery):
-    event = await get_event(callback.data)
-    data = f'ref_{event.name}__{callback.from_user.id}'
-    url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data}"  # TODO: after 04_12 event url = await create_start_link(bot, data, encode=True)
-    # short_url = await make_short_link(url)
-    # if short_url:
-    await safe_send_message(bot, callback, f"Вот твоя реферальная ссылка для событие {event.desc}:\n"
-                                           f"{url}", reply_markup=single_command_button_keyboard()
-                            )
-    # else:
-    #     await safe_send_message(bot, callback, "Какая то ошибка. Попробуйте еще раз позже", reply_markup=single_command_button_keyboard())
+    """Handle event selection for referral link generation."""
+    try:
+        event = await get_event(callback.data)
+        if event == "not created":
+            await callback.answer("Мероприятие не найдено")
+            return
+
+        data = f'ref_{callback.data}__{callback.from_user.id}'
+        url = f"https://t.me/HSE_SPB_Business_Club_Bot?start={data}"
+
+        await safe_send_message(bot, callback,
+                                f"Вот твоя реферальная ссылка для событие {event.desc}:\n{url}",
+                                reply_markup=single_command_button_keyboard()
+                                )
+    except Exception as e:
+        print(f"Referral link generation error: {e}")
+        await callback.answer("Произошла ошибка при создании реферальной ссылки")
+
+
+@router.message(Command("my_qr"))
+async def cmd_my_qr(message: Message):
+    """Handle /my_qr command to get QR code for latest event registration."""
+    user = await get_user(message.from_user.id)
+    if user == "not created":
+        await safe_send_message(bot, message, "Вы не зарегистрированы в боте")
+        return
+
+    # Get latest event registration
+    events = await get_all_user_events(message.from_user.id)
+    if not events:
+        await safe_send_message(bot, message, "У вас нет активных регистраций на мероприятия")
+        return
+
+    latest_event = events[0]  # Events are ordered by registration time
+
+    # Generate QR code
+    bot_username = (await bot.get_me()).username
+    qr_data = f"https://t.me/{bot_username}?start=qr_{message.from_user.id}_{latest_event.name}"
+    qr_image = create_styled_qr_code(qr_data)
+
+    # Create QR code record
+    await create_qr_code(message.from_user.id, latest_event.name)
+
+    # Save QR code to a temporary file
+    temp_file = "temp_qr.png"
+    with open(temp_file, "wb") as f:
+        f.write(qr_image.getvalue())
+
+    try:
+        # Send QR code with detailed caption
+        await message.answer_photo(
+            photo=FSInputFile(temp_file),
+            caption=f"⚠️ ВАЖНО: Сохраните этот QR код!\n\n"
+                    f"Это ваш пропуск на мероприятие:\n"
+                    f"Название: {latest_event.desc}\n"
+                    f"Дата: {latest_event.date}\n"
+                    f"Время: {latest_event.time}\n"
+                    f"Место: {latest_event.place}\n\n"
+                    f"Покажите этот QR код при входе на мероприятие. Без него вас могут не пропустить!"
+        )
+    finally:
+        # Clean up temporary file
+        import os
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+
+
+@router.callback_query(F.data == "yes")
+async def process_reg_yes(callback: CallbackQuery, state: FSMContext):
+    """Handle event registration confirmation."""
+    data = await state.get_data()
+    event_name = data.get("name")
+
+    # Create registration
+    await create_user_x_event_row(callback.from_user.id, event_name, callback.from_user.username)
+    event = await get_event(event_name)
+
+    # Generate and send QR code
+    bot_username = (await bot.get_me()).username
+    qr_data = f"https://t.me/{bot_username}?start=qr_{callback.from_user.id}_{event_name}"
+    qr_image = create_styled_qr_code(qr_data)
+    await create_qr_code(callback.from_user.id, event_name)
+
+    # Save QR code to a temporary file
+    temp_file = "temp_qr.png"
+    with open(temp_file, "wb") as f:
+        f.write(qr_image.getvalue())
+
+    try:
+        await callback.message.answer_photo(
+            photo=FSInputFile(temp_file),
+            caption=f"Вы успешно зарегистрировались на мероприятие!\n\n"
+                    f"Название: {event.desc}\n"
+                    f"Дата: {event.date}\n"
+                    f"Время: {event.time}\n"
+                    f"Место: {event.place}\n\n"
+                    f"Покажите этот QR код при входе на мероприятие."
+        )
+    finally:
+        # Clean up temporary file
+        import os
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+
+    await state.clear()
+
+
+@router.message(Command("check_qr"))
+async def cmd_check_qr(message: Message, command: CommandObject):
+    """Handle QR code verification via command."""
+    if not command.args:
+        await safe_send_message(bot, message, "Пожалуйста, укажите QR код после команды /check_qr")
+        return
+
+    hash_value = command.args
+    if not hash_value.startswith('qr_'):
+        await safe_send_message(bot, message, "Недействительный QR код")
+        return
+
+    try:
+        # Split only on first two underscores to preserve event name
+        parts = hash_value.split('_', 2)
+        if len(parts) != 3:
+            await safe_send_message(bot, message, "Недействительный QR код")
+            return
+
+        _, user_id, event_name = parts
+        user_id = int(user_id)
+
+        # Get user and event info
+        user = await get_user(user_id)
+        event = await get_event(event_name)
+
+        if user == "not created" or event == "not created":
+            await safe_send_message(bot, message, "Недействительный QR код")
+            return
+
+        # Check if user is registered for the event
+        user_x_event = await get_user_x_event_row(user_id, event_name)
+        if user_x_event == "not created":
+            await safe_send_message(bot, message, "Пользователь не зарегистрирован на это мероприятие")
+            return
+
+        if user_x_event.status not in ['reg', 'been']:
+            await safe_send_message(bot, message, "Пользователь не зарегистрирован на это мероприятие")
+            return
+
+        # Check if event is in progress
+        if event.status != 'in_progress':
+            await safe_send_message(bot, message, "Мероприятие не активно")
+            return
+
+        # Check if scanner is superuser
+        scanner = await get_user(message.from_user.id)
+        if scanner.is_superuser:
+            # Get user registration details
+            reg_event = await get_reg_event(user_id)
+            user_info = ""
+            if reg_event:
+                user_info = f"\nФИО: {reg_event.surname} {reg_event.name} {reg_event.fathername}\nТелефон: {reg_event.phone}"
+
+            # Check if QR code was already used
+            if user_x_event.status == 'been':
+                await safe_send_message(bot, message,
+                                        f"⚠️ Этот QR код уже был использован!\n\n"
+                                        f"Пользователь: @{user.handler}{user_info}\n"
+                                        f"Мероприятие: {event.desc}\n"
+                                        f"Дата: {event.date}\n"
+                                        f"Время: {event.time}\n"
+                                        f"Место: {event.place}"
+                                        )
+                return
+
+            # Show verification buttons
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="✅ Пропустить",
+                        callback_data=f"verify_{user_id}_{event_name}_allow"
+                    ),
+                    InlineKeyboardButton(
+                        text="❌ Не пропускать",
+                        callback_data=f"verify_{user_id}_{event_name}_deny"
+                    )
+                ]
+            ])
+
+            await message.answer(
+                f"Проверка QR кода:\n"
+                f"Пользователь: @{user.handler}{user_info}\n"
+                f"Мероприятие: {event.desc}\n"
+                f"Дата: {event.date}\n"
+                f"Время: {event.time}\n"
+                f"Место: {event.place}",
+                reply_markup=keyboard
+            )
+        else:
+            # Check if the QR code belongs to the user who scanned it
+            if user_id != message.from_user.id:
+                await safe_send_message(bot, message, "⚠️ Это не ваш QR код! Вы можете сканировать только свои QR коды.")
+                return
+
+            # Show event info to regular users
+            await safe_send_message(bot, message,
+                f"Информация о мероприятии:\n"
+                f"Название: {event.desc}\n"
+                f"Дата: {event.date}\n"
+                f"Время: {event.time}\n"
+                f"Место: {event.place}"
+            )
+
+    except (ValueError, IndexError) as e:
+        print(f"QR code validation error: {e}")
+        await safe_send_message(bot, message, "Недействительный QR код")
+        return

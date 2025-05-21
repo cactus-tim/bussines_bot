@@ -14,7 +14,7 @@ from database.req import (get_user, add_vacancy, delete_vacancy, get_users_tg_id
                           get_users_unreg_tg_id, get_all_hosts_in_event_orgs, create_host,
                           get_host_by_org_name, update_strick, get_all_for_networking, delete_all_from_networking)
 from handlers.error import safe_send_message
-from keyboards.keyboards import post_target, post_ev_tagret, stat_target, apply_winner, vacancy_selection_keyboard, \
+from keyboards.keyboards import post_target, post_ev_target, stat_target, apply_winner, vacancy_selection_keyboard, \
     single_command_button_keyboard, link_ikb, yes_no_link_ikb, unreg_yes_no_link_ikb, get_ref_ikb
 from statistics.stat import get_stat_all, get_stat_all_in_ev, get_stat_quest, get_stat_ad_give_away, get_stat_reg_out, \
     get_stat_reg
@@ -138,7 +138,7 @@ async def get_link(message: Message, state: FSMContext):
     events = await get_all_events_in_p()
     if not events:
         await safe_send_message(bot, message, 'У вас нет событий((')
-    await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_target(events))
     await state.set_state(EventState.waiting_ev_for_link)
 
 
@@ -179,7 +179,7 @@ async def cmd_end_event(message: Message, state: FSMContext):
     if not events:
         await safe_send_message(bot, message, "Нет активных событий(")
         return
-    await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, message, text="Выберете событие", reply_markup=post_ev_target(events))
     await state.set_state(EventState.waiting_ev)
 
 
@@ -355,7 +355,7 @@ async def choose_event(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий")
         return
     await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit",
-                            reply_markup=post_ev_tagret(events))
+                            reply_markup=post_ev_target(events))
     await state.set_state(PostState.waiting_for_post_to_ev_ev_unreg)
 
 
@@ -495,7 +495,7 @@ async def cmd_post_to_ev(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий")
         return
     await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit",
-                            reply_markup=post_ev_tagret(events))
+                            reply_markup=post_ev_target(events))
     await state.set_state(PostState.waiting_for_post_to_ev_ev)
 
 
@@ -529,7 +529,6 @@ async def process_post_to_ev(message: Message, state: FSMContext):
     await state.clear()
 
 
-# https://chatgpt.com/share/673d7302-fcc0-8004-877f-11760ff426f4
 @router.callback_query(F.data == "post_wth_op_to_ev")
 async def cmd_post_to_ev(callback: CallbackQuery, state: FSMContext):
     events = await get_all_events()
@@ -537,7 +536,7 @@ async def cmd_post_to_ev(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий")
         return
     await safe_send_message(bot, callback, text="Выберете событие:\n\nДля отмены введите quit",
-                            reply_markup=post_ev_tagret(events))
+                            reply_markup=post_ev_target(events))
     await state.set_state(PostState.waiting_for_post_wth_op_to_ev_ev)
 
 
@@ -610,7 +609,7 @@ async def cmd_stat_ev(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(StatState.waiting_for_ev)
 
 
@@ -632,7 +631,7 @@ async def cmd_stat_give_away(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(StatState.waiting_for_give_away_ev)
 
 
@@ -665,7 +664,7 @@ async def cmd_stat_reg(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(StatState.waiting_for_ev1)
 
 
@@ -682,7 +681,7 @@ async def cmd_stat_reg(callback: CallbackQuery, state: FSMContext):
         await safe_send_message(bot, callback, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, callback, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(StatState.waiting_for_ev2)
 
 
@@ -707,7 +706,7 @@ async def cmd_get_result(message: Message, state: FSMContext):
         await safe_send_message(bot, message, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, message, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, message, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(WinnerState.wait_give_away_event)
 
 
@@ -721,7 +720,7 @@ async def get_result(message: Message, state: FSMContext):
         await state.clear()
         return
     await safe_send_message(bot, message, text="Выберете организатора:\n\nДля отмены введите quit'",
-                            reply_markup=post_ev_tagret(hosts_orgs))
+                            reply_markup=post_ev_target(hosts_orgs))
     await state.set_state(WinnerState.wait_give_away_id)
 
 
@@ -758,7 +757,7 @@ async def cmd_create_give_away(message: Message, state: FSMContext):
         await safe_send_message(bot, message, text="У вас нет событий", reply_markup=single_command_button_keyboard())
         await state.clear()
         return
-    await safe_send_message(bot, message, text="Выберете событие:", reply_markup=post_ev_tagret(events))
+    await safe_send_message(bot, message, text="Выберете событие:", reply_markup=post_ev_target(events))
     await state.set_state(GiveAwayState.waiting_event)
 
 
@@ -808,9 +807,9 @@ async def give_colors(message: Message):
         await safe_send_message(bot, message.from_user.id, "Пока никто не зарегистрировался на нетворкинг")
         return
     for user in users:
-        colors = ['белый', 'синий', 'красный', 'зелёный']
+        colors = ["Локация", "Меню", "Команда", "Маркетинг"]
         color = random.choice(colors)
-        await safe_send_message(bot, user, f"Ваш цвет - {color}!")
+        await safe_send_message(bot, user, f"Ваша тема - {color}!")
     await delete_all_from_networking()
     await safe_send_message(bot, message.from_user.id, "Готово")
 
