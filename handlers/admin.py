@@ -4,7 +4,7 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot_instance import bot
 from database.req import (get_user, add_vacancy, delete_vacancy, get_users_tg_id, get_all_events,
@@ -12,7 +12,8 @@ from database.req import (get_user, add_vacancy, delete_vacancy, get_users_tg_id
                           get_random_user_from_event_wth_bad, get_all_vacancy_names, get_all_events_in_p,
                           create_event, get_users_tg_id_in_event_bad, update_user_x_event_row_status, get_add_winner,
                           get_users_unreg_tg_id, get_all_hosts_in_event_orgs, create_host,
-                          get_host_by_org_name, update_strick, get_all_for_networking, delete_all_from_networking)
+                          get_host_by_org_name, update_strick, get_all_for_networking, delete_all_from_networking,
+                          add_face_control, remove_face_control, get_face_control, list_face_control)
 from handlers.error import safe_send_message
 from keyboards.keyboards import post_target, post_ev_target, stat_target, apply_winner, vacancy_selection_keyboard, \
     single_command_button_keyboard, link_ikb, yes_no_link_ikb, unreg_yes_no_link_ikb, get_ref_ikb
@@ -20,6 +21,236 @@ from statistics.stat import get_stat_all, get_stat_all_in_ev, get_stat_quest, ge
     get_stat_reg
 
 router = Router()
+
+
+class FaceControlState(StatesGroup):
+    """States for face control management."""
+    waiting_user_id = State()  # Waiting for user ID to add/remove
+    waiting_confirmation = State()  # Waiting for confirmation to remove
+
+
+@router.message(Command("face_control"))
+async def cmd_face_control(message: Message):
+    """Show face control management menu."""
+    user = await get_user(message.from_user.id)
+    if not user.is_superuser:
+        return
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="➕ Добавить фейс-контроль", callback_data="face_control_add"),
+            InlineKeyboardButton(text="➖ Удалить фейс-контроль", callback_data="face_control_remove")
+        ],
+        [InlineKeyboardButton(text="📋 Список фейс-контроль", callback_data="face_control_list")]
+    ])
+
+    await safe_send_message(bot, message, 
+        "Управление фейс-контроль:\n"
+        "• Добавить - назначить нового фейс-контроль\n"
+        "• Удалить - снять права фейс-контроль\n"
+        "• Список - просмотреть всех фейс-контроль",
+        reply_markup=keyboard
+    )
+
+
+@router.callback_query(F.data == "face_control")
+async def face_control_menu(callback: CallbackQuery):
+    """Show face control management menu."""
+    user = await get_user(callback.from_user.id)
+    if not user.is_superuser:
+        return
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="➕ Добавить фейс-контроль", callback_data="face_control_add"),
+            InlineKeyboardButton(text="➖ Удалить фейс-контроль", callback_data="face_control_remove")
+        ],
+        [InlineKeyboardButton(text="📋 Список фейс-контроль", callback_data="face_control_list")]
+    ])
+
+    await callback.message.edit_text(
+        "Управление фейс-контроль:\n"
+        "• Добавить - назначить нового фейс-контроль\n"
+        "• Удалить - снять права фейс-контроль\n"
+        "• Список - просмотреть всех фейс-контроль",
+        reply_markup=keyboard
+    )
+
+
+@router.callback_query(F.data == "face_control_add")
+async def face_control_add(callback: CallbackQuery, state: FSMContext):
+    """Start process of adding a face control user."""
+    user = await get_user(callback.from_user.id)
+    if not user.is_superuser:
+        return
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="◀️ Назад", callback_data="face_control")]
+    ])
+    await callback.message.edit_text(
+        "Введите Telegram ID пользователя, которого хотите назначить фейс-контроль.\n"
+        "ID можно получить, если пользователь перешлет сообщение от @getmyid_bot", reply_markup=keyboard
+    )
+    await state.set_state(FaceControlState.waiting_user_id)
+
+
+@router.callback_query(F.data == "face_control_remove")
+async def face_control_remove(callback: CallbackQuery):
+    """Show list of face control users to remove."""
+    user = await get_user(callback.from_user.id)
+    if not user.is_superuser:
+        return
+
+    face_controls = await list_face_control()
+    if not face_controls:
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="◀️ Назад", callback_data="face_control")]
+        ])
+        await callback.message.edit_text(
+            "Нет назначенных фейс-контроль",
+            reply_markup=keyboard
+        )
+        return
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text=f"@{fc.username or 'No username'} ({fc.user_id})",
+            callback_data=f"face_control_remove_{fc.user_id}"
+        )]
+        for fc in face_controls
+    ])
+    keyboard.inline_keyboard.append([InlineKeyboardButton(text="◀️ Назад", callback_data="face_control")])
+
+    await callback.message.edit_text(
+        "Выберите пользователя, которого хотите снять с фейс-контроль:",
+        reply_markup=keyboard
+    )
+
+
+@router.callback_query(F.data == "face_control_list")
+async def face_control_list(callback: CallbackQuery):
+    """List all face control users."""
+    try:
+        face_control_users = await list_face_control()
+        if not face_control_users:
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="◀️ Назад", callback_data="face_control")]
+            ])
+            await callback.message.edit_text(
+                "Нет назначенных фейс-контроль",
+                reply_markup=keyboard
+            )
+            return
+
+        msg = "Список фейс-контроль:\n\n"
+        for fc in face_control_users:
+            msg += f"- {fc.user_id} @{fc.username or 'не указан'}\n"
+
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="◀️ Назад", callback_data="face_control")]
+        ])
+        await callback.message.edit_text(msg, reply_markup=keyboard)
+    except Exception as e:
+        print(f"Error listing face control users: {e}")
+        await callback.answer("Произошла ошибка при получении списка фейс-контроль")
+
+
+@router.callback_query(F.data.startswith("face_control_remove_"))
+async def face_control_remove_confirm(callback: CallbackQuery, state: FSMContext):
+    """Confirm removal of face control user."""
+    user = await get_user(callback.from_user.id)
+    if not user.is_superuser:
+        return
+
+    user_id = int(callback.data.split("_")[-1])
+    face_control = await get_face_control(user_id)
+    if face_control == "not found":
+        await callback.answer("Пользователь не найден")
+        return
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✅ Да", callback_data=f"face_control_confirm_remove_{user_id}"),
+            InlineKeyboardButton(text="❌ Нет", callback_data="face_control_cancel_remove")
+        ]
+    ])
+
+    await callback.message.edit_text(
+        f"Вы уверены, что хотите снять права фейс-контроль у пользователя @{face_control.username or 'No username'}?",
+        reply_markup=keyboard
+    )
+
+
+@router.callback_query(F.data.startswith("face_control_confirm_remove_"))
+async def face_control_remove_execute(callback: CallbackQuery):
+    """Execute removal of face control user."""
+    user = await get_user(callback.from_user.id)
+    if not user.is_superuser:
+        return
+
+    user_id = int(callback.data.split("_")[-1])
+    success = await remove_face_control(user_id)
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="◀️ Назад", callback_data="face_control")]
+    ])
+    
+    if success:
+        await callback.message.edit_text("✅ Пользователь снят с фейс-контроль", reply_markup=keyboard)
+    else:
+        await callback.message.edit_text("❌ Не удалось снять пользователя с фейс-контроль", reply_markup=keyboard)
+
+
+@router.callback_query(F.data == "face_control_cancel_remove")
+async def face_control_cancel_remove(callback: CallbackQuery):
+    """Cancel removal of face control user."""
+    await callback.message.edit_text("❌ Операция отменена")
+
+
+@router.message(FaceControlState.waiting_user_id)
+async def face_control_add_process(message: Message, state: FSMContext):
+    """Process adding a new face control user."""
+    user = await get_user(message.from_user.id)
+    if not user.is_superuser:
+        return
+
+    try:
+        user_id = int(message.text)
+        target_user = await get_user(user_id)
+        if target_user == "not created":
+            await safe_send_message(bot, message, "❌ Пользователь не найден в базе бота")
+            await state.clear()
+            return
+
+        # Check if user is already face control
+        existing = await get_face_control(user_id)
+        if existing != "not found":
+            await safe_send_message(bot, message, "❌ Пользователь уже является фейс-контроль")
+            await state.clear()
+            return
+
+        # Add user as face control
+        await add_face_control(
+            user_id=user_id,
+            admin_id=message.from_user.id,
+            username=target_user.handler,
+            full_name=""
+        )
+
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="◀️ Назад", callback_data="face_control")]
+        ])
+        await safe_send_message(bot, message, 
+            f"✅ Пользователь @{target_user.handler} назначен фейс-контроль", reply_markup=keyboard
+        )
+
+    except ValueError:
+        await safe_send_message(bot, message, "❌ Неверный формат ID. Введите числовой ID пользователя")
+    except Exception as e:
+        print(f"Error adding face control: {e}")
+        await safe_send_message(bot, message, "❌ Произошла ошибка при назначении фейс-контроль")
+    
+    await state.clear()
 
 
 class EventCreateState(StatesGroup):
