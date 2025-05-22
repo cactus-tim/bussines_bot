@@ -10,7 +10,7 @@ from database.req import get_user, create_user, create_user_x_event_row, get_all
     update_user_x_event_row_status, update_reg_event, check_completly_reg_event, create_reg_event, get_reg_event, \
     get_user_x_event_row, get_ref_give_away, create_ref_give_away, delete_user_x_event_row, delete_ref_give_away_row, \
     get_all_hosts_in_event_ids, get_host, add_money, one_more_event, get_user_rank_by_money, get_top_10_users_by_money, \
-    add_referal_cnt, update_strick, add_user_to_networking, create_qr_code
+    add_referal_cnt, update_strick, add_user_to_networking, create_qr_code, get_face_control
 from handlers.error import safe_send_message
 from handlers.qr_utils import create_styled_qr_code
 from handlers.quest import start
@@ -398,8 +398,7 @@ async def cmd_info(message: Message):
                                                    "/get_link - получить ссылки на событие\n"
                                                    "/create_give_away - создать дополнительный розыгрыш для инфлюенсера\n"
                                                    "/get_result - получить победителя в дополнительном розыгрыше\n"
-                                                   "Инструкция по пользованию ботом https://clck.ru/3EwSJM",
-                                reply_markup=single_command_button_keyboard())
+                                                   "/face_control - управление фейс-контроль (добавление/удаление/просмотр)")
     else:
         await safe_send_message(bot, message, text="Список доступных команд:\n"
                                                    "/start - перезапуск бота\n"
@@ -408,7 +407,7 @@ async def cmd_info(message: Message):
                                                    "/get_ref - получить реферальную ссылку на событие\n"
                                                    "/profile - ваш профиль со всей информацией о вас\n"
                                                    "/top - топ 10 по владению монетками\n"
-                                                   "/my_qr - получить QR код для последнего мероприятия\n")
+                                                   "/my_qr - получить QR код для последнего мероприятия")
 
 
 @router.message(Command('profile'))
@@ -817,9 +816,11 @@ async def cmd_check_qr(message: Message, command: CommandObject):
             await safe_send_message(bot, message, "Мероприятие не активно")
             return
 
-        # Check if scanner is superuser
+        # Check if scanner is superuser or face control
         scanner = await get_user(message.from_user.id)
-        if scanner.is_superuser:
+        face_control = await get_face_control(message.from_user.id)
+        
+        if scanner.is_superuser or face_control != "not found":
             # Get user registration details
             reg_event = await get_reg_event(user_id)
             user_info = ""
@@ -869,14 +870,12 @@ async def cmd_check_qr(message: Message, command: CommandObject):
 
             # Show event info to regular users
             await safe_send_message(bot, message,
-                f"Информация о мероприятии:\n"
-                f"Название: {event.desc}\n"
-                f"Дата: {event.date}\n"
-                f"Время: {event.time}\n"
-                f"Место: {event.place}"
-            )
+                                    f"Ваш QR код действителен для мероприятия:\n"
+                                    f"Название: {event.desc}\n"
+                                    f"Дата: {event.date}\n"
+                                    f"Время: {event.time}\n"
+                                    f"Место: {event.place}")
 
-    except (ValueError, IndexError) as e:
-        print(f"QR code validation error: {e}")
-        await safe_send_message(bot, message, "Недействительный QR код")
-        return
+    except Exception as e:
+        print(f"QR verification error: {e}")
+        await safe_send_message(bot, message, "Произошла ошибка при проверке QR кода")
