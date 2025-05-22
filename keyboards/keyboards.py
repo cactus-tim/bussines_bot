@@ -182,7 +182,8 @@ def single_command_button_keyboard() -> ReplyKeyboardMarkup:
         ReplyKeyboardMarkup: Reply keyboard markup.
     """
     return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="Стать частью команды HSE SPB Business Club")]],
+        # keyboard=[[KeyboardButton(text="Стать частью команды HSE SPB Business Club")]],
+        keyboard=[[KeyboardButton(text="Получить QR-код")]],
         resize_keyboard=True,
     )
 

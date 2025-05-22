@@ -647,6 +647,17 @@ async def is_user_event(callback: CallbackQuery) -> bool:
 @router.message(Command("my_qr"))
 async def cmd_my_qr(message: Message):
     """Handle /my_qr command to get QR code for event registration."""
+    await handle_qr_request(message)
+
+
+@router.message(F.text == "Получить QR-код")
+async def handle_qr_button(message: Message):
+    """Handle QR code button press."""
+    await handle_qr_request(message)
+
+
+async def handle_qr_request(message: Message):
+    """Common handler for QR code requests from both command and button."""
     user = await get_user(message.from_user.id)
     if user == "not created":
         await safe_send_message(bot, message, "Вы не зарегистрированы в боте")
