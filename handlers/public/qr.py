@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from aiogram import Router, F, Bot
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -7,12 +9,13 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, FSInputFile
 
 from config.settings import TOKEN
+from config.texts.months import MONTH_MAP
 from database.req import get_user, create_user_x_event_row, get_all_user_events, get_event, \
     get_reg_event, get_user_x_event_row, create_qr_code
 from handlers.error import safe_send_message
-from handlers.utils.base import get_bot_username
 from handlers.utils.qr_utils import create_styled_qr_code
-from keyboards.keyboards import get_ref_ikb, face_checkout_kb, choose_event_for_qr
+from keyboards.keyboards import get_ref_ikb, face_checkout_kb
+from utils.base import is_valid_time_format
 
 router = Router()
 
@@ -91,7 +94,6 @@ async def cmd_check_qr(message: Message, command: CommandObject):
                 return
 
             # Show verification buttons
-
             await message.answer(
                 f"Проверка QR кода:\n"
                 f"Пользователь: @{user.handler}{user_info}\n"
@@ -108,14 +110,26 @@ async def cmd_check_qr(message: Message, command: CommandObject):
                                         "⚠️ Это не ваш QR код! Вы можете сканировать только свои QR коды.")
                 return
 
-            # Show event info to regular users
-            await safe_send_message(bot, message,
-                                    f"Информация о мероприятии:\n"
-                                    f"Название: {event.desc}\n"
-                                    f"Дата: {event.date}\n"
-                                    f"Время: {event.time}\n"
-                                    f"Место: {event.place}"
-                                    )
+            # Check if QR code was already used
+            if user_x_event.status == 'been':
+                await safe_send_message(bot, message,
+                                        f"⚠️ Этот QR код уже был использован!\n\n"
+                                        f"Мероприятие: {event.desc}\n"
+                                        f"Дата: {event.date}\n"
+                                        f"Время: {event.time}\n"
+                                        f"Место: {event.place}"
+                                        )
+                return
+
+            # Show event info and verification buttons to regular users
+            await message.answer(
+                f"Проверка QR кода:\n"
+                f"Мероприятие: {event.desc}\n"
+                f"Дата: {event.date}\n"
+                f"Время: {event.time}\n"
+                f"Место: {event.place}",
+                reply_markup=face_checkout_kb(user_id, event_name)
+            )
 
     except (ValueError, IndexError) as e:
         print(f"QR code validation error: {e}")
@@ -148,8 +162,89 @@ async def handle_qr_request(message: Message):
         await safe_send_message(bot, message, "У вас нет активных регистраций на мероприятия")
         return
 
-    await safe_send_message(bot, message, "Выберите мероприятие, для которого хотите получить QR код:",
-                            reply_markup=choose_event_for_qr(events))
+    current_time = datetime.now()
+
+    # Separate future and past events
+    future_events = []
+    past_events = []
+
+    for event in events:
+        try:
+            # Extract date from event name (format: eventDD_MM_YY)
+            date_parts = event.name.replace('event', '').split('_')
+            if len(date_parts) == 3:
+                day = int(date_parts[0])
+                month = int(date_parts[1])
+                year = 2000 + int(date_parts[2])  # Convert YY to YYYY
+                
+                # Parse time if available and valid
+                hour, minute = 0, 0
+                if event.time and is_valid_time_format(event.time):
+                    hour, minute = map(int, event.time.split(':'))
+                
+                event_date = datetime(year, month, day, hour, minute)
+                
+                if event_date > current_time:
+                    future_events.append(event)
+                else:
+                    past_events.append(event)
+        except (ValueError, IndexError) as e:
+            print(f"Error parsing date for event {event.name}: {e}")
+            continue
+
+    # Choose the nearest event
+    target_event = None
+    if future_events:
+        # If there are future events, take the nearest one
+        target_event = min(future_events, key=lambda x: datetime.strptime(f"{x.name.replace('event', '')}", "%d_%m_20%y"))
+    elif past_events:
+        # If no future events, take the most recent past event
+        target_event = max(past_events, key=lambda x: datetime.strptime(f"{x.name.replace('event', '')}", "%d_%m_20%y"))
+
+    if target_event:
+        # Check if user has already attended the event
+        user_x_event = await get_user_x_event_row(message.from_user.id, target_event.name)
+        if user_x_event and user_x_event.status == 'been':
+            await safe_send_message(bot, message, 
+                f"Спасибо, что посетили это мероприятие!\n\n"
+                f"Название: {target_event.desc}\n"
+                f"Дата: {target_event.date}\n"
+                f"Время: {target_event.time}\n"
+                f"Место: {target_event.place}"
+            )
+            return
+
+        bot_username = (await bot.get_me()).username
+        qr_data = f"https://t.me/{bot_username}?start=qr_{message.from_user.id}_{target_event.name}"
+        qr_image = create_styled_qr_code(qr_data)
+
+        # Create QR code record
+        await create_qr_code(message.from_user.id, target_event.name)
+
+        # Save QR code to a temporary file
+        temp_file = "temp_qr.png"
+        with open(temp_file, "wb") as f:
+            f.write(qr_image.getvalue())
+
+        try:
+            # Send QR code with detailed caption
+            await message.answer_photo(
+                photo=FSInputFile(temp_file),
+                caption=f"⚠️ ВАЖНО: Сохраните этот QR код!\n\n"
+                        f"Это ваш пропуск на мероприятие:\n"
+                        f"Название: {target_event.desc}\n"
+                        f"Дата: {target_event.date}\n"
+                        f"Время: {target_event.time}\n"
+                        f"Место: {target_event.place}\n\n"
+                        f"Покажите этот QR код при входе на мероприятие. Без него вас могут не пропустить!"
+            )
+        finally:
+            # Clean up temporary file
+            import os
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+    else:
+        await safe_send_message(bot, message, "Не удалось найти подходящее мероприятие")
 
 
 @router.callback_query(lambda c: c.data.startswith("qr_"))
@@ -170,7 +265,7 @@ async def process_qr_event_selection(callback: CallbackQuery):
             return
 
         # Generate QR code
-        bot_username = await get_bot_username()
+        bot_username = (await bot.get_me()).username
         qr_data = f"https://t.me/{bot_username}?start=qr_{callback.from_user.id}_{event_name}"
         qr_image = create_styled_qr_code(qr_data)
 

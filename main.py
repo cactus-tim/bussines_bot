@@ -12,6 +12,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from config.settings import TOKEN
+from database.models import async_main
 from handlers.admin import admin_routers
 from handlers.public import public_routers
 from utils.logger import get_logger
@@ -30,6 +31,7 @@ bot = Bot(
 )
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
+
 
 # --------------------------------------------------------------------------------
 
@@ -52,6 +54,7 @@ def register_routers() -> None:
         dp.include_router(router)
         logger.info(f"Registered admin router: {router.name}")
 
+
 # --------------------------------------------------------------------------------
 
 async def main():
@@ -66,6 +69,8 @@ async def main():
     try:
         logger.info("Starting bot...")
 
+        await  async_main()
+
         # Register all routers
         register_routers()
         logger.info("All routers registered successfully")
@@ -77,6 +82,7 @@ async def main():
         raise
     finally:
         logger.info("Bot stopped")
+
 
 # --------------------------------------------------------------------------------
 

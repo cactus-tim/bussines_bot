@@ -25,7 +25,6 @@ bot = Bot(
 logger = get_logger("main")
 
 
-
 # --------------------------------------------------------------------------------
 async def safe_send_message(
         bott: Bot,
@@ -115,5 +114,6 @@ async def make_short_link(url: str) -> str | None:
         logger.error(str(e))
         return None
 
+
 async def get_bot_username():
-    return  (await bot.get_me()).username
+    return (await bot.get_me()).username

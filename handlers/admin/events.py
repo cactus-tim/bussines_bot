@@ -16,7 +16,7 @@ from handlers.states import EventCreateState
 from handlers.states import EventState
 from handlers.utils.base import get_bot_username
 from keyboards.keyboards import single_command_button_keyboard, post_ev_target, apply_winner
-from utils.base import is_number_in_range
+from utils.base import is_number_in_range, is_valid_time_format
 
 router = Router()
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML, ), )
@@ -58,6 +58,12 @@ async def add_event_part_3(message: Message, state: FSMContext):
 async def add_event_part_4(message: Message, state: FSMContext):
     data = await state.get_data()
     name = data.get('name')
+    
+    # Validate time format
+    if not is_valid_time_format(message.text):
+        await safe_send_message(bot, message, 'Неверный формат времени. Пожалуйста, используйте формат HH:MM (например, 14:30)')
+        return
+        
     await update_event(name, {'time': message.text})
     await safe_send_message(bot, message, 'Отправьте место проведение мероприятия')
     await state.set_state(EventCreateState.waiting_event_place)
