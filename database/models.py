@@ -317,6 +317,33 @@ class QRCode(Base):
 # --------------------------------------------------------------------------------
 
 
+class FaceControl(Base):
+    """FaceControl model for storing face control users who can verify QR codes.
+
+    Args:
+        id (Integer): Primary key.
+        user_id (BigInteger): Foreign key to user who has face control permissions.
+        added_by (BigInteger): Foreign key to user (admin) who granted the permission.
+        added_at (String): Timestamp when permission was granted.
+        username (String): Telegram username of the face control user.
+        full_name (String): Full name of the face control user.
+
+    Returns:
+        FaceControl: SQLAlchemy face control model instance.
+    """
+    __tablename__ = "face_control"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False, unique=True)
+    added_by = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    added_at = Column(String, nullable=False)  # Store as ISO format string
+    username = Column(String, nullable=True)  # Telegram username
+    full_name = Column(String, nullable=True)  # Full name from Telegram
+
+
+# --------------------------------------------------------------------------------
+
+
 async def async_main():
     """Initialize database schema.
 
