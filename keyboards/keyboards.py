@@ -326,3 +326,25 @@ def top_ikb() -> InlineKeyboardMarkup:
     """
     ikb = [[InlineKeyboardButton(text="Топ пользователей", callback_data='top')]]
     return InlineKeyboardMarkup(inline_keyboard=ikb)
+
+def face_checkout_kb(user_id: int, event_name:str) -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="✅ Пропустить",
+                callback_data=f"verify_{user_id}_{event_name}_allow"
+            ),
+            InlineKeyboardButton(
+                text="❌ Не пропускать",
+                callback_data=f"verify_{user_id}_{event_name}_deny"
+            )
+        ]
+    ])
+    return keyboard
+
+def choose_event_for_qr(events:list) -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=ev.desc, callback_data=f"qr_{ev.name}")]
+        for ev in events
+    ])
+    return keyboard

@@ -4,13 +4,15 @@ Handlers for questionnaire FSM and callbacks.
 """
 
 # --------------------------------------------------------------------------------
-from aiogram import Router, F, types
+from aiogram import Router, F, types, Bot
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
-from bot_instance import bot
+from config.settings import TOKEN
+from config.texts.quest import QUEST_START, QUEST_FIRST_STEP
 from database.req import (
     create_questionary,
     update_questionary,
@@ -18,6 +20,7 @@ from database.req import (
     get_all_vacancy_names,
 )
 from handlers.error import safe_send_message
+from handlers.states import Questionnaire
 from keyboards.keyboards import (
     vacancy_selection_keyboard,
     another_vacancy_keyboard,
@@ -25,67 +28,16 @@ from keyboards.keyboards import (
     quest_keyboard_2,
 )
 
+# --------------------------------------------------------------------------------
+
 router = Router()
 
-# --------------------------------------------------------------------------------
-
-msg1 = """
-HSE SPB Business Club — это открытое сообщество, которое объединяет талантливых студентов ВШЭ и успешных предпринимателей для обмена опытом и совместного развития.
-    
-Команда организаторов клуба обеспечивает всю операционную деятельность сообщества и разделена на 5 департаментов:
-    
-    - Marketing (продвижение всех мероприятий Клуба, взаимодействие с инфопартнерами Клуба)
-    - Design (формирование единого дизайн-кода Клуба, разработка дизайн-материалов Клуба)
-    - Event & Project (проведение мероприятий Клуба, обеспечение регулярных процессов Клуба)
-    - SMM & Video production (ведение соцсетей Клуба, создание и управление всем контентом, фото и видеосъемка мероприятий Клуба)
-    - HR (управление профессиональным и личностным развитием членов команды Клуба)
-    
-Отбор в команду организаторов разделен на 3 этапа. Проход на следующий этап возможен при успешном прохождении предыдущего. Ниже можно ознакомиться с ключевыми этапами отбора:
-    
-1. Заполнение информации о себе и своем опыте.
-    
-2. Прохождение группового/личного собеседования.
-    
-3. Тестовый период в команде Клуба: в течение проведения двух мероприятий.
-    
-Нажимай на кнопку ниже, присылай необходимую информацию и следи за новыми сообщениями!
-"""
-
-msg2 = """
-Первый этап отбора — заполнение анкеты с информацией о себе и своем опыте.
-
-На этом этапе сначала тебе будет предложено указать персональные данные. Затем ты сможешь выбрать интересующую(-ие) вакансию(-и). Далее тебя попросят ответить на содержательные вопросы о твоем опыте, твоей мотивации присоединиться к команде Клуба и другие важные вопросы.
-
-Примерное время, необходимое для выполнения первого этапа отбора — 20-30 минут. Дедлайн приема заявок на первом этапе — 18 декабря 23:59.
-
-О решении по своей заявке и дальнейших шагах в случае успешного прохождения этапов ты будешь оповещен(-а) через личные сообщения в Telegram.
-
-В случае возникновения вопросов — пиши @vitaly_bshv
-"""
-
-
-# --------------------------------------------------------------------------------
-
-class Questionnaire(StatesGroup):
-    """
-    State definitions for questionnaire process.
-    """
-    full_name = State()
-    degree = State()
-    course = State()
-    program = State()
-    email = State()
-    vacancy = State()
-    motivation = State()
-    plans = State()
-    strengths = State()
-    career_goals = State()
-    team_motivation = State()
-    role_in_team = State()
-    events = State()
-    found_info = State()
-    resume = State()
-    another_vacancy = State()
+bot = Bot(
+    token=TOKEN,
+    default=DefaultBotProperties(
+        parse_mode=ParseMode.HTML,
+    ),
+)
 
 
 # --------------------------------------------------------------------------------
@@ -112,7 +64,7 @@ async def start(message: types.Message):
     await safe_send_message(
         bot,
         message,
-        text=msg1,
+        text=QUEST_START,
         reply_markup=quest_keyboard_1(),
     )
 
@@ -129,7 +81,7 @@ async def start_2(callback: CallbackQuery):
     await safe_send_message(
         bot,
         callback,
-        text=msg2,
+        text=QUEST_FIRST_STEP,
         reply_markup=quest_keyboard_2(),
     )
 

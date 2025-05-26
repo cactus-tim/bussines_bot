@@ -7,10 +7,13 @@ Excel export of user statistics for bot.
 from io import BytesIO
 
 import pandas as pd
+from aiogram import Bot
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from aiogram.types import BufferedInputFile
 from sqlalchemy.sql import select
 
-from bot_instance import bot
+from config.settings import TOKEN
 from database.models import async_session, UserXEvent, Event
 from database.req import (
     get_all_users,
@@ -23,6 +26,13 @@ from database.req import (
 from errors.errors import Error404
 from errors.handlers import stat_error_handler
 from handlers.error import safe_send_message
+
+bot = Bot(
+    token=TOKEN,
+    default=DefaultBotProperties(
+        parse_mode=ParseMode.HTML,
+    ),
+)
 
 
 # --------------------------------------------------------------------------------

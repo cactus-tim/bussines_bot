@@ -9,11 +9,11 @@ from sqlalchemy import Column, Integer, String, Boolean, BigInteger, ForeignKey
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase
 
-from bot_instance import SQL_URL_RC
+from config.settings import SQL_URL
 
 # --------------------------------------------------------------------------------
 
-engine = create_async_engine(url=SQL_URL_RC, echo=True)
+engine = create_async_engine(url=SQL_URL, echo=True)
 async_session = async_sessionmaker(engine)
 
 

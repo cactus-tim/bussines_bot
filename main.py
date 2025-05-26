@@ -1,67 +1,90 @@
+"""Telegram Bot Main.
+Main entry point for the Telegram bot application with router registration and startup logic.
 """
-App Entrypoint
-Initialize and run the Telegram bot application.
-"""
+
 # --------------------------------------------------------------------------------
+
 import asyncio
 
-from aiogram import Dispatcher
+from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from bot_instance import bot
-from confige import BotConfig
-from database.models import async_main
-from handlers import admin, error, quest, user
-
+from config.settings import TOKEN
+from handlers.admin import admin_routers
+from handlers.public import public_routers
+from utils.logger import get_logger
 
 # --------------------------------------------------------------------------------
-def register_routers(dp: Dispatcher) -> None:
-    """
-    Include all routers into dispatcher.
+
+# Initialize logger
+logger = get_logger("main")
+
+# Initialize bot and dispatcher
+bot = Bot(
+    token=TOKEN,
+    default=DefaultBotProperties(
+        parse_mode=ParseMode.HTML,
+    ),
+)
+storage = MemoryStorage()
+dp = Dispatcher(storage=storage)
+
+# --------------------------------------------------------------------------------
+
+def register_routers() -> None:
+    """Register all routers in the dispatcher.
 
     Args:
-        dp (Dispatcher): Dispatcher instance to register routers on.
+        None
 
     Returns:
         None
     """
-    dp.include_routers(
-        admin.router,
-        quest.router,
-        error.router,
-        user.router,
-    )
+    # Register public routers
+    for router in public_routers:
+        dp.include_router(router)
+        logger.info(f"Registered public router: {router.name}")
 
+    # Register admin routers
+    for router in admin_routers:
+        dp.include_router(router)
+        logger.info(f"Registered admin router: {router.name}")
 
 # --------------------------------------------------------------------------------
-async def main() -> None:
-    """
-    Run application: initialize DB, configure bot, and start polling.
+
+async def main():
+    """Start the bot and handle its lifecycle.
+
+    Args:
+        None
 
     Returns:
         None
     """
-    # Initialize database models and connections
-    await async_main()
-
-    # Create bot configuration and dispatcher
-    config = BotConfig(
-        admin_ids=[],  # List administrator IDs
-        welcome_message="",  # Initial welcome message
-    )
-    dp = Dispatcher(storage=MemoryStorage())
-    dp["config"] = config
-
-    # Register all routers
-    register_routers(dp)
-
-    # Start the bot polling loop
     try:
-        await dp.start_polling(bot, skip_updates=True)
-    except Exception as ex:
-        print(f"Exception: {ex}")
+        logger.info("Starting bot...")
 
+        # Register all routers
+        register_routers()
+        logger.info("All routers registered successfully")
+
+        # Start polling
+        await dp.start_polling(bot)
+    except Exception as e:
+        logger.error(f"Error starting bot: {e}")
+        raise
+    finally:
+        logger.info("Bot stopped")
 
 # --------------------------------------------------------------------------------
-if __name__ == '__main__':
-    asyncio.run(main())
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        logger.info("Bot stopped by user")
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        raise

@@ -5,9 +5,12 @@ Wrappers for database and statistic error handling.
 # --------------------------------------------------------------------------------
 from functools import wraps
 
+from aiogram import Bot
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from sqlalchemy.exc import NoResultFound
 
-from bot_instance import logger, bot
+from config.settings import TOKEN
 from errors.errors import (
     DatabaseConnectionError,
     Error404,
@@ -15,7 +18,15 @@ from errors.errors import (
     EventNameError,
     VacancyNameError,
 )
+from utils.logger import get_logger
 
+bot = Bot(
+    token=TOKEN,
+    default=DefaultBotProperties(
+        parse_mode=ParseMode.HTML,
+    ),
+)
+logger = get_logger("main")
 
 # --------------------------------------------------------------------------------
 def db_error_handler(func):
@@ -78,5 +89,7 @@ def stat_error_handler(func):
                     user_id,
                     "Произошла ошибка при генерации отчета. Пожалуйста, попробуйте позже."
                 )
+                return None
+            return None
 
     return wrapper
