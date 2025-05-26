@@ -48,7 +48,7 @@ async def get_result(message: Message, state: FSMContext):
 async def get_result2(message: Message, state: FSMContext):
     data = await state.get_data()
     event_name = data.get('event_name')
-    if message.text.lower() == 'quit':
+    if message.text.lower() == 'c':
         await state.clear()
         return
     host = await get_host_by_org_name(message.text, event_name)

@@ -2,6 +2,7 @@ from datetime import datetime
 from io import BytesIO
 from typing import Union
 
+import qrcode
 from aiogram import Router, F, Bot
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -11,15 +12,13 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, FSInputFile
 
 from config.settings import TOKEN
-from config.texts.months import MONTH_MAP
 from database.req import get_user, create_user_x_event_row, get_all_user_events, get_event, \
     get_reg_event, get_user_x_event_row, create_qr_code
 from database.req.face_control import get_face_control
 from handlers.error import safe_send_message
 from handlers.utils.qr_utils import create_styled_qr_code
-from keyboards.keyboards import get_ref_ikb, face_checkout_kb, single_command_button_keyboard
+from keyboards.keyboards import face_checkout_kb, single_command_button_keyboard
 from utils.base import is_valid_time_format
-import qrcode
 
 router = Router()
 
@@ -181,14 +180,14 @@ async def handle_qr_request(message: Message):
                 day = int(date_parts[0])
                 month = int(date_parts[1])
                 year = 2000 + int(date_parts[2])  # Convert YY to YYYY
-                
+
                 # Parse time if available and valid
                 hour, minute = 0, 0
                 if event.time and is_valid_time_format(event.time):
                     hour, minute = map(int, event.time.split(':'))
-                
+
                 event_date = datetime(year, month, day, hour, minute)
-                
+
                 if event_date > current_time:
                     future_events.append(event)
                 else:
@@ -201,7 +200,8 @@ async def handle_qr_request(message: Message):
     target_event = None
     if future_events:
         # If there are future events, take the nearest one
-        target_event = min(future_events, key=lambda x: datetime.strptime(f"{x.name.replace('event', '')}", "%d_%m_20%y"))
+        target_event = min(future_events,
+                           key=lambda x: datetime.strptime(f"{x.name.replace('event', '')}", "%d_%m_20%y"))
     elif past_events:
         # If no future events, take the most recent past event
         target_event = max(past_events, key=lambda x: datetime.strptime(f"{x.name.replace('event', '')}", "%d_%m_20%y"))
@@ -210,12 +210,25 @@ async def handle_qr_request(message: Message):
         # Check if user has already attended the event
         user_x_event = await get_user_x_event_row(message.from_user.id, target_event.name)
         if user_x_event and user_x_event.status == 'been':
-            await safe_send_message(bot, message, 
-                f"Спасибо, что посетили это мероприятие!\n\n"
-                f"Название: {target_event.desc}\n"
-                f"Дата: {target_event.date}\n"
-                f"Время: {target_event.time}\n"
-                f"Место: {target_event.place}"
+            bot_username = (await bot.get_me()).username
+            qr_data = f"https://t.me/{bot_username}?start=qr_{message.from_user.id}_{target_event.name}"
+            qr_image = create_styled_qr_code(qr_data)
+
+            # Create QR code record
+            await create_qr_code(message.from_user.id, target_event.name)
+
+            # Save QR code to a temporary file
+            temp_file = "temp_qr.png"
+            with open(temp_file, "wb") as f:
+                f.write(qr_image.getvalue())
+
+            await message.answer_photo(
+                photo=FSInputFile(temp_file),
+                caption=f"Спасибо, что посетили это мероприятие!\n\n"
+                        f"Название: {target_event.desc}\n"
+                        f"Дата: {target_event.date}\n"
+                        f"Время: {target_event.time}\n"
+                        f"Место: {target_event.place}"
             )
             return
 
@@ -354,12 +367,12 @@ async def send_event_qr_code(user_id: int, event_name: str, message: Union[Messa
         qr.add_data(event_name)
         qr.make(fit=True)
         qr_image = qr.make_image(fill_color="black", back_color="white")
-        
+
         # Save QR code to bytes
         qr_bytes = BytesIO()
         qr_image.save(qr_bytes, format='PNG')
         qr_bytes.seek(0)
-        
+
         # Send QR code
         if isinstance(message, CallbackQuery):
             await message.message.answer_photo(
@@ -374,10 +387,10 @@ async def send_event_qr_code(user_id: int, event_name: str, message: Union[Messa
                 caption=f"Ваш QR-код для мероприятия {event_name}",
                 reply_markup=single_command_button_keyboard()
             )
-            
+
         # Clear state
         await state.clear()
-        
+
     except Exception as e:
         print(f"Error generating QR code: {e}")
         if isinstance(message, CallbackQuery):

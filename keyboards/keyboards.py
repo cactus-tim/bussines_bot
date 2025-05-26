@@ -196,7 +196,7 @@ def quest_keyboard_1() -> InlineKeyboardMarkup:
     Returns:
         InlineKeyboardMarkup: Inline keyboard markup.
     """
-    ikb = [[InlineKeyboardButton(text='Приступить к первому этапу', callback_data="next")]]
+    ikb = [[InlineKeyboardButton(text='Приступить к первому этапу', callback_data="quest_next")]]
     return InlineKeyboardMarkup(inline_keyboard=ikb)
 
 

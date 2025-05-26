@@ -40,7 +40,6 @@ async def cmd_profile(message: Message):
     msg = f'👤 <b>Личный кабинет {name}</b>\n\n' \
           f'🎯 <b>Статистика:</b>\n' \
           f'• Посещено мероприятий: {user.event_cnt}\n' \
-          f'• Текущая серия: {user.strick}\n' \
           f'• Рефералов: {user.ref_cnt}\n' \
           f'• Монеток: {user.money}\n' \
           f'• Место в топе: {rank}'
@@ -81,7 +80,7 @@ async def get_ref_v2_part1(message: Message):
                             reply_markup=events_ikb(events))
 
 
-@router.callback_query(lambda c: not c.data.startswith(("qr_", "event_", "hse_", "verify_", "another_", "post_", "stat_", "link_", "unreg_", "cancel", "confirm", "reroll", "top")))
+@router.callback_query(lambda c: not c.data.startswith(("qr_", "event_", "hse_", "verify_", "another_", "post_", "stat_", "link_", "unreg_", "cancel", "confirm", "reroll", "top", "quest_", "face_")))
 async def get_ref_v2_part2(callback: CallbackQuery):
     """Handle event selection for referral link generation."""
     try:

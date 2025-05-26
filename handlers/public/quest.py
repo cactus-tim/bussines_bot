@@ -70,7 +70,7 @@ async def start(message: types.Message):
 
 
 # --------------------------------------------------------------------------------
-@router.callback_query(F.data == "next")
+@router.callback_query(F.data == "quest_next")
 async def start_2(callback: CallbackQuery):
     """
     Send details message and second keyboard on callback.
