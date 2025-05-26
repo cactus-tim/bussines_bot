@@ -81,14 +81,9 @@ async def get_ref_v2_part1(message: Message):
                             reply_markup=events_ikb(events))
 
 
-@router.callback_query()
+@router.callback_query(lambda c: not c.data.startswith(("qr_", "event_", "hse_", "verify_", "another_", "post_", "stat_", "link_", "unreg_", "cancel", "confirm", "reroll", "top")))
 async def get_ref_v2_part2(callback: CallbackQuery):
     """Handle event selection for referral link generation."""
-    # Skip if this is a QR code callback
-    if callback.data.startswith("qr_"):
-        print("Skipping QR callback in general handler")  # Debug print
-        return
-
     try:
         event = await get_event(callback.data)
         if event == "not created":
@@ -96,7 +91,7 @@ async def get_ref_v2_part2(callback: CallbackQuery):
             return
 
         data = f'ref_{callback.data}__{callback.from_user.id}'
-        bot_username = get_bot_username()
+        bot_username = await get_bot_username()
         url = f"https://t.me/{bot_username}?start={data}"
 
         await safe_send_message(bot, callback,

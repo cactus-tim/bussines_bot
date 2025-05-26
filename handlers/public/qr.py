@@ -1,4 +1,6 @@
 from datetime import datetime
+from io import BytesIO
+from typing import Union
 
 from aiogram import Router, F, Bot
 from aiogram.client.default import DefaultBotProperties
@@ -12,10 +14,12 @@ from config.settings import TOKEN
 from config.texts.months import MONTH_MAP
 from database.req import get_user, create_user_x_event_row, get_all_user_events, get_event, \
     get_reg_event, get_user_x_event_row, create_qr_code
+from database.req.face_control import get_face_control
 from handlers.error import safe_send_message
 from handlers.utils.qr_utils import create_styled_qr_code
-from keyboards.keyboards import get_ref_ikb, face_checkout_kb
+from keyboards.keyboards import get_ref_ikb, face_checkout_kb, single_command_button_keyboard
 from utils.base import is_valid_time_format
+import qrcode
 
 router = Router()
 
@@ -74,7 +78,8 @@ async def cmd_check_qr(message: Message, command: CommandObject):
 
         # Check if scanner is superuser
         scanner = await get_user(message.from_user.id)
-        if scanner.is_superuser:
+        face_control = await get_face_control(message.from_user.id)
+        if scanner.is_superuser or face_control != "not found":
             # Get user registration details
             reg_event = await get_reg_event(user_id)
             user_info = ""
@@ -113,7 +118,7 @@ async def cmd_check_qr(message: Message, command: CommandObject):
             # Check if QR code was already used
             if user_x_event.status == 'been':
                 await safe_send_message(bot, message,
-                                        f"⚠️ Этот QR код уже был использован!\n\n"
+                                        f"Спасибо, что посетили это мероприятие!\n\n"
                                         f"Мероприятие: {event.desc}\n"
                                         f"Дата: {event.date}\n"
                                         f"Время: {event.time}\n"
@@ -123,12 +128,12 @@ async def cmd_check_qr(message: Message, command: CommandObject):
 
             # Show event info and verification buttons to regular users
             await message.answer(
-                f"Проверка QR кода:\n"
+                f"⚠️ ВАЖНО: Сохраните этот QR код!\n"
                 f"Мероприятие: {event.desc}\n"
                 f"Дата: {event.date}\n"
                 f"Время: {event.time}\n"
-                f"Место: {event.place}",
-                reply_markup=face_checkout_kb(user_id, event_name)
+                f"Место: {event.place}\n"
+                f"Покажите этот QR код при входе на мероприятие. Без него вас могут не пропустить!",
             )
 
     except (ValueError, IndexError) as e:
@@ -341,93 +346,42 @@ async def process_reg_yes(callback: CallbackQuery, state: FSMContext):
     await state.clear()
 
 
-async def send_event_qr_code(user_id: int, event_name: str, message: Message | CallbackQuery, state: FSMContext = None):
-    """Helper function to generate and send QR code for event registration."""
-    event = await get_event(event_name)
-    await create_user_x_event_row(user_id, event_name, message.from_user.username)
-    bot_username = (await bot.get_me()).username
-    qr_data = f"https://t.me/{bot_username}?start=qr_{user_id}_{event_name}"
-    qr_image = create_styled_qr_code(qr_data)
-    await create_qr_code(user_id, event_name)
-
-    temp_file = "temp_qr.png"
-    with open(temp_file, "wb") as f:
-        f.write(qr_image.getvalue())
-
+async def send_event_qr_code(user_id: int, event_name: str, message: Union[Message, CallbackQuery], state: FSMContext):
+    """Send QR code for event registration."""
     try:
-        await safe_send_message(bot, message,
-                                f"Мы вас ждем на мероприятии \"{event.desc}\", которое пройдет {event.date} в {event.time}\n"
-                                f"Место проведение - {event.place}",
-                                reply_markup=get_ref_ikb(event_name)
-                                )
-        await message.answer_photo(
-            photo=FSInputFile(temp_file),
-            caption=f"⚠️ ВАЖНО: Сохраните этот QR код!\n\n"
-                    f"Это ваш пропуск на мероприятие:\n"
-                    f"Название: {event.desc}\n"
-                    f"Дата: {event.date}\n"
-                    f"Время: {event.time}\n"
-                    f"Место: {event.place}\n\n"
-                    f"Покажите этот QR код при входе на мероприятие. Без него вас могут не пропустить!"
-        )
-    finally:
-        import os
-        if os.path.exists(temp_file):
-            os.remove(temp_file)
-
-    if state:
-        await state.clear()
-
-
-@router.callback_query(lambda c: c.data.startswith("qr_"))
-async def process_qr_event_selection(callback: CallbackQuery):
-    """Handle event selection for QR code generation."""
-    try:
-        event_name = callback.data
-        event = await get_event(event_name.replace('qr_', ''))
-
-        if event == "not created":
-            await callback.answer("Мероприятие не найдено")
-            return
-
-        # Verify that user is registered for this event
-        user_x_event = await get_user_x_event_row(callback.from_user.id, event_name.replace('qr_', ''))
-        if user_x_event == "not created":
-            await callback.answer("Вы не зарегистрированы на это мероприятие")
-            return
-
         # Generate QR code
-        bot_username = (await bot.get_me()).username
-        qr_data = f"https://t.me/{bot_username}?start=qr_{callback.from_user.id}_{event_name.replace('qr_', '')}"
-        qr_image = create_styled_qr_code(qr_data)
-
-        # Create QR code record
-        await create_qr_code(callback.from_user.id, event_name.replace('qr_', ''))
-
-        # Save QR code to a temporary file
-        temp_file = "temp_qr.png"
-        with open(temp_file, "wb") as f:
-            f.write(qr_image.getvalue())
-
-        try:
-            # Send QR code with detailed caption
-            await callback.message.answer_photo(
-                photo=FSInputFile(temp_file),
-                caption=f"⚠️ ВАЖНО: Сохраните этот QR код!\n\n"
-                        f"Это ваш пропуск на мероприятие:\n"
-                        f"Название: {event.desc}\n"
-                        f"Дата: {event.date}\n"
-                        f"Время: {event.time}\n"
-                        f"Место: {event.place}\n\n"
-                        f"Покажите этот QR код при входе на мероприятие. Без него вас могут не пропустить!"
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(event_name)
+        qr.make(fit=True)
+        qr_image = qr.make_image(fill_color="black", back_color="white")
+        
+        # Save QR code to bytes
+        qr_bytes = BytesIO()
+        qr_image.save(qr_bytes, format='PNG')
+        qr_bytes.seek(0)
+        
+        # Send QR code
+        if isinstance(message, CallbackQuery):
+            await message.message.answer_photo(
+                photo=qr_bytes,
+                caption=f"Ваш QR-код для мероприятия {event_name}",
+                reply_markup=single_command_button_keyboard()
             )
-            # Delete the keyboard message
-            await callback.message.delete()
-        finally:
-            # Clean up temporary file
-            import os
-            if os.path.exists(temp_file):
-                os.remove(temp_file)
+            await message.answer()  # Отвечаем на callback query
+        else:
+            await message.answer_photo(
+                photo=qr_bytes,
+                caption=f"Ваш QR-код для мероприятия {event_name}",
+                reply_markup=single_command_button_keyboard()
+            )
+            
+        # Clear state
+        await state.clear()
+        
     except Exception as e:
-        print(f"QR code generation error: {e}")
-        await callback.answer("Произошла ошибка при генерации QR кода")
+        print(f"Error generating QR code: {e}")
+        if isinstance(message, CallbackQuery):
+            await message.message.answer("Произошла ошибка при генерации QR-кода")
+            await message.answer()  # Отвечаем на callback query
+        else:
+            await message.answer("Произошла ошибка при генерации QR-кода")

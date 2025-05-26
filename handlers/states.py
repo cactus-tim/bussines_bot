@@ -6,6 +6,7 @@ State machine definitions for various bot workflows and forms.
 
 from aiogram.fsm.state import StatesGroup, State
 
+
 # --------------------------------------------------------------------------------
 
 class Questionnaire(StatesGroup):
@@ -34,6 +35,7 @@ class Questionnaire(StatesGroup):
     resume = State()
     another_vacancy = State()
 
+
 # --------------------------------------------------------------------------------
 
 class EventReg(StatesGroup):
@@ -52,6 +54,7 @@ class EventReg(StatesGroup):
     waiting_phone = State()
     waiting_org = State()
 
+
 # --------------------------------------------------------------------------------
 
 class EventCreateState(StatesGroup):
@@ -69,6 +72,7 @@ class EventCreateState(StatesGroup):
     waiting_event_place = State()
     waiting_links_count = State()
 
+
 # --------------------------------------------------------------------------------
 
 class EventState(StatesGroup):
@@ -84,6 +88,7 @@ class EventState(StatesGroup):
     waiting_ev_for_link = State()
     waiting_links_count = State()
 
+
 # --------------------------------------------------------------------------------
 
 class VacancyState(StatesGroup):
@@ -97,6 +102,7 @@ class VacancyState(StatesGroup):
     """
     waiting_for_vacancy_name = State()
     waiting_for_vacancy_name_to_delete = State()
+
 
 # --------------------------------------------------------------------------------
 
@@ -124,6 +130,7 @@ class PostState(StatesGroup):
     waiting_for_post_to_ev_media = State()
     waiting_for_post_to_all_media_unreg = State()
 
+
 # --------------------------------------------------------------------------------
 
 class StatState(StatesGroup):
@@ -141,6 +148,7 @@ class StatState(StatesGroup):
     waiting_for_ev1 = State()
     waiting_for_ev2 = State()
 
+
 # --------------------------------------------------------------------------------
 
 class WinnerState(StatesGroup):
@@ -154,6 +162,7 @@ class WinnerState(StatesGroup):
     """
     wait_give_away_event = State()
     wait_give_away_id = State()
+
 
 # --------------------------------------------------------------------------------
 
@@ -169,3 +178,10 @@ class GiveAwayState(StatesGroup):
     waiting_event = State()
     waiting_org_name = State()
     waiting_id = State()
+
+# --------------------------------------------------------------------------------
+
+class FaceControlState(StatesGroup):
+    """States for face control management."""
+    waiting_user_id = State()  # Waiting for user ID to add/remove
+    waiting_confirmation = State()  # Waiting for confirmation to remove

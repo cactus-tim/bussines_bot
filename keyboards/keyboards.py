@@ -348,3 +348,40 @@ def choose_event_for_qr(events:list) -> InlineKeyboardMarkup:
         for ev in events
     ])
     return keyboard
+
+def back_to_face_control():
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="◀️ Назад", callback_data="face_control")]
+    ])
+    return keyboard
+
+def face_control_menu_kb():
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="➕ Добавить фейс-контроль", callback_data="face_control_add"),
+            InlineKeyboardButton(text="➖ Удалить фейс-контроль", callback_data="face_control_remove")
+        ],
+        [InlineKeyboardButton(text="📋 Список фейс-контроль", callback_data="face_control_list")]
+    ])
+    return keyboard
+
+def face_controls_list(face_controls):
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text=f"@{fc.username or 'No username'} ({fc.user_id})",
+            callback_data=f"face_control_remove_{fc.user_id}"
+        )]
+        for fc in face_controls
+    ])
+    keyboard.inline_keyboard.append([InlineKeyboardButton(text="◀️ Назад", callback_data="face_control")])
+    return keyboard
+
+def yes_no_face(user_id):
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✅ Да", callback_data=f"face_control_confirm_remove_{user_id}"),
+            InlineKeyboardButton(text="❌ Нет", callback_data="face_control_cancel_remove")
+        ]
+    ])
+
+    return keyboard

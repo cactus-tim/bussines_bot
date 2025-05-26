@@ -5,6 +5,7 @@ from aiogram.filters import CommandStart
 from aiogram.filters.command import CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
+import logging
 
 from config.settings import TOKEN
 from config.texts.commands import WELCOME_MESSAGE
