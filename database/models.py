@@ -1,6 +1,6 @@
 """
 Database Models
-SQLAlchemy models for users, events, vacancies, and registrations.
+SQLAlchemy models for users, club_events, vacancies, and registrations.
 """
 
 # --------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ class User(Base):
         id (BigInteger): Primary key.
         handler (str): User's handler.
         is_superuser (bool): Indicates superuser status.
-        event_cnt (int): Number of events the user has.
+        event_cnt (int): Number of club_events the user has.
         strick (int): User's streak.
         first_contact (str): First contact value.
         money (int): Amount of money.
@@ -268,7 +268,7 @@ class Networking(Base):
 
 
 class EventAttendance(Base):
-    """EventAttendance model for tracking user attendance at events.
+    """EventAttendance model for tracking user attendance at club_events.
 
     Args:
         id (Integer): Primary key.

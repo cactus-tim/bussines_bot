@@ -1,11 +1,12 @@
 """
 DB Operations
 
-CRUD operations for users, events, vacancies, and networking.
+CRUD operations for users, club_events, vacancies, and networking.
 """
-import datetime
 
 # --------------------------------------------------------------------------------
+import datetime
+
 from sqlalchemy import (select, delete)
 
 from database.models import (

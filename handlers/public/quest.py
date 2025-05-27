@@ -362,7 +362,7 @@ async def enter_team_motivation(message: types.Message, state: FSMContext):
 @router.message(Questionnaire.role_in_team)
 async def enter_role_in_team(message: types.Message, state: FSMContext):
     """
-    Handle role in team input and proceed to events.
+    Handle role in team input and proceed to club_events.
 
     Args:
         message (types.Message): Incoming message instance.
@@ -380,7 +380,7 @@ async def enter_role_in_team(message: types.Message, state: FSMContext):
 @router.message(Questionnaire.events)
 async def enter_events(message: types.Message, state: FSMContext):
     """
-    Handle events input and proceed to found info.
+    Handle club_events input and proceed to found info.
 
     Args:
         message (types.Message): Incoming message instance.
@@ -389,7 +389,7 @@ async def enter_events(message: types.Message, state: FSMContext):
     Returns:
         None
     """
-    await update_questionary(message.from_user.id, {'events': message.text})
+    await update_questionary(message.from_user.id, {'club_events': message.text})
     await safe_send_message(bot, message, text="Где ты узнал(-а) про отбор в Бизнес-клуб?")
     await state.set_state(Questionnaire.found_info)
 

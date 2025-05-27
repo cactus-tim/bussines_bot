@@ -1,7 +1,7 @@
 """
 DB Operations
 
-CRUD operations for users, events, vacancies, and networking.
+CRUD operations for users, club_events, vacancies, and networking.
 """
 
 # --------------------------------------------------------------------------------
@@ -294,7 +294,7 @@ async def get_all_users_in_event(event_name: str):
 @db_error_handler
 async def get_all_user_events(user_id: int):
     """
-    Retrieve all in-progress events for a specific user.
+    Retrieve all in-progress club_events for a specific user.
 
     Args:
         user_id (int): Telegram user ID.

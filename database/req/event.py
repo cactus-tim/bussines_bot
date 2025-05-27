@@ -1,7 +1,7 @@
 """
 DB Operations
 
-CRUD operations for users, events, vacancies, and networking.
+CRUD operations for users, club_events, vacancies, and networking.
 """
 
 # --------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ async def update_event(name: str, data: dict):
 @db_error_handler
 async def get_all_events_in_p():
     """
-    Fetch names of events in progress.
+    Fetch names of club_events in progress.
 
     Returns:
         list[str]: List of event names.

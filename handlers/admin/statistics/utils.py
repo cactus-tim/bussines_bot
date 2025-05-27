@@ -53,11 +53,11 @@ async def get_stat_all(user_id: int) -> None:
             bot, user_id, 'У вас нет подходящих пользователей((')
         return
 
-    # Get all events for each user
+    # Get all club_events for each user
     data = []
     for user in users:
         try:
-            # Get all events where user has status 'been'
+            # Get all club_events where user has status 'been'
             async with async_session() as session:
                 result = await session.execute(
                     select(
@@ -74,7 +74,7 @@ async def get_stat_all(user_id: int) -> None:
                 )
                 visited_events = result.all()
 
-                # Format visited events info
+                # Format visited club_events info
                 visited_events_info = []
                 for event, status, first_contact in visited_events:
                     visited_events_info.append(
@@ -202,7 +202,7 @@ async def get_stat_quest(user_id: int) -> None:
             "career_goals": u.career_goals,
             "team_motivation": u.team_motivation,
             "role_in_team": u.role_in_team,
-            "events": u.events,
+            "club_events": u.events,
             "found_info": u.found_info,
             "resume": u.resume,
         }

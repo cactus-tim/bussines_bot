@@ -20,6 +20,7 @@ from errors.errors import (
 )
 from utils.logger import get_logger
 
+# --------------------------------------------------------------------------------
 bot = Bot(
     token=TOKEN,
     default=DefaultBotProperties(
@@ -27,6 +28,7 @@ bot = Bot(
     ),
 )
 logger = get_logger("main")
+
 
 # --------------------------------------------------------------------------------
 def db_error_handler(func):

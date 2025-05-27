@@ -16,6 +16,8 @@ from config.settings import TOKEN
 from keyboards.keyboards import single_command_button_keyboard
 from utils.logger import get_logger
 
+# --------------------------------------------------------------------------------
+
 bot = Bot(
     token=TOKEN,
     default=DefaultBotProperties(

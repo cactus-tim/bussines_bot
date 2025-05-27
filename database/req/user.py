@@ -1,7 +1,7 @@
 """
 DB Operations
 
-CRUD operations for users, events, vacancies, and networking.
+CRUD operations for users, club_events, vacancies, and networking.
 """
 
 # --------------------------------------------------------------------------------

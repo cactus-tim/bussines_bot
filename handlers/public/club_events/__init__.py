@@ -5,12 +5,11 @@ Imports and aggregates all public routers for registration.
 
 # --------------------------------------------------------------------------------
 
-from .user import router as user
-from .quest import router as quest
-from .start import router as start
-from .club_events import events_routers
+from .qr import router as qr
+from .face_control import router as fc_control
+from .ref import router as ref_router
+from .registration import router as registration_router
 
 # --------------------------------------------------------------------------------
 
-public_routers = [user, quest, start]
-public_routers.extend(events_routers)
+events_routers = [ref_router, qr, fc_control, registration_router]

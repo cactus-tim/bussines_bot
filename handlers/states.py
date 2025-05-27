@@ -179,6 +179,7 @@ class GiveAwayState(StatesGroup):
     waiting_org_name = State()
     waiting_id = State()
 
+
 # --------------------------------------------------------------------------------
 
 class FaceControlState(StatesGroup):

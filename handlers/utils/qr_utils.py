@@ -2,6 +2,7 @@
 QR Code Generator
 Stylish QR code with gradient background and central logo.
 """
+# --------------------------------------------------------------------------------
 
 import os
 from io import BytesIO

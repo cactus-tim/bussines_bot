@@ -1,21 +1,18 @@
 """
 DB Operations
 
-CRUD operations for users, events, vacancies, and networking.
+CRUD operations for users, club_events, vacancies, and networking.
 """
 
 # --------------------------------------------------------------------------------
-from sqlalchemy import (select)
 
-from database.models import (
-    RegEvent,
-    async_session, )
-from errors.errors import (
-    Error404,
-    Error409,
-)
+from sqlalchemy import select
+
+from database.models import RegEvent, async_session
+from errors.errors import Error404, Error409
 from errors.handlers import db_error_handler
 
+# --------------------------------------------------------------------------------
 
 @db_error_handler
 async def get_reg_event(tg_id: int):
@@ -36,7 +33,6 @@ async def get_reg_event(tg_id: int):
             return reg_event
         else:
             raise Error404
-
 
 # --------------------------------------------------------------------------------
 
@@ -61,7 +57,6 @@ async def create_reg_event(tg_id: int):
         else:
             raise Error409
 
-
 # --------------------------------------------------------------------------------
 
 @db_error_handler
@@ -85,7 +80,6 @@ async def update_reg_event(tg_id: int, data: dict):
         session.add(reg_event)
         await session.commit()
 
-
 # --------------------------------------------------------------------------------
 
 @db_error_handler
@@ -104,12 +98,12 @@ async def check_completly_reg_event(tg_id: int):
         if not reg_event:
             return False
         if (
-                reg_event.name == '' or
-                reg_event.surname == '' or
-                reg_event.fathername == '' or
-                reg_event.mail == '' or
-                reg_event.phone == '' or
-                reg_event.org == ''
+            reg_event.name == '' or
+            reg_event.surname == '' or
+            reg_event.fathername == '' or
+            reg_event.mail == '' or
+            reg_event.phone == '' or
+            reg_event.org == ''
         ):
             return False
         return True
