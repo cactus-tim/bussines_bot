@@ -1,0 +1,8 @@
+reg_event
+=========
+
+.. automodule:: database.req.reg_event
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

@@ -1,0 +1,8 @@
+vacancies
+=========
+
+.. automodule:: handlers.admin.vacancies
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

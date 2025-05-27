@@ -19,7 +19,7 @@ from database.req import (
 )
 from handlers.error import safe_send_message
 from handlers.states import WinnerState
-from keyboards.keyboards import post_ev_target, single_command_button_keyboard
+from keyboards import post_ev_target, main_reply_keyboard
 
 # --------------------------------------------------------------------------------
 
@@ -50,7 +50,7 @@ async def cmd_get_result(message: Message, state: FSMContext):
             bot,
             message,
             text="У вас нет событий",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
         await state.clear()
         return
@@ -85,7 +85,7 @@ async def get_result(message: Message, state: FSMContext):
             bot,
             message,
             text="У вас нет организаторов дополнительных розыгрышей",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
         await state.clear()
         return

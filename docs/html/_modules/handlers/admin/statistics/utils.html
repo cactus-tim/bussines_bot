@@ -1,0 +1,483 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>handlers.admin.statistics.utils &mdash; HSE Buisness Club Telegram-bot v3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/togglebutton.css?v=13237357" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5773a0da"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../../../../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            HSE Buisness Club Telegram-bot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../config/index.html">config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../database/index.html">database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../errors/index.html">errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../handlers/index.html">handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../keyboards/index.html">keyboards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../utils/index.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../main.html">main</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">HSE Buisness Club Telegram-bot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">handlers.admin.statistics.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for handlers.admin.statistics.utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Statistics Handlers</span>
+<span class="sd">Excel export of user statistics for bot.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesIO</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.client.default</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultBotProperties</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParseMode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferedInputFile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">config.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">TOKEN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">database.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">async_session</span><span class="p">,</span> <span class="n">UserXEvent</span><span class="p">,</span> <span class="n">Event</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">database.req</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_all_users</span><span class="p">,</span>
+    <span class="n">get_all_users_in_event</span><span class="p">,</span>
+    <span class="n">get_all_quests</span><span class="p">,</span>
+    <span class="n">get_all_from_give_away</span><span class="p">,</span>
+    <span class="n">get_reg_users_stat</span><span class="p">,</span>
+    <span class="n">get_reg_users</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">errors.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">Error404</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">errors.handlers</span><span class="w"> </span><span class="kn">import</span> <span class="n">stat_error_handler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">handlers.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">safe_send_message</span>
+
+<span class="n">bot</span> <span class="o">=</span> <span class="n">Bot</span><span class="p">(</span>
+    <span class="n">token</span><span class="o">=</span><span class="n">TOKEN</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="n">DefaultBotProperties</span><span class="p">(</span>
+        <span class="n">parse_mode</span><span class="o">=</span><span class="n">ParseMode</span><span class="o">.</span><span class="n">HTML</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="get_stat_all">
+<a class="viewcode-back" href="../../../../handlers/admin/statistics/utils.html#handlers.admin.statistics.utils.get_stat_all">[docs]</a>
+<span class="nd">@stat_error_handler</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_stat_all</span><span class="p">(</span><span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve all users and send statistics as Excel.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): Telegram user ID to send report.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_all_users</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">users</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="s1">&#39;У вас нет подходящих пользователей((&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Get all club_events for each user</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Get all club_events where user has status &#39;been&#39;</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="n">async_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="n">select</span><span class="p">(</span>
+                        <span class="n">Event</span><span class="p">,</span>
+                        <span class="n">UserXEvent</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+                        <span class="n">UserXEvent</span><span class="o">.</span><span class="n">first_contact</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">UserXEvent</span><span class="p">,</span>
+                        <span class="n">Event</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">UserXEvent</span><span class="o">.</span><span class="n">event_name</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                        <span class="n">UserXEvent</span><span class="o">.</span><span class="n">user_id</span> <span class="o">==</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                        <span class="n">UserXEvent</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;been&#39;</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Event</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+                <span class="p">)</span>
+                <span class="n">visited_events</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+                <span class="c1"># Format visited club_events info</span>
+                <span class="n">visited_events_info</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">event</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">first_contact</span> <span class="ow">in</span> <span class="n">visited_events</span><span class="p">:</span>
+                    <span class="n">visited_events_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">desc</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">date</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">time</span><span class="si">}</span><span class="s2">)&quot;</span>
+                    <span class="p">)</span>
+
+                <span class="n">visited_events_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">visited_events_info</span><span class="p">)</span> <span class="k">if</span> <span class="n">visited_events_info</span> <span class="k">else</span> <span class="s2">&quot;Нет посещенных мероприятий&quot;</span>
+        <span class="k">except</span> <span class="n">Error404</span><span class="p">:</span>
+            <span class="n">visited_events_str</span> <span class="o">=</span> <span class="s2">&quot;Нет посещенных мероприятий&quot;</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">&quot;Handler&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">handler</span><span class="p">,</span>
+            <span class="s2">&quot;Is Superuser&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span><span class="p">,</span>
+            <span class="s2">&quot;Event Count&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">event_cnt</span><span class="p">,</span>
+            <span class="s2">&quot;Strick&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">strick</span><span class="p">,</span>
+            <span class="s2">&quot;Money&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">money</span><span class="p">,</span>
+            <span class="s2">&quot;Referral Count&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">ref_cnt</span><span class="p">,</span>
+            <span class="s2">&quot;Visited Events&quot;</span><span class="p">:</span> <span class="n">visited_events_str</span>
+        <span class="p">})</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># Adjust column widths for better readability</span>
+    <span class="k">with</span> <span class="n">BytesIO</span><span class="p">()</span> <span class="k">as</span> <span class="n">buffer</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;xlsxwriter&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s2">&quot;Users&quot;</span><span class="p">)</span>
+            <span class="n">worksheet</span> <span class="o">=</span> <span class="n">writer</span><span class="o">.</span><span class="n">sheets</span><span class="p">[</span><span class="s2">&quot;Users&quot;</span><span class="p">]</span>
+            <span class="n">worksheet</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s1">&#39;A:A&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1"># ID</span>
+            <span class="n">worksheet</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s1">&#39;B:B&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>  <span class="c1"># Handler</span>
+            <span class="n">worksheet</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s1">&#39;C:C&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>  <span class="c1"># Is Superuser</span>
+            <span class="n">worksheet</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s1">&#39;D:D&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>  <span class="c1"># Event Count</span>
+            <span class="n">worksheet</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s1">&#39;E:E&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1"># Strick</span>
+            <span class="n">worksheet</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s1">&#39;F:F&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1"># Money</span>
+            <span class="n">worksheet</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s1">&#39;G:G&#39;</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>  <span class="c1"># Referral Count</span>
+            <span class="n">worksheet</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s1">&#39;H:H&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>  <span class="c1"># Visited Events</span>
+
+        <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">temp_file</span> <span class="o">=</span> <span class="n">BufferedInputFile</span><span class="p">(</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;user_statistics.xlsx&quot;</span>
+        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_document</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">temp_file</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="get_stat_all_in_ev">
+<a class="viewcode-back" href="../../../../handlers/admin/statistics/utils.html#handlers.admin.statistics.utils.get_stat_all_in_ev">[docs]</a>
+<span class="nd">@stat_error_handler</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_stat_all_in_ev</span><span class="p">(</span><span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">event_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve users in event and send Excel plus summary.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): Telegram user ID to send report.</span>
+<span class="sd">        event_name (str): Event identifier.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_all_users_in_event</span><span class="p">(</span><span class="n">event_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">users</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="s1">&#39;У вас нет подходящих пользователей((&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cnt</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">ue</span><span class="p">,</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;User_id&#39;</span><span class="p">:</span> <span class="n">ue</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="s1">&#39;Handler&#39;</span><span class="p">:</span> <span class="n">handler</span><span class="p">,</span>
+            <span class="s1">&#39;Event_name&#39;</span><span class="p">:</span> <span class="n">ue</span><span class="o">.</span><span class="n">event_name</span><span class="p">,</span>
+            <span class="s1">&#39;Status&#39;</span><span class="p">:</span> <span class="n">ue</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="s1">&#39;First_contact&#39;</span><span class="p">:</span> <span class="n">ue</span><span class="o">.</span><span class="n">first_contact</span><span class="p">,</span>
+        <span class="p">})</span>
+        <span class="n">cnt</span><span class="p">[</span><span class="n">ue</span><span class="o">.</span><span class="n">first_contact</span><span class="p">]</span> <span class="o">=</span> <span class="n">cnt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ue</span><span class="o">.</span><span class="n">first_contact</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;С потока </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> зарегистрировалось человек: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;это </span><span class="si">{</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">% от общего трафика</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">cnt</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;Всего зарегистрировалось человек: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s1"> человек&#39;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">BytesIO</span><span class="p">()</span> <span class="k">as</span> <span class="n">buffer</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;xlsxwriter&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s2">&quot;Users&quot;</span><span class="p">)</span>
+        <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">temp_file</span> <span class="o">=</span> <span class="n">BufferedInputFile</span><span class="p">(</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;user_statistics.xlsx&quot;</span>
+        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_document</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">temp_file</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="get_stat_quest">
+<a class="viewcode-back" href="../../../../handlers/admin/statistics/utils.html#handlers.admin.statistics.utils.get_stat_quest">[docs]</a>
+<span class="nd">@stat_error_handler</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_stat_quest</span><span class="p">(</span><span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve questionnaire submissions and send as Excel.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): Telegram user ID to send report.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_all_quests</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">users</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="s1">&#39;У вас нет подходящих пользователей((&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="s2">&quot;full_name&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">full_name</span><span class="p">,</span>
+            <span class="s2">&quot;degree&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span>
+            <span class="s2">&quot;course&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">course</span><span class="p">,</span>
+            <span class="s2">&quot;program&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">program</span><span class="p">,</span>
+            <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
+            <span class="s2">&quot;vacancy&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">vacancy</span><span class="p">,</span>
+            <span class="s2">&quot;motivation&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">motivation</span><span class="p">,</span>
+            <span class="s2">&quot;plans&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">plans</span><span class="p">,</span>
+            <span class="s2">&quot;strengths&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">strengths</span><span class="p">,</span>
+            <span class="s2">&quot;career_goals&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">career_goals</span><span class="p">,</span>
+            <span class="s2">&quot;team_motivation&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">team_motivation</span><span class="p">,</span>
+            <span class="s2">&quot;role_in_team&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">role_in_team</span><span class="p">,</span>
+            <span class="s2">&quot;club_events&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">events</span><span class="p">,</span>
+            <span class="s2">&quot;found_info&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">found_info</span><span class="p">,</span>
+            <span class="s2">&quot;resume&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">resume</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">users</span>
+    <span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">BytesIO</span><span class="p">()</span> <span class="k">as</span> <span class="n">buffer</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;xlsxwriter&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s2">&quot;Users&quot;</span><span class="p">)</span>
+        <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">temp_file</span> <span class="o">=</span> <span class="n">BufferedInputFile</span><span class="p">(</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;user_statistics.xlsx&quot;</span>
+        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_document</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">temp_file</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="get_stat_ad_give_away">
+<a class="viewcode-back" href="../../../../handlers/admin/statistics/utils.html#handlers.admin.statistics.utils.get_stat_ad_give_away">[docs]</a>
+<span class="nd">@stat_error_handler</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_stat_ad_give_away</span><span class="p">(</span>
+        <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">host_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">event_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve giveaway participants and send as Excel.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): Telegram user ID to send report.</span>
+<span class="sd">        host_id (int): Host identifier.</span>
+<span class="sd">        event_name (str): Event identifier.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_all_from_give_away</span><span class="p">(</span><span class="n">host_id</span><span class="p">,</span> <span class="n">event_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">users</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="s1">&#39;У вас нет подходящих пользователей((&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="s2">&quot;Handler&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span>
+            <span class="s2">&quot;Event&quot;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">event_name</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">users</span>
+    <span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">BytesIO</span><span class="p">()</span> <span class="k">as</span> <span class="n">buffer</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;xlsxwriter&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s2">&quot;Users&quot;</span><span class="p">)</span>
+        <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">temp_file</span> <span class="o">=</span> <span class="n">BufferedInputFile</span><span class="p">(</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;user_statistics.xlsx&quot;</span>
+        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_document</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">temp_file</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="get_stat_reg_out">
+<a class="viewcode-back" href="../../../../handlers/admin/statistics/utils.html#handlers.admin.statistics.utils.get_stat_reg_out">[docs]</a>
+<span class="nd">@stat_error_handler</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_stat_reg_out</span><span class="p">(</span><span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">event_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve external registrations and send as Excel.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): Telegram user ID to send report.</span>
+<span class="sd">        event_name (str): Event identifier.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_reg_users</span><span class="p">(</span><span class="n">event_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">users</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="s1">&#39;У вас нет подходящих пользователей((&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;Id&#39;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s1">&#39;Handler&#39;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span>
+            <span class="s1">&#39;Name&#39;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s1">&#39;Surname&#39;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">surname</span><span class="p">,</span>
+            <span class="s1">&#39;Fathername&#39;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">fathername</span><span class="p">,</span>
+            <span class="s1">&#39;Mail&#39;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">mail</span><span class="p">,</span>
+            <span class="s1">&#39;Phone&#39;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">phone</span><span class="p">,</span>
+            <span class="s1">&#39;Organization&#39;</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">org</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">users</span>
+    <span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">BytesIO</span><span class="p">()</span> <span class="k">as</span> <span class="n">buffer</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;xlsxwriter&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s2">&quot;Users&quot;</span><span class="p">)</span>
+        <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">temp_file</span> <span class="o">=</span> <span class="n">BufferedInputFile</span><span class="p">(</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;user_statistics.xlsx&quot;</span>
+        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_document</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">temp_file</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="get_stat_reg">
+<a class="viewcode-back" href="../../../../handlers/admin/statistics/utils.html#handlers.admin.statistics.utils.get_stat_reg">[docs]</a>
+<span class="nd">@stat_error_handler</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_stat_reg</span><span class="p">(</span><span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">event_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve registration statistics and send Excel plus summary.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): Telegram user ID to send report.</span>
+<span class="sd">        event_name (str): Event identifier.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_reg_users_stat</span><span class="p">(</span><span class="n">event_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">users</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="s1">&#39;У вас нет подходящих пользователей((&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cnt</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">ue</span><span class="p">,</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;User_id&#39;</span><span class="p">:</span> <span class="n">ue</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span>
+            <span class="s1">&#39;Handler&#39;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span>
+            <span class="s1">&#39;Event_name&#39;</span><span class="p">:</span> <span class="n">ue</span><span class="o">.</span><span class="n">event_name</span><span class="p">,</span>
+            <span class="s1">&#39;Status&#39;</span><span class="p">:</span> <span class="n">ue</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="s1">&#39;First_contact&#39;</span><span class="p">:</span> <span class="n">ue</span><span class="o">.</span><span class="n">first_contact</span><span class="p">,</span>
+        <span class="p">})</span>
+        <span class="n">cnt</span><span class="p">[</span><span class="n">ue</span><span class="o">.</span><span class="n">first_contact</span><span class="p">]</span> <span class="o">=</span> <span class="n">cnt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ue</span><span class="o">.</span><span class="n">first_contact</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;С потока </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> зарегистрировалось человек: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;это </span><span class="si">{</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">% от общего трафика</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">cnt</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;Всего зарегистрировалось человек: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">BytesIO</span><span class="p">()</span> <span class="k">as</span> <span class="n">buffer</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;xlsxwriter&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s2">&quot;Users&quot;</span><span class="p">)</span>
+        <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">temp_file</span> <span class="o">=</span> <span class="n">BufferedInputFile</span><span class="p">(</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;user_statistics.xlsx&quot;</span>
+        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_document</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">temp_file</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, HSE IT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

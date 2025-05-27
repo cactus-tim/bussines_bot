@@ -1,0 +1,97 @@
+models
+======
+
+.. automodule:: database.models
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :exclude-members: Base,Event,EventAttendance,FaceControl,GiveAwayHost,Networking,QRCode,Questionary,RefGiveAway,RegEvent,User,UserXEvent,Vacancy
+
+.. autoclass:: database.models.Base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: database.models.Event
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: database.models.EventAttendance
+   :exclude-members: attended_at
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. py:attribute:: attended_at
+
+      Store as ISO format string
+
+.. autoclass:: database.models.FaceControl
+   :exclude-members: added_at,username,full_name
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. py:attribute:: added_at
+
+      Store as ISO format string
+
+   .. py:attribute:: username
+
+      Telegram username
+
+   .. py:attribute:: full_name
+
+      Full name from Telegram
+
+.. autoclass:: database.models.GiveAwayHost
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: database.models.Networking
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: database.models.QRCode
+   :exclude-members: created_at
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. py:attribute:: created_at
+
+      Store as ISO format string
+
+.. autoclass:: database.models.Questionary
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: database.models.RefGiveAway
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: database.models.RegEvent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: database.models.User
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: database.models.UserXEvent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: database.models.Vacancy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

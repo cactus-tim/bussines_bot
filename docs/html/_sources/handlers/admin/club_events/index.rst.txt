@@ -1,0 +1,22 @@
+club_events
+===========
+
+Admin Routers
+
+List of all routers used in admin panel routing.
+
+.. contents::
+   :local:
+   :depth: 2
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :glob:
+
+   events
+   face_control
+   give_away
+   posts
+   winner
+

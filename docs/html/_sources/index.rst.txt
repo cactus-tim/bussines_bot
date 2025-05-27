@@ -1,0 +1,20 @@
+HSE Buisness Club Telegram-bot Documentation
+============================================
+
+.. contents::
+   :local:
+   :depth: 2
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :glob:
+
+   config/index
+   database/index
+   errors/index
+   handlers/index
+   keyboards/index
+   utils/index
+   main
+

@@ -1,0 +1,8 @@
+user
+====
+
+.. automodule:: handlers.public.user
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

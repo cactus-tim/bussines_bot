@@ -1,0 +1,8 @@
+qr
+==
+
+.. automodule:: handlers.public.club_events.qr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

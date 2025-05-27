@@ -1,0 +1,8 @@
+admin_keyboards
+===============
+
+.. automodule:: keyboards.club_events.admin.admin_keyboards
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

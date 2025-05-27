@@ -1,0 +1,8 @@
+qr
+==
+
+.. automodule:: database.req.qr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

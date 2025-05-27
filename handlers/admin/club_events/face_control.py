@@ -19,7 +19,7 @@ from database.req.face_control import (
 )
 from handlers.error import safe_send_message
 from handlers.states import FaceControlState
-from keyboards.keyboards import (
+from keyboards import (
     face_control_menu_kb, back_to_face_control,
     face_controls_list, yes_no_face
 )

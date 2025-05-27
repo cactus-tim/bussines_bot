@@ -20,8 +20,8 @@ from database.req import (
 )
 from handlers.error import safe_send_message
 from handlers.states import PostState
-from keyboards.keyboards import (
-    post_ev_target, single_command_button_keyboard,
+from keyboards import (
+    post_ev_target, main_reply_keyboard,
     post_target, unreg_yes_no_link_ikb, yes_no_link_ikb, link_ikb
 )
 
@@ -192,7 +192,7 @@ async def process_post_to_all_media_unreg(message: Message, state: FSMContext):
             bot,
             message,
             text="У вас нет пользователей((",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
         return
 
@@ -244,21 +244,21 @@ async def process_post_to_all_media_unreg(message: Message, state: FSMContext):
                     chat_id=user_id,
                     photo=message.photo[-1].file_id,
                     caption=message.caption,
-                    reply_markup=reply_markup or single_command_button_keyboard()
+                    reply_markup=reply_markup or main_reply_keyboard()
                 )
             elif message.video:
                 await bot.send_video(
                     chat_id=user_id,
                     video=message.video.file_id,
                     caption=message.caption,
-                    reply_markup=reply_markup or single_command_button_keyboard()
+                    reply_markup=reply_markup or main_reply_keyboard()
                 )
             else:
                 await safe_send_message(
                     bot,
                     user_id,
                     text=message.text,
-                    reply_markup=reply_markup or single_command_button_keyboard()
+                    reply_markup=reply_markup or main_reply_keyboard()
                 )
             success_count += 1
 
@@ -375,7 +375,7 @@ async def process_post_to_all_media(message: Message, state: FSMContext):
             bot,
             message,
             text="У вас нет пользователей((",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
         return
 
@@ -429,21 +429,21 @@ async def process_post_to_all_media(message: Message, state: FSMContext):
                     chat_id=user_id,
                     photo=message.photo[-1].file_id,
                     caption=message.caption,
-                    reply_markup=reply_markup or single_command_button_keyboard()
+                    reply_markup=reply_markup or main_reply_keyboard()
                 )
             elif message.video:
                 await bot.send_video(
                     chat_id=user_id,
                     video=message.video.file_id,
                     caption=message.caption,
-                    reply_markup=reply_markup or single_command_button_keyboard()
+                    reply_markup=reply_markup or main_reply_keyboard()
                 )
             else:
                 await safe_send_message(
                     bot,
                     user_id,
                     text=message.text,
-                    reply_markup=reply_markup or single_command_button_keyboard()
+                    reply_markup=reply_markup or main_reply_keyboard()
                 )
             success_count += 1
 
@@ -552,7 +552,7 @@ async def process_post_to_all(message: Message, state: FSMContext):
             bot,
             message,
             text="У вас нет пользователей((",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
         return
 
@@ -561,10 +561,10 @@ async def process_post_to_all(message: Message, state: FSMContext):
             bot,
             user_id,
             text=message.text,
-            reply_markup=(single_command_button_keyboard() if not flag else link_ikb(text, link))
+            reply_markup=(main_reply_keyboard() if not flag else link_ikb(text, link))
         )
 
-    await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
+    await safe_send_message(bot, message, "Готово", reply_markup=main_reply_keyboard())
     await state.clear()
 
 # --------------------------------------------------------------------------------
@@ -646,7 +646,7 @@ async def process_post_to_ev_media(message: Message, state: FSMContext):
             bot,
             message,
             text="У вас нет пользователей принявших участие в этом событии",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
         return
 
@@ -692,21 +692,21 @@ async def process_post_to_ev_media(message: Message, state: FSMContext):
                     chat_id=user_id,
                     photo=message.photo[-1].file_id,
                     caption=message.caption,
-                    reply_markup=single_command_button_keyboard()
+                    reply_markup=main_reply_keyboard()
                 )
             elif message.video:
                 await bot.send_video(
                     chat_id=user_id,
                     video=message.video.file_id,
                     caption=message.caption,
-                    reply_markup=single_command_button_keyboard()
+                    reply_markup=main_reply_keyboard()
                 )
             else:
                 await safe_send_message(
                     bot,
                     user_id,
                     text=message.text,
-                    reply_markup=single_command_button_keyboard()
+                    reply_markup=main_reply_keyboard()
                 )
             success_count += 1
 
@@ -812,7 +812,7 @@ async def process_post_to_wth_op_to_ev(message: Message, state: FSMContext):
             bot,
             message,
             text="У вас нет пользователей принявших участие в этом событии",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
         return
 
@@ -824,5 +824,5 @@ async def process_post_to_wth_op_to_ev(message: Message, state: FSMContext):
             reply_markup=link_ikb('Форма обратной связи', message.text)
         )
 
-    await safe_send_message(bot, message, "Готово", reply_markup=single_command_button_keyboard())
+    await safe_send_message(bot, message, "Готово", reply_markup=main_reply_keyboard())
     await state.clear()

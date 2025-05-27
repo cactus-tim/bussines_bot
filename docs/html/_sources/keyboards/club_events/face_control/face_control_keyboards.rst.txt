@@ -1,0 +1,8 @@
+face_control_keyboards
+======================
+
+.. automodule:: keyboards.club_events.face_control.face_control_keyboards
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

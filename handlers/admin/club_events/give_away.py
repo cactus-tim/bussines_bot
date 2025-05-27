@@ -22,8 +22,8 @@ from database.req import (
 )
 from handlers.error import safe_send_message
 from handlers.states import GiveAwayState
-from keyboards.keyboards import (
-    post_ev_target, single_command_button_keyboard, get_ref_ikb
+from keyboards import (
+    post_ev_target, main_reply_keyboard, get_ref_ikb
 )
 from utils.validators import is_number_in_range
 
@@ -56,7 +56,7 @@ async def cmd_create_give_away(message: Message, state: FSMContext):
         await safe_send_message(
             bot, message,
             text="У вас нет событий",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
         await state.clear()
         return

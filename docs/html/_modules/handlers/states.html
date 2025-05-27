@@ -1,0 +1,330 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>handlers.states &mdash; HSE Buisness Club Telegram-bot v3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5773a0da"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            HSE Buisness Club Telegram-bot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../config/index.html">config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../database/index.html">database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../errors/index.html">errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../handlers/index.html">handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../keyboards/index.html">keyboards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utils/index.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../main.html">main</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">HSE Buisness Club Telegram-bot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">handlers.states</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for handlers.states</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Bot States.</span>
+<span class="sd">State machine definitions for various bot workflows and forms.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatesGroup</span><span class="p">,</span> <span class="n">State</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="Questionnaire">
+<a class="viewcode-back" href="../../handlers/states.html#handlers.states.Questionnaire">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Questionnaire</span><span class="p">(</span><span class="n">StatesGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Questionnaire form states for user registration.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">full_name</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">degree</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">course</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">program</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">vacancy</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">motivation</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">plans</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">strengths</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">career_goals</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">team_motivation</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">role_in_team</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">found_info</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">resume</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">another_vacancy</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="EventReg">
+<a class="viewcode-back" href="../../handlers/states.html#handlers.states.EventReg">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EventReg</span><span class="p">(</span><span class="n">StatesGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Event registration form states.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">waiting_name</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_surname</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_fathername</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_mail</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_phone</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_org</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="EventCreateState">
+<a class="viewcode-back" href="../../handlers/states.html#handlers.states.EventCreateState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EventCreateState</span><span class="p">(</span><span class="n">StatesGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Event creation form states.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">waiting_event_name</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_event_date</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_event_time</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_event_place</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_links_count</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="EventState">
+<a class="viewcode-back" href="../../handlers/states.html#handlers.states.EventState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EventState</span><span class="p">(</span><span class="n">StatesGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Event management states.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">waiting_ev</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_ev_for_link</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_links_count</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="VacancyState">
+<a class="viewcode-back" href="../../handlers/states.html#handlers.states.VacancyState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VacancyState</span><span class="p">(</span><span class="n">StatesGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vacancy management states.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">waiting_for_vacancy_name</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_vacancy_name_to_delete</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="PostState">
+<a class="viewcode-back" href="../../handlers/states.html#handlers.states.PostState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PostState</span><span class="p">(</span><span class="n">StatesGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Post creation and management states.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">waiting_for_post_to_all_text1</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_to_all_text05</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_to_all_text</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_to_ev_ev_unreg</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_to_all_text1_unreg</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_to_all_text05_unreg</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_to_all_text_unreg</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_to_ev_ev</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_to_ev_text</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_wth_op_to_ev_ev</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_wth_op_to_ev_text</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_to_all_media</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_to_ev_media</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_post_to_all_media_unreg</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="StatState">
+<a class="viewcode-back" href="../../handlers/states.html#handlers.states.StatState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StatState</span><span class="p">(</span><span class="n">StatesGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Statistics management states.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">waiting_for_ev</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_give_away_ev</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_user_id</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_ev1</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_for_ev2</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="WinnerState">
+<a class="viewcode-back" href="../../handlers/states.html#handlers.states.WinnerState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">WinnerState</span><span class="p">(</span><span class="n">StatesGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Winner selection states.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">wait_give_away_event</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">wait_give_away_id</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="GiveAwayState">
+<a class="viewcode-back" href="../../handlers/states.html#handlers.states.GiveAwayState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GiveAwayState</span><span class="p">(</span><span class="n">StatesGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Giveaway management states.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">waiting_event</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_org_name</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+    <span class="n">waiting_id</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="FaceControlState">
+<a class="viewcode-back" href="../../handlers/states.html#handlers.states.FaceControlState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FaceControlState</span><span class="p">(</span><span class="n">StatesGroup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;States for face control management.&quot;&quot;&quot;</span>
+    <span class="n">waiting_user_id</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>  <span class="c1"># Waiting for user ID to add/remove</span>
+    <span class="n">waiting_confirmation</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>  <span class="c1"># Waiting for confirmation to remove</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, HSE IT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

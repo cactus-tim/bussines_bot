@@ -1,0 +1,8 @@
+registration
+============
+
+.. automodule:: handlers.public.club_events.registration
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

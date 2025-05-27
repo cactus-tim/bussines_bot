@@ -1,0 +1,39 @@
+errors
+======
+
+.. automodule:: errors.errors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :exclude-members: CustomError,DatabaseConnectionError,Error404,Error409,EventNameError,VacancyNameError
+
+.. autoclass:: errors.errors.CustomError
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: errors.errors.DatabaseConnectionError
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: errors.errors.Error404
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: errors.errors.Error409
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: errors.errors.EventNameError
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: errors.errors.VacancyNameError
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

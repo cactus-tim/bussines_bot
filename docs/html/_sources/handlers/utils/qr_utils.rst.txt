@@ -1,0 +1,8 @@
+qr_utils
+========
+
+.. automodule:: handlers.utils.qr_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

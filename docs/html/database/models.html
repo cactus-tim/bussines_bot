@@ -1,0 +1,809 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>models &mdash; HSE Buisness Club Telegram-bot v3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5773a0da"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="errors" href="../errors/index.html" />
+    <link rel="prev" title="vacancy" href="req/vacancy.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            HSE Buisness Club Telegram-bot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../config/index.html">config</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">database</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="req/index.html">req</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../errors/index.html">errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../handlers/index.html">handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../keyboards/index.html">keyboards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/index.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../main.html">main</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">HSE Buisness Club Telegram-bot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">database</a></li>
+      <li class="breadcrumb-item active">models</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/database/models.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-database.models">
+<span id="models"></span><h1>models<a class="headerlink" href="#module-database.models" title="Link to this heading"></a></h1>
+<p>Database Models
+SQLAlchemy models for users, club_events, vacancies, and registrations.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="database.models.async_main">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">async_main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#async_main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.async_main" title="Link to this definition"></a></dt>
+<dd><p>Initialize database schema.</p>
+<p>Connects to the database and creates all tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.Base">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#Base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Base" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AsyncAttrs</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DeclarativeBase</span></code></p>
+<p>Base class for SQLAlchemy models.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Base.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">MetaData</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">MetaData()</span></em><a class="headerlink" href="#database.models.Base.metadata" title="Link to this definition"></a></dt>
+<dd><p>Refers to the <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection that will be used
+for new <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.Table</span></code> objects.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><span class="xref std std-ref">orm_declarative_metadata</span></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Base.registry">
+<span class="sig-name descname"><span class="pre">registry</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">_RegistryType</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;sqlalchemy.orm.decl_api.registry</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#database.models.Base.registry" title="Link to this definition"></a></dt>
+<dd><p>Refers to the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> in use where new
+<code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.Mapper</span></code> objects will be associated.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.Event">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">Event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#Event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Event" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Event model representing a bot event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Event name.</p></li>
+<li><p><strong>desc</strong> (<em>str</em>) – Event description.</p></li>
+<li><p><strong>date</strong> (<em>str</em>) – Event date.</p></li>
+<li><p><strong>status</strong> (<em>str</em>) – Event status.</p></li>
+<li><p><strong>time</strong> (<em>str</em>) – Event time.</p></li>
+<li><p><strong>place</strong> (<em>str</em>) – Event location.</p></li>
+<li><p><strong>winner</strong> (<em>BigInteger</em>) – Winner user ID.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy event model instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.Event" title="database.models.Event">Event</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Event.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#database.models.Event.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Event.desc">
+<span class="sig-name descname"><span class="pre">desc</span></span><a class="headerlink" href="#database.models.Event.desc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Event.date">
+<span class="sig-name descname"><span class="pre">date</span></span><a class="headerlink" href="#database.models.Event.date" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Event.status">
+<span class="sig-name descname"><span class="pre">status</span></span><a class="headerlink" href="#database.models.Event.status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Event.time">
+<span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#database.models.Event.time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Event.place">
+<span class="sig-name descname"><span class="pre">place</span></span><a class="headerlink" href="#database.models.Event.place" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Event.winner">
+<span class="sig-name descname"><span class="pre">winner</span></span><a class="headerlink" href="#database.models.Event.winner" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.EventAttendance">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">EventAttendance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#EventAttendance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.EventAttendance" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>EventAttendance model for tracking user attendance at club_events.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>Integer</em>) – Primary key.</p></li>
+<li><p><strong>user_id</strong> (<em>BigInteger</em>) – Foreign key to user.</p></li>
+<li><p><strong>event_name</strong> (<em>String</em>) – Foreign key to event.</p></li>
+<li><p><strong>attended_at</strong> (<em>String</em>) – Timestamp of attendance.</p></li>
+<li><p><strong>verified_by</strong> (<em>BigInteger</em>) – Foreign key to user (superuser who verified).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy attendance model instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.EventAttendance" title="database.models.EventAttendance">EventAttendance</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.EventAttendance.attended_at">
+<span class="sig-name descname"><span class="pre">attended_at</span></span><a class="headerlink" href="#database.models.EventAttendance.attended_at" title="Link to this definition"></a></dt>
+<dd><p>Store as ISO format string</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.EventAttendance.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#database.models.EventAttendance.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.EventAttendance.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#database.models.EventAttendance.user_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.EventAttendance.event_name">
+<span class="sig-name descname"><span class="pre">event_name</span></span><a class="headerlink" href="#database.models.EventAttendance.event_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.EventAttendance.verified_by">
+<span class="sig-name descname"><span class="pre">verified_by</span></span><a class="headerlink" href="#database.models.EventAttendance.verified_by" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.FaceControl">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">FaceControl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#FaceControl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.FaceControl" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>FaceControl model for storing face control users who can verify QR codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>Integer</em>) – Primary key.</p></li>
+<li><p><strong>user_id</strong> (<em>BigInteger</em>) – Foreign key to user who has face control permissions.</p></li>
+<li><p><strong>added_by</strong> (<em>BigInteger</em>) – Foreign key to user (admin) who granted the permission.</p></li>
+<li><p><strong>added_at</strong> (<em>String</em>) – Timestamp when permission was granted.</p></li>
+<li><p><strong>username</strong> (<em>String</em>) – Telegram username of the face control user.</p></li>
+<li><p><strong>full_name</strong> (<em>String</em>) – Full name of the face control user.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy face control model instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.FaceControl" title="database.models.FaceControl">FaceControl</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.FaceControl.added_at">
+<span class="sig-name descname"><span class="pre">added_at</span></span><a class="headerlink" href="#database.models.FaceControl.added_at" title="Link to this definition"></a></dt>
+<dd><p>Store as ISO format string</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.FaceControl.username">
+<span class="sig-name descname"><span class="pre">username</span></span><a class="headerlink" href="#database.models.FaceControl.username" title="Link to this definition"></a></dt>
+<dd><p>Telegram username</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.FaceControl.full_name">
+<span class="sig-name descname"><span class="pre">full_name</span></span><a class="headerlink" href="#database.models.FaceControl.full_name" title="Link to this definition"></a></dt>
+<dd><p>Full name from Telegram</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.FaceControl.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#database.models.FaceControl.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.FaceControl.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#database.models.FaceControl.user_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.FaceControl.added_by">
+<span class="sig-name descname"><span class="pre">added_by</span></span><a class="headerlink" href="#database.models.FaceControl.added_by" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.GiveAwayHost">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">GiveAwayHost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#GiveAwayHost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.GiveAwayHost" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>GiveAwayHost model representing event hosts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user_id</strong> (<em>BigInteger</em>) – Host user ID.</p></li>
+<li><p><strong>event_name</strong> (<em>str</em>) – Event name.</p></li>
+<li><p><strong>org_name</strong> (<em>str</em>) – Organization name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy host model instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.GiveAwayHost" title="database.models.GiveAwayHost">GiveAwayHost</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.GiveAwayHost.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#database.models.GiveAwayHost.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.GiveAwayHost.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#database.models.GiveAwayHost.user_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.GiveAwayHost.event_name">
+<span class="sig-name descname"><span class="pre">event_name</span></span><a class="headerlink" href="#database.models.GiveAwayHost.event_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.GiveAwayHost.org_name">
+<span class="sig-name descname"><span class="pre">org_name</span></span><a class="headerlink" href="#database.models.GiveAwayHost.org_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.Networking">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">Networking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#Networking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Networking" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Networking model placeholder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>id</strong> (<em>BigInteger</em>) – Primary key.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy networking model instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.Networking" title="database.models.Networking">Networking</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Networking.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#database.models.Networking.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.QRCode">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">QRCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#QRCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.QRCode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>QRCode model for storing QR code data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>Integer</em>) – Primary key.</p></li>
+<li><p><strong>user_id</strong> (<em>BigInteger</em>) – Foreign key to user.</p></li>
+<li><p><strong>event_name</strong> (<em>String</em>) – Foreign key to event.</p></li>
+<li><p><strong>created_at</strong> (<em>String</em>) – Timestamp of creation.</p></li>
+<li><p><strong>is_used</strong> (<em>Boolean</em>) – Whether the QR code has been used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy QR code model instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.QRCode" title="database.models.QRCode">QRCode</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.QRCode.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#database.models.QRCode.created_at" title="Link to this definition"></a></dt>
+<dd><p>Store as ISO format string</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.QRCode.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#database.models.QRCode.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.QRCode.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#database.models.QRCode.user_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.QRCode.event_name">
+<span class="sig-name descname"><span class="pre">event_name</span></span><a class="headerlink" href="#database.models.QRCode.event_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.QRCode.is_used">
+<span class="sig-name descname"><span class="pre">is_used</span></span><a class="headerlink" href="#database.models.QRCode.is_used" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.Questionary">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">Questionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#Questionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Questionary" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Questionary model storing user’s application info.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user_id</strong> (<em>BigInteger</em>) – Foreign key to user.</p></li>
+<li><p><strong>full_name</strong> (<em>str</em>) – Full name.</p></li>
+<li><p><strong>degree</strong> (<em>str</em>) – Academic degree.</p></li>
+<li><p><strong>course</strong> (<em>str</em>) – Study course.</p></li>
+<li><p><strong>program</strong> (<em>str</em>) – Study program.</p></li>
+<li><p><strong>email</strong> (<em>str</em>) – Email address.</p></li>
+<li><p><strong>vacancy</strong> (<em>str</em>) – Vacancy applied for.</p></li>
+<li><p><strong>motivation</strong> (<em>str</em>) – Motivation text.</p></li>
+<li><p><strong>plans</strong> (<em>str</em>) – Future plans.</p></li>
+<li><p><strong>strengths</strong> (<em>str</em>) – User strengths.</p></li>
+<li><p><strong>career_goals</strong> (<em>str</em>) – Career goals.</p></li>
+<li><p><strong>team_motivation</strong> (<em>str</em>) – Team motivation.</p></li>
+<li><p><strong>role_in_team</strong> (<em>str</em>) – Role in a team.</p></li>
+<li><p><strong>events</strong> (<em>str</em>) – Events attended.</p></li>
+<li><p><strong>found_info</strong> (<em>str</em>) – How user found out.</p></li>
+<li><p><strong>resume</strong> (<em>str</em>) – Resume link or text.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy questionary model instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.Questionary" title="database.models.Questionary">Questionary</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#database.models.Questionary.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#database.models.Questionary.user_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.full_name">
+<span class="sig-name descname"><span class="pre">full_name</span></span><a class="headerlink" href="#database.models.Questionary.full_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.degree">
+<span class="sig-name descname"><span class="pre">degree</span></span><a class="headerlink" href="#database.models.Questionary.degree" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.course">
+<span class="sig-name descname"><span class="pre">course</span></span><a class="headerlink" href="#database.models.Questionary.course" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.program">
+<span class="sig-name descname"><span class="pre">program</span></span><a class="headerlink" href="#database.models.Questionary.program" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.email">
+<span class="sig-name descname"><span class="pre">email</span></span><a class="headerlink" href="#database.models.Questionary.email" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.vacancy">
+<span class="sig-name descname"><span class="pre">vacancy</span></span><a class="headerlink" href="#database.models.Questionary.vacancy" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.motivation">
+<span class="sig-name descname"><span class="pre">motivation</span></span><a class="headerlink" href="#database.models.Questionary.motivation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.plans">
+<span class="sig-name descname"><span class="pre">plans</span></span><a class="headerlink" href="#database.models.Questionary.plans" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.strengths">
+<span class="sig-name descname"><span class="pre">strengths</span></span><a class="headerlink" href="#database.models.Questionary.strengths" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.career_goals">
+<span class="sig-name descname"><span class="pre">career_goals</span></span><a class="headerlink" href="#database.models.Questionary.career_goals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.team_motivation">
+<span class="sig-name descname"><span class="pre">team_motivation</span></span><a class="headerlink" href="#database.models.Questionary.team_motivation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.role_in_team">
+<span class="sig-name descname"><span class="pre">role_in_team</span></span><a class="headerlink" href="#database.models.Questionary.role_in_team" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.events">
+<span class="sig-name descname"><span class="pre">events</span></span><a class="headerlink" href="#database.models.Questionary.events" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.found_info">
+<span class="sig-name descname"><span class="pre">found_info</span></span><a class="headerlink" href="#database.models.Questionary.found_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Questionary.resume">
+<span class="sig-name descname"><span class="pre">resume</span></span><a class="headerlink" href="#database.models.Questionary.resume" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.RefGiveAway">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">RefGiveAway</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#RefGiveAway"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.RefGiveAway" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>RefGiveAway model for referrals in giveaways.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user_id</strong> (<em>BigInteger</em>) – User ID.</p></li>
+<li><p><strong>event_name</strong> (<em>str</em>) – Event name.</p></li>
+<li><p><strong>host_id</strong> (<em>BigInteger</em>) – Host user ID.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy referral model instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.RefGiveAway" title="database.models.RefGiveAway">RefGiveAway</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.RefGiveAway.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#database.models.RefGiveAway.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.RefGiveAway.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#database.models.RefGiveAway.user_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.RefGiveAway.event_name">
+<span class="sig-name descname"><span class="pre">event_name</span></span><a class="headerlink" href="#database.models.RefGiveAway.event_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.RefGiveAway.host_id">
+<span class="sig-name descname"><span class="pre">host_id</span></span><a class="headerlink" href="#database.models.RefGiveAway.host_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.RegEvent">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">RegEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#RegEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.RegEvent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>RegEvent model for generic event registrations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>BigInteger</em>) – Primary key.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – First name.</p></li>
+<li><p><strong>surname</strong> (<em>str</em>) – Surname.</p></li>
+<li><p><strong>fathername</strong> (<em>str</em>) – Middle name.</p></li>
+<li><p><strong>mail</strong> (<em>str</em>) – Email address.</p></li>
+<li><p><strong>phone</strong> (<em>str</em>) – Phone number.</p></li>
+<li><p><strong>org</strong> (<em>str</em>) – Organization name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy registration model instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.RegEvent" title="database.models.RegEvent">RegEvent</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.RegEvent.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#database.models.RegEvent.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.RegEvent.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#database.models.RegEvent.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.RegEvent.surname">
+<span class="sig-name descname"><span class="pre">surname</span></span><a class="headerlink" href="#database.models.RegEvent.surname" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.RegEvent.fathername">
+<span class="sig-name descname"><span class="pre">fathername</span></span><a class="headerlink" href="#database.models.RegEvent.fathername" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.RegEvent.mail">
+<span class="sig-name descname"><span class="pre">mail</span></span><a class="headerlink" href="#database.models.RegEvent.mail" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.RegEvent.phone">
+<span class="sig-name descname"><span class="pre">phone</span></span><a class="headerlink" href="#database.models.RegEvent.phone" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.RegEvent.org">
+<span class="sig-name descname"><span class="pre">org</span></span><a class="headerlink" href="#database.models.RegEvent.org" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.User">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">User</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#User"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.User" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>User model representing a bot user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>BigInteger</em>) – Primary key.</p></li>
+<li><p><strong>handler</strong> (<em>str</em>) – User’s handler.</p></li>
+<li><p><strong>is_superuser</strong> (<em>bool</em>) – Indicates superuser status.</p></li>
+<li><p><strong>event_cnt</strong> (<em>int</em>) – Number of club_events the user has.</p></li>
+<li><p><strong>strick</strong> (<em>int</em>) – User’s streak.</p></li>
+<li><p><strong>first_contact</strong> (<em>str</em>) – First contact value.</p></li>
+<li><p><strong>money</strong> (<em>int</em>) – Amount of money.</p></li>
+<li><p><strong>ref_cnt</strong> (<em>int</em>) – Referral count.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy user model instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.User" title="database.models.User">User</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.User.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#database.models.User.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.User.handler">
+<span class="sig-name descname"><span class="pre">handler</span></span><a class="headerlink" href="#database.models.User.handler" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.User.is_superuser">
+<span class="sig-name descname"><span class="pre">is_superuser</span></span><a class="headerlink" href="#database.models.User.is_superuser" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.User.event_cnt">
+<span class="sig-name descname"><span class="pre">event_cnt</span></span><a class="headerlink" href="#database.models.User.event_cnt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.User.strick">
+<span class="sig-name descname"><span class="pre">strick</span></span><a class="headerlink" href="#database.models.User.strick" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.User.first_contact">
+<span class="sig-name descname"><span class="pre">first_contact</span></span><a class="headerlink" href="#database.models.User.first_contact" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.User.money">
+<span class="sig-name descname"><span class="pre">money</span></span><a class="headerlink" href="#database.models.User.money" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.User.ref_cnt">
+<span class="sig-name descname"><span class="pre">ref_cnt</span></span><a class="headerlink" href="#database.models.User.ref_cnt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.UserXEvent">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">UserXEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#UserXEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.UserXEvent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>UserXEvent model representing user registration to an event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user_id</strong> (<em>BigInteger</em>) – Foreign key to user.</p></li>
+<li><p><strong>event_name</strong> (<em>str</em>) – Foreign key to event.</p></li>
+<li><p><strong>status</strong> (<em>str</em>) – Registration status.</p></li>
+<li><p><strong>first_contact</strong> (<em>str</em>) – First contact value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy user-event relation model.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.UserXEvent" title="database.models.UserXEvent">UserXEvent</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.UserXEvent.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#database.models.UserXEvent.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.UserXEvent.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#database.models.UserXEvent.user_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.UserXEvent.event_name">
+<span class="sig-name descname"><span class="pre">event_name</span></span><a class="headerlink" href="#database.models.UserXEvent.event_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.UserXEvent.status">
+<span class="sig-name descname"><span class="pre">status</span></span><a class="headerlink" href="#database.models.UserXEvent.status" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.UserXEvent.first_contact">
+<span class="sig-name descname"><span class="pre">first_contact</span></span><a class="headerlink" href="#database.models.UserXEvent.first_contact" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.Vacancy">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">Vacancy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database/models.html#Vacancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Vacancy" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#database.models.Base" title="database.models.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Vacancy model representing available positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name of the vacancy.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SQLAlchemy vacancy model instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#database.models.Vacancy" title="database.models.Vacancy">Vacancy</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Vacancy.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#database.models.Vacancy.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="req/vacancy.html" class="btn btn-neutral float-left" title="vacancy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../errors/index.html" class="btn btn-neutral float-right" title="errors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, HSE IT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

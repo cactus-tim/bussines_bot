@@ -1,0 +1,8 @@
+events
+======
+
+.. automodule:: handlers.admin.club_events.events
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

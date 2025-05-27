@@ -1,0 +1,8 @@
+user_x_event
+============
+
+.. automodule:: database.req.user_x_event
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

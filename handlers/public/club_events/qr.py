@@ -26,7 +26,7 @@ from database.req import (
 from database.req.face_control import get_face_control
 from handlers.error import safe_send_message
 from handlers.utils.qr_utils import create_styled_qr_code
-from keyboards.keyboards import face_checkout_kb, single_command_button_keyboard
+from keyboards import face_checkout_kb, main_reply_keyboard
 from utils.validators import is_valid_time_format
 
 # --------------------------------------------------------------------------------
@@ -436,14 +436,14 @@ async def send_event_qr_code(
             await message.message.answer_photo(
                 photo=qr_bytes,
                 caption=f"Ваш QR-код для мероприятия {event_name}",
-                reply_markup=single_command_button_keyboard()
+                reply_markup=main_reply_keyboard()
             )
             await message.answer()
         else:
             await message.answer_photo(
                 photo=qr_bytes,
                 caption=f"Ваш QR-код для мероприятия {event_name}",
-                reply_markup=single_command_button_keyboard()
+                reply_markup=main_reply_keyboard()
             )
 
         await state.clear()

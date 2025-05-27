@@ -1,0 +1,8 @@
+face_control
+============
+
+.. automodule:: handlers.public.club_events.face_control
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

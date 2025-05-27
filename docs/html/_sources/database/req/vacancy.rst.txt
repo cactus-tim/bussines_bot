@@ -1,0 +1,8 @@
+vacancy
+=======
+
+.. automodule:: database.req.vacancy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

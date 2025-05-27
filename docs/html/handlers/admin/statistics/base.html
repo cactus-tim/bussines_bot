@@ -1,0 +1,285 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>base &mdash; HSE Buisness Club Telegram-bot v3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5773a0da"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="utils" href="utils.html" />
+    <link rel="prev" title="statistics" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            HSE Buisness Club Telegram-bot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../config/index.html">config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../database/index.html">database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../errors/index.html">errors</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">handlers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">admin</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../club_events/index.html">club_events</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">statistics</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html">utils</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vacancies.html">vacancies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../public/index.html">public</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utils/index.html">utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../error.html">error</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../states.html">states</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../keyboards/index.html">keyboards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utils/index.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../main.html">main</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">HSE Buisness Club Telegram-bot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">handlers</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">admin</a></li>
+          <li class="breadcrumb-item"><a href="index.html">statistics</a></li>
+      <li class="breadcrumb-item active">base</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/handlers/admin/statistics/base.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-handlers.admin.statistics.base">
+<span id="base"></span><h1>base<a class="headerlink" href="#module-handlers.admin.statistics.base" title="Link to this heading"></a></h1>
+<p>Statistics Handlers</p>
+<p>Handlers for sending various types of statistics to superusers.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="handlers.admin.statistics.base.cmd_send_stat">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.admin.statistics.base.</span></span><span class="sig-name descname"><span class="pre">cmd_send_stat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/handlers/admin/statistics/base.html#cmd_send_stat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.admin.statistics.base.cmd_send_stat" title="Link to this definition"></a></dt>
+<dd><p>Send the initial statistics selection menu to the superuser.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>Message</em>) – Incoming message from the user.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="handlers.admin.statistics.base.cmd_stat_all">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.admin.statistics.base.</span></span><span class="sig-name descname"><span class="pre">cmd_stat_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CallbackQuery</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/handlers/admin/statistics/base.html#cmd_stat_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.admin.statistics.base.cmd_stat_all" title="Link to this definition"></a></dt>
+<dd><p>Send overall statistics to the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>callback</strong> (<em>CallbackQuery</em>) – Incoming callback from button press.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="handlers.admin.statistics.base.process_post_to_all">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.admin.statistics.base.</span></span><span class="sig-name descname"><span class="pre">process_post_to_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FSMContext</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/handlers/admin/statistics/base.html#process_post_to_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.admin.statistics.base.process_post_to_all" title="Link to this definition"></a></dt>
+<dd><p>Handle event selection for statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>Message</em>) – Incoming message with event name.</p></li>
+<li><p><strong>state</strong> (<em>FSMContext</em>) – Current FSM context.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="handlers.admin.statistics.base.cmd_stat_ev">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.admin.statistics.base.</span></span><span class="sig-name descname"><span class="pre">cmd_stat_ev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CallbackQuery</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/handlers/admin/statistics/base.html#cmd_stat_ev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.admin.statistics.base.cmd_stat_ev" title="Link to this definition"></a></dt>
+<dd><p>Send statistics on questions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>callback</strong> (<em>CallbackQuery</em>) – Incoming callback from button press.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="handlers.admin.statistics.base.cmd_stat_give_away">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.admin.statistics.base.</span></span><span class="sig-name descname"><span class="pre">cmd_stat_give_away</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CallbackQuery</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FSMContext</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/handlers/admin/statistics/base.html#cmd_stat_give_away"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.admin.statistics.base.cmd_stat_give_away" title="Link to this definition"></a></dt>
+<dd><p>Start additional giveaway statistics process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>callback</strong> (<em>CallbackQuery</em>) – Incoming callback from button press.</p></li>
+<li><p><strong>state</strong> (<em>FSMContext</em>) – Current FSM context.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="handlers.admin.statistics.base.cmd_stat_give_away2">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.admin.statistics.base.</span></span><span class="sig-name descname"><span class="pre">cmd_stat_give_away2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FSMContext</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/handlers/admin/statistics/base.html#cmd_stat_give_away2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.admin.statistics.base.cmd_stat_give_away2" title="Link to this definition"></a></dt>
+<dd><p>Handle event name for giveaway statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>Message</em>) – Message containing event name or ‘quit’.</p></li>
+<li><p><strong>state</strong> (<em>FSMContext</em>) – Current FSM context.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="handlers.admin.statistics.base.cmd_stat_give_away3">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.admin.statistics.base.</span></span><span class="sig-name descname"><span class="pre">cmd_stat_give_away3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FSMContext</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/handlers/admin/statistics/base.html#cmd_stat_give_away3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.admin.statistics.base.cmd_stat_give_away3" title="Link to this definition"></a></dt>
+<dd><p>Handle organizer ID for giveaway statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>Message</em>) – Message containing user ID or ‘quit’.</p></li>
+<li><p><strong>state</strong> (<em>FSMContext</em>) – Current FSM context.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="handlers.admin.statistics.base.cmd_stat_reg">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.admin.statistics.base.</span></span><span class="sig-name descname"><span class="pre">cmd_stat_reg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CallbackQuery</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FSMContext</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/handlers/admin/statistics/base.html#cmd_stat_reg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.admin.statistics.base.cmd_stat_reg" title="Link to this definition"></a></dt>
+<dd><p>Start process for registration statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>callback</strong> (<em>CallbackQuery</em>) – Incoming callback from button press.</p></li>
+<li><p><strong>state</strong> (<em>FSMContext</em>) – Current FSM context.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="handlers.admin.statistics.base.cmd_stat_reg2">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.admin.statistics.base.</span></span><span class="sig-name descname"><span class="pre">cmd_stat_reg2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FSMContext</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/handlers/admin/statistics/base.html#cmd_stat_reg2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.admin.statistics.base.cmd_stat_reg2" title="Link to this definition"></a></dt>
+<dd><p>Handle event name for registration statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>Message</em>) – Message with event name.</p></li>
+<li><p><strong>state</strong> (<em>FSMContext</em>) – Current FSM context.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="statistics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils.html" class="btn btn-neutral float-right" title="utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, HSE IT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

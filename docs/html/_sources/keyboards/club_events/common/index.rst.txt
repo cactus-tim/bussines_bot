@@ -1,0 +1,17 @@
+common
+======
+
+Common keyboard layouts.
+
+.. contents::
+   :local:
+   :depth: 2
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :glob:
+
+   common_keyboards
+   utils
+

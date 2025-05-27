@@ -1,0 +1,8 @@
+error
+=====
+
+.. automodule:: handlers.error
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

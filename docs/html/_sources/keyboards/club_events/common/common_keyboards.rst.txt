@@ -1,0 +1,8 @@
+common_keyboards
+================
+
+.. automodule:: keyboards.club_events.common.common_keyboards
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

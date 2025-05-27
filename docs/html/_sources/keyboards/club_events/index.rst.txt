@@ -1,0 +1,17 @@
+club_events
+===========
+
+.. contents::
+   :local:
+   :depth: 2
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :glob:
+
+   admin/index
+   common/index
+   event/index
+   face_control/index
+

@@ -9,17 +9,16 @@ from aiogram import Router, F, Bot
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message
 
 from config.settings import TOKEN
 from config.texts.commands import INFO_ADMIN, INFO_USER
 from database.req import (
-    get_user, get_all_user_events, get_user_rank_by_money,
-    get_top_10_users_by_money, get_event
+    get_user, get_user_rank_by_money,
+    get_top_10_users_by_money
 )
 from handlers.error import safe_send_message
-from handlers.utils.base import get_bot_username
-from keyboards.keyboards import single_command_button_keyboard, events_ikb, top_ikb
+from keyboards import main_reply_keyboard, top_ikb
 
 # --------------------------------------------------------------------------------
 
@@ -50,7 +49,7 @@ async def cmd_info(message: Message):
         await safe_send_message(
             bot, message,
             text=INFO_ADMIN,
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
     else:
         await safe_send_message(bot, message, text=INFO_USER)

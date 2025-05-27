@@ -1,0 +1,17 @@
+months
+======
+
+.. automodule:: config.texts.months
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Constants
+---------
+
+.. py:data:: MONTHS
+
+
+.. py:data:: MONTH_MAP
+
+

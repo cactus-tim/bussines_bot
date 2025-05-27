@@ -1,0 +1,17 @@
+admin
+=====
+
+.. automodule:: config.texts.admin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Constants
+---------
+
+.. py:data:: EVENT_END_FEEDBACK
+
+
+.. py:data:: THEMES
+
+

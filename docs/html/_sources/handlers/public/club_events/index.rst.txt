@@ -1,0 +1,20 @@
+club_events
+===========
+
+Public Routers List
+Imports and aggregates all public routers for registration.
+
+.. contents::
+   :local:
+   :depth: 2
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :glob:
+
+   face_control
+   qr
+   ref
+   registration
+

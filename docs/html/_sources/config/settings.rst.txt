@@ -1,0 +1,27 @@
+settings
+========
+
+.. automodule:: config.settings
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Constants
+---------
+
+.. py:data:: TOKEN
+
+
+.. py:data:: ENV
+
+   Default to development if not set
+
+.. py:data:: NETWORKING_THEMES
+
+
+.. py:data:: LOG_LEVEL
+
+
+.. py:data:: LOG_FORMAT
+
+

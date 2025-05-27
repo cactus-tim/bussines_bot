@@ -1,0 +1,991 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>handlers.admin.club_events.posts &mdash; HSE Buisness Club Telegram-bot v3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/togglebutton.css?v=13237357" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5773a0da"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../../../../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            HSE Buisness Club Telegram-bot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../config/index.html">config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../database/index.html">database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../errors/index.html">errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../handlers/index.html">handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../keyboards/index.html">keyboards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../utils/index.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../main.html">main</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">HSE Buisness Club Telegram-bot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">handlers.admin.club_events.posts</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for handlers.admin.club_events.posts</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Send Post Router</span>
+<span class="sd">Handles admin post distribution to Telegram users.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">Router</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Bot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.client.default</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultBotProperties</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParseMode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSMContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span><span class="p">,</span> <span class="n">CallbackQuery</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">config.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">TOKEN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">config.texts.admin</span><span class="w"> </span><span class="kn">import</span> <span class="n">EVENT_END_FEEDBACK</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">database.req</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_user</span><span class="p">,</span> <span class="n">get_all_events</span><span class="p">,</span> <span class="n">get_users_tg_id_in_event</span><span class="p">,</span>
+    <span class="n">get_users_unreg_tg_id</span><span class="p">,</span> <span class="n">get_users_tg_id</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">handlers.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">safe_send_message</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">handlers.states</span><span class="w"> </span><span class="kn">import</span> <span class="n">PostState</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">keyboards</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">post_ev_target</span><span class="p">,</span> <span class="n">main_reply_keyboard</span><span class="p">,</span>
+    <span class="n">post_target</span><span class="p">,</span> <span class="n">unreg_yes_no_link_ikb</span><span class="p">,</span> <span class="n">yes_no_link_ikb</span><span class="p">,</span> <span class="n">link_ikb</span>
+<span class="p">)</span>
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">Router</span><span class="p">()</span>
+<span class="n">bot</span> <span class="o">=</span> <span class="n">Bot</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">TOKEN</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">DefaultBotProperties</span><span class="p">(</span><span class="n">parse_mode</span><span class="o">=</span><span class="n">ParseMode</span><span class="o">.</span><span class="n">HTML</span><span class="p">))</span>
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="cmd_send_post">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.cmd_send_post">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Command</span><span class="p">(</span><span class="s2">&quot;send_post&quot;</span><span class="p">))</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cmd_send_post</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Entry point to start the post sending process.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Message): Incoming message from admin.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_user</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Выберете кому вы хотите отправить пост&quot;</span><span class="p">,</span>
+        <span class="n">reply_markup</span><span class="o">=</span><span class="n">post_target</span><span class="p">()</span>
+    <span class="p">)</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="cancel">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.cancel">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;cancel&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cancel</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cancels current FSM context and deletes previous messages.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        callback (CallbackQuery): Callback query from user.</span>
+<span class="sd">        state (FSMContext): Current FSM context.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">delete_message</span><span class="p">(</span><span class="n">callback</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">message_id</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">delete_message</span><span class="p">(</span><span class="n">callback</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">message_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="k">return</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="choose_event">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.choose_event">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;post_to_unreg&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">choose_event</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Starts process of choosing an event for unregistered users.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        callback (CallbackQuery): Callback query from user.</span>
+<span class="sd">        state (FSMContext): FSM context to store selected event.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_all_events</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">events</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;У вас нет событий&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Выберете событие:</span><span class="se">\n\n</span><span class="s2">Для отмены введите quit&quot;</span><span class="p">,</span>
+        <span class="n">reply_markup</span><span class="o">=</span><span class="n">post_ev_target</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_ev_ev_unreg</span><span class="p">)</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="mb_add_link_unreg">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.mb_add_link_unreg">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_ev_ev_unreg</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mb_add_link_unreg</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Asks whether to add a link to the post.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Message): Incoming message with event name.</span>
+<span class="sd">        state (FSMContext): FSM context to store event name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">update_data</span><span class="p">({</span><span class="s1">&#39;event_name&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="s2">&quot;Хочешь добавить к посту кнопку с ссылкой?&quot;</span><span class="p">,</span>
+        <span class="n">unreg_yes_no_link_ikb</span><span class="p">()</span>
+    <span class="p">)</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="link_no_unreg">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.link_no_unreg">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;unreg_link_no&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">link_no_unreg</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Continues posting without link.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        callback (CallbackQuery): Callback query from user.</span>
+<span class="sd">        state (FSMContext): FSM context to update flag.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">update_data</span><span class="p">({</span><span class="s1">&#39;flag&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Отправьте мне пост (текст, фото или видео)</span><span class="se">\n\n</span><span class="s2">Для отмены введите quit&quot;</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_all_media_unreg</span><span class="p">)</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="link_yes_unreg">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.link_yes_unreg">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;unreg_link_yes&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">link_yes_unreg</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prompts user to send a link.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        callback (CallbackQuery): Callback query from user.</span>
+<span class="sd">        state (FSMContext): FSM context to transition.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Отправь мне ссылку</span><span class="se">\n\n</span><span class="s2">Для отмены введите quit&quot;</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_all_text05_unreg</span><span class="p">)</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="process_post_to_all_media_unreg">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.process_post_to_all_media_unreg">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_all_media_unreg</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_post_to_all_media_unreg</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Processes and sends post to unregistered users.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Message): Message containing post content.</span>
+<span class="sd">        state (FSMContext): FSM context with event and post data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span> <span class="ow">and</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;quit&#39;</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="s1">&#39;Вы вышли&#39;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">event_name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;event_name&#39;</span><span class="p">)</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;flag&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">user_ids</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_users_unreg_tg_id</span><span class="p">(</span><span class="n">event_name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_ids</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span>
+            <span class="n">message</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;У вас нет пользователей((&quot;</span><span class="p">,</span>
+            <span class="n">reply_markup</span><span class="o">=</span><span class="n">main_reply_keyboard</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">status_message</span> <span class="o">=</span> <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;🚀 Начинаю рассылку для незарегистрированных пользователей события </span><span class="si">{</span><span class="n">event_name</span><span class="si">}</span><span class="s2">...</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Всего получателей: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">user_ids</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">Отправлено: 0</span><span class="se">\n</span><span class="s2">Ошибок: 0&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">reply_markup</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">flag</span><span class="p">:</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;link&#39;</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+        <span class="n">reply_markup</span> <span class="o">=</span> <span class="n">link_ikb</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">link</span><span class="p">)</span>
+
+    <span class="n">failed_users</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">success_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_ids</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_status</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates or replaces status message.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): Text to display in the status message.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">nonlocal</span> <span class="n">status_message</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">edit_message_text</span><span class="p">(</span>
+                <span class="n">chat_id</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">message_id</span><span class="o">=</span><span class="n">status_message</span><span class="o">.</span><span class="n">message_id</span><span class="p">,</span>
+                <span class="n">text</span><span class="o">=</span><span class="n">text</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">delete_message</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">status_message</span><span class="o">.</span><span class="n">message_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">status_message</span> <span class="o">=</span> <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">user_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">user_ids</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">photo</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_photo</span><span class="p">(</span>
+                    <span class="n">chat_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+                    <span class="n">photo</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">photo</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">file_id</span><span class="p">,</span>
+                    <span class="n">caption</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">caption</span><span class="p">,</span>
+                    <span class="n">reply_markup</span><span class="o">=</span><span class="n">reply_markup</span> <span class="ow">or</span> <span class="n">main_reply_keyboard</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">video</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_video</span><span class="p">(</span>
+                    <span class="n">chat_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+                    <span class="n">video</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">video</span><span class="o">.</span><span class="n">file_id</span><span class="p">,</span>
+                    <span class="n">caption</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">caption</span><span class="p">,</span>
+                    <span class="n">reply_markup</span><span class="o">=</span><span class="n">reply_markup</span> <span class="ow">or</span> <span class="n">main_reply_keyboard</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+                    <span class="n">bot</span><span class="p">,</span>
+                    <span class="n">user_id</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                    <span class="n">reply_markup</span><span class="o">=</span><span class="n">reply_markup</span> <span class="ow">or</span> <span class="n">main_reply_keyboard</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="n">success_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="n">total</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">update_status</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;📨 Рассылка в процессе...</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Событие: </span><span class="si">{</span><span class="n">event_name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Всего получателей: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Отправлено: </span><span class="si">{</span><span class="n">success_count</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Ошибок: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_users</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Прогресс: </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="si">}</span><span class="s2">%)&quot;</span>
+                <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">failed_users</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+    <span class="k">await</span> <span class="n">update_status</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;✅ Рассылка завершена!</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Событие: </span><span class="si">{</span><span class="n">event_name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Всего получателей: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Успешно отправлено: </span><span class="si">{</span><span class="n">success_count</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Ошибок: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_users</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="mb_add_link">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.mb_add_link">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;post_to_all&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mb_add_link</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Asks whether to add a link before posting to all users.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        callback (CallbackQuery): Callback query from admin.</span>
+<span class="sd">        state (FSMContext): FSM context to store user choice.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">,</span>
+        <span class="s2">&quot;Хочешь добавить к посту кнопку с ссылкой?&quot;</span><span class="p">,</span>
+        <span class="n">yes_no_link_ikb</span><span class="p">()</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="link_no">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.link_no">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;link_no&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">link_no</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Continues posting without a link.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        callback (CallbackQuery): User interaction callback.</span>
+<span class="sd">        state (FSMContext): State machine context.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">update_data</span><span class="p">({</span><span class="s1">&#39;flag&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Отправьте мне пост (текст, фото или видео)</span><span class="se">\n\n</span><span class="s2">Для отмены введите quit&quot;</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_all_media</span><span class="p">)</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="link_yes">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.link_yes">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;link_yes&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">link_yes</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Starts flow to add a link button.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        callback (CallbackQuery): User interaction callback.</span>
+<span class="sd">        state (FSMContext): State machine context.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Отправь мне ссылку</span><span class="se">\n\n</span><span class="s2">Для отмены введите quit&quot;</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_all_text05</span><span class="p">)</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="process_post_to_all_media">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.process_post_to_all_media">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_all_media</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_post_to_all_media</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sends the prepared post to all users.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Message): Message with content.</span>
+<span class="sd">        state (FSMContext): Context with link flag and data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span> <span class="ow">and</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;quit&#39;</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="s1">&#39;Вы вышли&#39;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="n">user_ids</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_users_tg_id</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_ids</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span>
+            <span class="n">message</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;У вас нет пользователей((&quot;</span><span class="p">,</span>
+            <span class="n">reply_markup</span><span class="o">=</span><span class="n">main_reply_keyboard</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">status_message</span> <span class="o">=</span> <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;🚀 Начинаю рассылку...</span><span class="se">\n</span><span class="s2">Всего получателей: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">user_ids</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Отправлено: 0</span><span class="se">\n</span><span class="s2">Ошибок: 0&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;flag&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">reply_markup</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">flag</span><span class="p">:</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;link&#39;</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+        <span class="n">reply_markup</span> <span class="o">=</span> <span class="n">link_ikb</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">link</span><span class="p">)</span>
+
+    <span class="n">failed_users</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">success_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_ids</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_status</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates progress status in the chat.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): Progress message.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">nonlocal</span> <span class="n">status_message</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">edit_message_text</span><span class="p">(</span>
+                <span class="n">chat_id</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">message_id</span><span class="o">=</span><span class="n">status_message</span><span class="o">.</span><span class="n">message_id</span><span class="p">,</span>
+                <span class="n">text</span><span class="o">=</span><span class="n">text</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">delete_message</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">status_message</span><span class="o">.</span><span class="n">message_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">status_message</span> <span class="o">=</span> <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">user_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">user_ids</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">photo</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_photo</span><span class="p">(</span>
+                    <span class="n">chat_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+                    <span class="n">photo</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">photo</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">file_id</span><span class="p">,</span>
+                    <span class="n">caption</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">caption</span><span class="p">,</span>
+                    <span class="n">reply_markup</span><span class="o">=</span><span class="n">reply_markup</span> <span class="ow">or</span> <span class="n">main_reply_keyboard</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">video</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_video</span><span class="p">(</span>
+                    <span class="n">chat_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+                    <span class="n">video</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">video</span><span class="o">.</span><span class="n">file_id</span><span class="p">,</span>
+                    <span class="n">caption</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">caption</span><span class="p">,</span>
+                    <span class="n">reply_markup</span><span class="o">=</span><span class="n">reply_markup</span> <span class="ow">or</span> <span class="n">main_reply_keyboard</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+                    <span class="n">bot</span><span class="p">,</span>
+                    <span class="n">user_id</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                    <span class="n">reply_markup</span><span class="o">=</span><span class="n">reply_markup</span> <span class="ow">or</span> <span class="n">main_reply_keyboard</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="n">success_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="n">total</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">update_status</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;📨 Рассылка в процессе...</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Всего получателей: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Отправлено: </span><span class="si">{</span><span class="n">success_count</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Ошибок: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_users</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Прогресс: </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="si">}</span><span class="s2">%)&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">failed_users</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+    <span class="k">await</span> <span class="n">update_status</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;✅ Рассылка завершена!</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Всего получателей: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Успешно отправлено: </span><span class="si">{</span><span class="n">success_count</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Ошибок: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_users</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_all_text05</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cmd_post_to_all</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Receives the link and asks for button text.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Message): Message with the link.</span>
+<span class="sd">        state (FSMContext): Context to store link.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;quit&#39;</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="s1">&#39;Вы вышли&#39;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">return</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">update_data</span><span class="p">({</span><span class="s1">&#39;link&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;flag&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Отправь надпись на кнопке</span><span class="se">\n\n</span><span class="s2">Для отмены введите quit&quot;</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_all_text1</span><span class="p">)</span>
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="cmd_post_to_all">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.cmd_post_to_all">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_all_text1</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cmd_post_to_all</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Receives button text and moves to media collection.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Message): Message with button text.</span>
+<span class="sd">        state (FSMContext): Context to update button label.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;quit&#39;</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="s1">&#39;Вы вышли&#39;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">return</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">update_data</span><span class="p">({</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Отправьте мне пост (текст, фото или видео)</span><span class="se">\n\n</span><span class="s2">Для отмены введите quit&quot;</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_all_media</span><span class="p">)</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="process_post_to_all">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.process_post_to_all">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_all_text</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_post_to_all</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sends post with or without button to all users.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Message): Post content.</span>
+<span class="sd">        state (FSMContext): FSM state with post options.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;quit&#39;</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="s1">&#39;Вы вышли&#39;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="n">user_ids</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_users_tg_id</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;flag&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">flag</span><span class="p">:</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;link&#39;</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_ids</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span>
+            <span class="n">message</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;У вас нет пользователей((&quot;</span><span class="p">,</span>
+            <span class="n">reply_markup</span><span class="o">=</span><span class="n">main_reply_keyboard</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">for</span> <span class="n">user_id</span> <span class="ow">in</span> <span class="n">user_ids</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span>
+            <span class="n">user_id</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="n">reply_markup</span><span class="o">=</span><span class="p">(</span><span class="n">main_reply_keyboard</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span> <span class="k">else</span> <span class="n">link_ikb</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">link</span><span class="p">))</span>
+        <span class="p">)</span>
+
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="s2">&quot;Готово&quot;</span><span class="p">,</span> <span class="n">reply_markup</span><span class="o">=</span><span class="n">main_reply_keyboard</span><span class="p">())</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<span class="nd">@router</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;post_to_ev&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cmd_post_to_ev</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Starts event-specific post distribution.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        callback (CallbackQuery): Callback from user.</span>
+<span class="sd">        state (FSMContext): FSM state for event flow.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_all_events</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">events</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;У вас нет событий&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Выберете событие:</span><span class="se">\n\n</span><span class="s2">Для отмены введите quit&quot;</span><span class="p">,</span>
+        <span class="n">reply_markup</span><span class="o">=</span><span class="n">post_ev_target</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_ev_ev</span><span class="p">)</span>
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_ev_ev</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">pre_process_post_to_ev</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets event name and requests post content.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Message): Message with event name.</span>
+<span class="sd">        state (FSMContext): FSM state to save event.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;quit&#39;</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="s1">&#39;Вы вышли&#39;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">return</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Отправьте мне пост (текст, фото или видео)</span><span class="se">\n\n</span><span class="s2">Для отмены введите quit&quot;</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">update_data</span><span class="p">(</span><span class="n">event_name</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_ev_media</span><span class="p">)</span>
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="process_post_to_ev_media">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.process_post_to_ev_media">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_to_ev_media</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_post_to_ev_media</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sends a post to users registered in a specific event.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Message): Incoming post message.</span>
+<span class="sd">        state (FSMContext): FSM context with event data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span> <span class="ow">and</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;quit&#39;</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="s1">&#39;Вы вышли&#39;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">event_name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;event_name&quot;</span><span class="p">)</span>
+    <span class="n">user_ids</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_users_tg_id_in_event</span><span class="p">(</span><span class="n">event_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_ids</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span>
+            <span class="n">message</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;У вас нет пользователей принявших участие в этом событии&quot;</span><span class="p">,</span>
+            <span class="n">reply_markup</span><span class="o">=</span><span class="n">main_reply_keyboard</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">status_message</span> <span class="o">=</span> <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;🚀 Начинаю рассылку для события </span><span class="si">{</span><span class="n">event_name</span><span class="si">}</span><span class="s2">...</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Всего получателей: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">user_ids</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">Отправлено: 0</span><span class="se">\n</span><span class="s2">Ошибок: 0&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">failed_users</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">success_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_ids</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_status</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates or replaces the status message in the chat.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): Text content for update.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">nonlocal</span> <span class="n">status_message</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">edit_message_text</span><span class="p">(</span>
+                <span class="n">chat_id</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">message_id</span><span class="o">=</span><span class="n">status_message</span><span class="o">.</span><span class="n">message_id</span><span class="p">,</span>
+                <span class="n">text</span><span class="o">=</span><span class="n">text</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">delete_message</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">status_message</span><span class="o">.</span><span class="n">message_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">status_message</span> <span class="o">=</span> <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">user_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">user_ids</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">photo</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_photo</span><span class="p">(</span>
+                    <span class="n">chat_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+                    <span class="n">photo</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">photo</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">file_id</span><span class="p">,</span>
+                    <span class="n">caption</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">caption</span><span class="p">,</span>
+                    <span class="n">reply_markup</span><span class="o">=</span><span class="n">main_reply_keyboard</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">video</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">bot</span><span class="o">.</span><span class="n">send_video</span><span class="p">(</span>
+                    <span class="n">chat_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span>
+                    <span class="n">video</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">video</span><span class="o">.</span><span class="n">file_id</span><span class="p">,</span>
+                    <span class="n">caption</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">caption</span><span class="p">,</span>
+                    <span class="n">reply_markup</span><span class="o">=</span><span class="n">main_reply_keyboard</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+                    <span class="n">bot</span><span class="p">,</span>
+                    <span class="n">user_id</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                    <span class="n">reply_markup</span><span class="o">=</span><span class="n">main_reply_keyboard</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="n">success_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="n">total</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">update_status</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;📨 Рассылка в процессе...</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Событие: </span><span class="si">{</span><span class="n">event_name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Всего получателей: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Отправлено: </span><span class="si">{</span><span class="n">success_count</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Ошибок: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_users</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Прогресс: </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="si">}</span><span class="s2">%)&quot;</span>
+                <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">failed_users</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+    <span class="k">await</span> <span class="n">update_status</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;✅ Рассылка завершена!</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Событие: </span><span class="si">{</span><span class="n">event_name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Всего получателей: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Успешно отправлено: </span><span class="si">{</span><span class="n">success_count</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Ошибок: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_users</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="cmd_post_to_ev">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.cmd_post_to_ev">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;post_wth_op_to_ev&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cmd_post_to_ev</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Starts flow to send a post with feedback form link.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        callback (CallbackQuery): Callback from admin.</span>
+<span class="sd">        state (FSMContext): FSM context for storing event.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_all_events</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">events</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;У вас нет событий&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Выберете событие:</span><span class="se">\n\n</span><span class="s2">Для отмены введите quit&quot;</span><span class="p">,</span>
+        <span class="n">reply_markup</span><span class="o">=</span><span class="n">post_ev_target</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_wth_op_to_ev_ev</span><span class="p">)</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="pre_process_post_to_ev">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.pre_process_post_to_ev">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_wth_op_to_ev_ev</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">pre_process_post_to_ev</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Receives event name and requests Google Form link.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Message): Message with event name.</span>
+<span class="sd">        state (FSMContext): FSM context to store event.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;quit&#39;</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="s1">&#39;Вы вышли&#39;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">return</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Отправьте мне ссылку на гугл-форму</span><span class="se">\n\n</span><span class="s2">Для отмены введите quit&quot;</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">update_data</span><span class="p">(</span><span class="n">event_name</span><span class="o">=</span><span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_wth_op_to_ev_text</span><span class="p">)</span></div>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="process_post_to_wth_op_to_ev">
+<a class="viewcode-back" href="../../../../handlers/admin/club_events/posts.html#handlers.admin.club_events.posts.process_post_to_wth_op_to_ev">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">PostState</span><span class="o">.</span><span class="n">waiting_for_post_wth_op_to_ev_text</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_post_to_wth_op_to_ev</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sends feedback form link to users in selected event.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Message): Message containing Google Form link.</span>
+<span class="sd">        state (FSMContext): FSM context containing event.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;quit&#39;</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="s1">&#39;Вы вышли&#39;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">event_name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;event_name&quot;</span><span class="p">)</span>
+    <span class="n">user_ids</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_users_tg_id_in_event</span><span class="p">(</span><span class="n">event_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_ids</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span>
+            <span class="n">message</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;У вас нет пользователей принявших участие в этом событии&quot;</span><span class="p">,</span>
+            <span class="n">reply_markup</span><span class="o">=</span><span class="n">main_reply_keyboard</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">for</span> <span class="n">user_id</span> <span class="ow">in</span> <span class="n">user_ids</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span>
+            <span class="n">user_id</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">EVENT_END_FEEDBACK</span><span class="p">,</span>
+            <span class="n">reply_markup</span><span class="o">=</span><span class="n">link_ikb</span><span class="p">(</span><span class="s1">&#39;Форма обратной связи&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="s2">&quot;Готово&quot;</span><span class="p">,</span> <span class="n">reply_markup</span><span class="o">=</span><span class="n">main_reply_keyboard</span><span class="p">())</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, HSE IT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

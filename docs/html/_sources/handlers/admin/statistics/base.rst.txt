@@ -1,0 +1,8 @@
+base
+====
+
+.. automodule:: handlers.admin.statistics.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

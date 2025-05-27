@@ -8,15 +8,12 @@ Handles /start command and hash-based user scenarios.
 from aiogram import Router, F, Bot
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart
-from aiogram.filters.command import CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from config.settings import TOKEN
-from config.texts.commands import WELCOME_MESSAGE
 from database.req import (
-    get_user, create_user, create_user_x_event_row, get_event,
+    get_user, create_user_x_event_row, get_event,
     update_user_x_event_row_status, update_reg_event, check_completly_reg_event,
     create_reg_event, get_reg_event, get_user_x_event_row, get_ref_give_away,
     create_ref_give_away, delete_user_x_event_row, delete_ref_give_away_row,
@@ -24,12 +21,12 @@ from database.req import (
     add_referal_cnt, update_strick, add_user_to_networking
 )
 from handlers.error import safe_send_message
-from handlers.public.club_events.qr import cmd_check_qr, send_event_qr_code
+from handlers.public.club_events.qr import send_event_qr_code
 from handlers.public.quest import start
 from handlers.public.utils.base import create_user_if_not_exists
 from handlers.states import EventReg
-from keyboards.keyboards import (
-    single_command_button_keyboard, yes_no_ikb, yes_no_hse_ikb, get_ref_ikb
+from keyboards import (
+    main_reply_keyboard, yes_no_ikb, yes_no_hse_ikb, get_ref_ikb
 )
 
 # --------------------------------------------------------------------------------
@@ -43,7 +40,6 @@ bot = Bot(
 
 
 # --------------------------------------------------------------------------------
-
 
 
 async def handle_networking_hash(user_id: int, username: str, message: Message):
@@ -175,7 +171,7 @@ async def handle_otbor_hash(user_id: int, username: str, message: Message):
     """
     await create_user_if_not_exists(user_id, username, 'otbor')
     name = message.from_user.first_name if message.from_user.first_name else username
-    await safe_send_message(bot, message, f'Привет, {name}!', reply_markup=single_command_button_keyboard())
+    await safe_send_message(bot, message, f'Привет, {name}!', reply_markup=main_reply_keyboard())
     await start(message)
 
 
@@ -208,7 +204,7 @@ async def handle_default_hash(user_id: int, username: str, hash_value: str, mess
     await safe_send_message(
         bot, message,
         text="QR-код удачно отсканирован!",
-        reply_markup=single_command_button_keyboard()
+        reply_markup=main_reply_keyboard()
     )
 
     hosts_ids = await get_all_hosts_in_event_ids(hash_value)
@@ -229,6 +225,7 @@ async def handle_default_hash(user_id: int, username: str, hash_value: str, mess
         )
         await add_money(user_id, 1)
 
+
 @router.callback_query(F.data == "event_no")
 async def reg_event_part0_5(callback: CallbackQuery, state: FSMContext):
     """
@@ -242,7 +239,7 @@ async def reg_event_part0_5(callback: CallbackQuery, state: FSMContext):
         None
     """
     await safe_send_message(bot, callback, "Это очень грустно((",
-                            reply_markup=single_command_button_keyboard())
+                            reply_markup=main_reply_keyboard())
     data = await state.get_data()
     event_name = data.get('name')
     row = await get_user_x_event_row(callback.from_user.id, event_name)

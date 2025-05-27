@@ -1,0 +1,8 @@
+winner
+======
+
+.. automodule:: handlers.admin.club_events.winner
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

@@ -13,7 +13,7 @@ from aiogram.types import Message, CallbackQuery
 from aiohttp import ClientConnectorError
 
 from config.settings import TOKEN
-from keyboards.keyboards import single_command_button_keyboard
+from keyboards import main_reply_keyboard
 from utils.logger import get_logger
 
 # --------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ async def safe_send_message(
         bott: Bot,
         recipient,
         text: str,
-        reply_markup=single_command_button_keyboard(),
+        reply_markup=main_reply_keyboard(),
         retry_attempts: int = 3,
         delay: int = 5,
 ) -> Message | None:

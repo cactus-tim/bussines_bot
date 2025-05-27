@@ -1,0 +1,608 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>handlers.public.quest &mdash; HSE Buisness Club Telegram-bot v3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5773a0da"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            HSE Buisness Club Telegram-bot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../config/index.html">config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../database/index.html">database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../errors/index.html">errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../handlers/index.html">handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../keyboards/index.html">keyboards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utils/index.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../main.html">main</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">HSE Buisness Club Telegram-bot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">handlers.public.quest</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for handlers.public.quest</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Questionnaire Router</span>
+<span class="sd">Handlers for questionnaire FSM and callbacks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">Router</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">Bot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.client.default</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultBotProperties</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParseMode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span><span class="p">,</span> <span class="n">StateFilter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.fsm.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSMContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aiogram.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">CallbackQuery</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">config.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">TOKEN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">config.texts.quest</span><span class="w"> </span><span class="kn">import</span> <span class="n">QUEST_START</span><span class="p">,</span> <span class="n">QUEST_FIRST_STEP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">database.req</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">create_questionary</span><span class="p">,</span>
+    <span class="n">update_questionary</span><span class="p">,</span>
+    <span class="n">get_questionary</span><span class="p">,</span>
+    <span class="n">get_all_vacancy_names</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">handlers.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">safe_send_message</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">handlers.states</span><span class="w"> </span><span class="kn">import</span> <span class="n">Questionnaire</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">keyboards</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">vacancy_selection_keyboard</span><span class="p">,</span>
+    <span class="n">another_vacancy_keyboard</span><span class="p">,</span>
+    <span class="n">quest_keyboard_1</span><span class="p">,</span>
+    <span class="n">quest_keyboard_2</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">Router</span><span class="p">()</span>
+
+<span class="n">bot</span> <span class="o">=</span> <span class="n">Bot</span><span class="p">(</span>
+    <span class="n">token</span><span class="o">=</span><span class="n">TOKEN</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="n">DefaultBotProperties</span><span class="p">(</span>
+        <span class="n">parse_mode</span><span class="o">=</span><span class="n">ParseMode</span><span class="o">.</span><span class="n">HTML</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="start2">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.start2">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="s2">&quot;Стать частью команды HSE SPB Business Club&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start2</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Redirect text trigger to /quest command.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">start</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="start">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.start">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Command</span><span class="p">(</span><span class="s2">&quot;quest&quot;</span><span class="p">))</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Send introduction message and first keyboard.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="n">QUEST_START</span><span class="p">,</span>
+        <span class="n">reply_markup</span><span class="o">=</span><span class="n">quest_keyboard_1</span><span class="p">(),</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="start_2">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.start_2">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;quest_next&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start_2</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Send details message and second keyboard on callback.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        callback (CallbackQuery): Incoming callback query.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="n">QUEST_FIRST_STEP</span><span class="p">,</span>
+        <span class="n">reply_markup</span><span class="o">=</span><span class="n">quest_keyboard_2</span><span class="p">(),</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="start_nu">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.start_nu">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start_nu</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize or continue questionnaire based on state.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message or callback.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vacancies</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_all_vacancy_names</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">vacancies</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+            <span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;К сожалению сейчас нет доступных вакансий&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">quest</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">quest</span> <span class="o">==</span> <span class="s2">&quot;not created&quot;</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">create_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">get_state</span><span class="p">()</span>
+    <span class="n">second_states</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">Questionnaire</span><span class="o">.</span><span class="n">motivation</span><span class="p">,</span>
+        <span class="n">Questionnaire</span><span class="o">.</span><span class="n">plans</span><span class="p">,</span>
+        <span class="n">Questionnaire</span><span class="o">.</span><span class="n">strengths</span><span class="p">,</span>
+        <span class="n">Questionnaire</span><span class="o">.</span><span class="n">career_goals</span><span class="p">,</span>
+        <span class="n">Questionnaire</span><span class="o">.</span><span class="n">team_motivation</span><span class="p">,</span>
+        <span class="n">Questionnaire</span><span class="o">.</span><span class="n">role_in_team</span><span class="p">,</span>
+        <span class="n">Questionnaire</span><span class="o">.</span><span class="n">events</span><span class="p">,</span>
+        <span class="n">Questionnaire</span><span class="o">.</span><span class="n">found_info</span><span class="p">,</span>
+        <span class="n">Questionnaire</span><span class="o">.</span><span class="n">resume</span><span class="p">,</span>
+        <span class="n">Questionnaire</span><span class="o">.</span><span class="n">another_vacancy</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">current</span> <span class="ow">in</span> <span class="n">second_states</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">continue_from_second_part</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">start_first_part</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="start_first_part">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.start_first_part">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start_first_part</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Begin first part: request full name.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Введите свое ФИО&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">full_name</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_full_name">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_full_name">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">full_name</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_full_name</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle full name input and proceed to degree.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;full_name&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Введите свою степень обучения&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">degree</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_degree">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_degree">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">degree</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_degree</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle degree input and proceed to course.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;degree&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Введите свой курс&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">course</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_course">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_course">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">course</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_course</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle course input and proceed to program.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;course&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Напишите свою образовательную программу&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">program</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_program">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_program">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">program</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_program</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle program input and proceed to email.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;program&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Введите свою электронную почту&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">email</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_email">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_email">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_email</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle email input and request vacancy selection.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="n">vacancies</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_all_vacancy_names</span><span class="p">()</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Какая вакансия тебя интересует?&quot;</span><span class="p">,</span>
+        <span class="n">reply_markup</span><span class="o">=</span><span class="n">vacancy_selection_keyboard</span><span class="p">(</span><span class="n">vacancies</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">vacancy</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_vacancy">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_vacancy">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">vacancy</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_vacancy</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle vacancy selection and ask for another.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;vacancy&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span>
+        <span class="n">bot</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Хочешь подать заявку на другую вакансию?&quot;</span><span class="p">,</span>
+        <span class="n">reply_markup</span><span class="o">=</span><span class="n">another_vacancy_keyboard</span><span class="p">(),</span>
+    <span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">another_vacancy</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="ask_another_vacancy">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.ask_another_vacancy">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">callback_query</span><span class="p">(</span><span class="n">StateFilter</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">another_vacancy</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;another_&quot;</span><span class="p">))</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">ask_another_vacancy</span><span class="p">(</span><span class="n">callback</span><span class="p">:</span> <span class="n">CallbackQuery</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle another vacancy choice or continue questionnaire.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        callback (CallbackQuery): Incoming callback query.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">callback</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;another_yes&quot;</span><span class="p">:</span>
+        <span class="n">vacancies</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_all_vacancy_names</span><span class="p">()</span>
+        <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">edit_text</span><span class="p">(</span>
+            <span class="s2">&quot;Какая вакансия тебя интересует?&quot;</span><span class="p">,</span>
+            <span class="n">reply_markup</span><span class="o">=</span><span class="n">vacancy_selection_keyboard</span><span class="p">(</span><span class="n">vacancies</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">vacancy</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">edit_text</span><span class="p">(</span><span class="s2">&quot;Спасибо за ваш выбор.&quot;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">continue_from_second_part</span><span class="p">(</span><span class="n">callback</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">callback</span><span class="o">.</span><span class="n">answer</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="continue_from_second_part">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.continue_from_second_part">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">continue_from_second_part</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Begin second part: ask motivation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Мотивация стать частью HSE Business Club&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">motivation</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_motivation">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_motivation">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">motivation</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_motivation</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle motivation input and proceed to plans.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;motivation&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Какие у тебя планы на этот учебный год?&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">plans</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_plans">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_plans">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">plans</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_plans</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle plans input and proceed to strengths.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;plans&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Какие твои сильные качества?&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">strengths</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_strengths">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_strengths">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">strengths</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_strengths</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle strengths input and proceed to career goals.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;strengths&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Как ты видишь для себя развитие своей карьеры?&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">career_goals</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_career_goals">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_career_goals">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">career_goals</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_career_goals</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle career goals input and proceed to team motivation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;career_goals&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Почему ты хочешь попасть к нам в команду?&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">team_motivation</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_team_motivation">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_team_motivation">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">team_motivation</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_team_motivation</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle team motivation input and proceed to role in team.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;team_motivation&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;В какой роли ты видишь себя в команде?&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">role_in_team</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_role_in_team">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_role_in_team">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">role_in_team</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_role_in_team</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle role in team input and proceed to club_events.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;role_in_team&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;На каких мероприятиях Бизнес-клуба ты был(-а)?&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">events</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_events">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_events">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">events</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_events</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle club_events input and proceed to found info.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;club_events&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Где ты узнал(-а) про отбор в Бизнес-клуб?&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">found_info</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_found_info">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_found_info">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">found_info</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_found_info</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle found info input and proceed to resume.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;found_info&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Отправь ссылку на свое резюме/портфолио&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">resume</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="enter_resume">
+<a class="viewcode-back" href="../../../handlers/public/quest.html#handlers.public.quest.enter_resume">[docs]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">Questionnaire</span><span class="o">.</span><span class="n">resume</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">enter_resume</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">FSMContext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle resume input and end questionnaire.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (types.Message): Incoming message instance.</span>
+<span class="sd">        state (FSMContext): FSM context instance.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">await</span> <span class="n">update_questionary</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;resume&#39;</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">await</span> <span class="n">safe_send_message</span><span class="p">(</span><span class="n">bot</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Благодарим тебя за заполнение анкеты!&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, HSE IT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,20 @@
+admin
+=====
+
+Admin Routers
+
+List of all routers used in admin panel routing.
+
+.. contents::
+   :local:
+   :depth: 2
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :glob:
+
+   club_events/index
+   statistics/index
+   vacancies
+

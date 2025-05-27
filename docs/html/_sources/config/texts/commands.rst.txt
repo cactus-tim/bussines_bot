@@ -1,0 +1,20 @@
+commands
+========
+
+.. automodule:: config.texts.commands
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Constants
+---------
+
+.. py:data:: WELCOME_MESSAGE
+
+
+.. py:data:: INFO_ADMIN
+
+
+.. py:data:: INFO_USER
+
+

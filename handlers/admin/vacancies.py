@@ -18,14 +18,13 @@ from database.req import (
 )
 from handlers.error import safe_send_message
 from handlers.states import VacancyState
-from keyboards.keyboards import (
-    single_command_button_keyboard, vacancy_selection_keyboard
-)
+from keyboards import main_reply_keyboard, vacancy_selection_keyboard
 
 # --------------------------------------------------------------------------------
 
 router = Router()
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
 
 # --------------------------------------------------------------------------------
 
@@ -54,8 +53,9 @@ async def cmd_all_vacancies(message: Message):
         bot,
         message,
         text=msg,
-        reply_markup=single_command_button_keyboard()
+        reply_markup=main_reply_keyboard()
     )
+
 
 # --------------------------------------------------------------------------------
 
@@ -76,6 +76,7 @@ async def cmd_add_vacancy(message: Message, state: FSMContext):
         return
     await safe_send_message(bot, message, text="Введите название вакансии")
     await state.set_state(VacancyState.waiting_for_vacancy_name)
+
 
 # --------------------------------------------------------------------------------
 
@@ -105,9 +106,10 @@ async def process_vacancy_name(message: Message, state: FSMContext):
     else:
         await message.answer(
             f"Вакансия '{vacancy_name}' успешно добавлена.",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
         await state.clear()
+
 
 # --------------------------------------------------------------------------------
 
@@ -135,6 +137,7 @@ async def cmd_dell_vacancy(message: Message, state: FSMContext):
     )
     await state.set_state(VacancyState.waiting_for_vacancy_name_to_delete)
 
+
 # --------------------------------------------------------------------------------
 
 @router.message(VacancyState.waiting_for_vacancy_name_to_delete)
@@ -154,13 +157,13 @@ async def process_vacancy_name_to_delete(message: Message, state: FSMContext):
     if not resp:
         await message.answer(
             f"Вакансии '{vacancy_name}' нет.",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
         await state.clear()
         return
 
     await message.answer(
         f"Вакансия '{vacancy_name}' успешно удалена.",
-        reply_markup=single_command_button_keyboard()
+        reply_markup=main_reply_keyboard()
     )
     await state.clear()

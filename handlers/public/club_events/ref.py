@@ -12,12 +12,10 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 
 from config.settings import TOKEN
-from database.req import (
-    get_all_user_events, get_event
-)
+from database.req import get_all_user_events, get_event
 from handlers.error import safe_send_message
 from handlers.utils.base import get_bot_username
-from keyboards.keyboards import single_command_button_keyboard, events_ikb
+from keyboards import main_reply_keyboard, events_ikb
 
 # --------------------------------------------------------------------------------
 
@@ -47,7 +45,7 @@ async def get_ref_v2_part1(message: Message):
         await safe_send_message(
             bot, message,
             "Вы не зарегистрированы ни на одно событие и не можете никого никуда пригласить",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
         return
 
@@ -85,7 +83,7 @@ async def get_ref_v2_part2(callback: CallbackQuery):
         await safe_send_message(
             bot, callback,
             f"Вот твоя реферальная ссылка для событие {event.desc}:\n{url}",
-            reply_markup=single_command_button_keyboard()
+            reply_markup=main_reply_keyboard()
         )
     except Exception as e:
         print(f"Referral link generation error: {e}")

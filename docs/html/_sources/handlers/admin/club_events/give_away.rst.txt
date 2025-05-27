@@ -1,0 +1,8 @@
+give_away
+=========
+
+.. automodule:: handlers.admin.club_events.give_away
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

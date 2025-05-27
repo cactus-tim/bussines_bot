@@ -18,9 +18,7 @@ from config.texts.commands import WELCOME_MESSAGE
 from handlers.error import safe_send_message
 from handlers.public.quest import start
 from handlers.public.utils.base import create_user_if_not_exists
-from keyboards.keyboards import (
-    single_command_button_keyboard
-)
+from keyboards import main_reply_keyboard
 from .club_events.qr import cmd_check_qr
 from .club_events.registration import handle_networking_hash, handle_reg_hash, handle_ref_hash, \
     handle_default_hash
@@ -54,7 +52,7 @@ async def send_welcome_message(user_id: int, username: str, message: Message):
     await safe_send_message(
         bot, message,
         text=WELCOME_MESSAGE.format(name=name),
-        reply_markup=single_command_button_keyboard()
+        reply_markup=main_reply_keyboard()
     )
 
 
@@ -72,7 +70,7 @@ async def handle_otbor_hash(user_id: int, username: str, message: Message):
     """
     await create_user_if_not_exists(user_id, username, 'otbor')
     name = message.from_user.first_name if message.from_user.first_name else username
-    await safe_send_message(bot, message, f'Привет, {name}!', reply_markup=single_command_button_keyboard())
+    await safe_send_message(bot, message, f'Привет, {name}!', reply_markup=main_reply_keyboard())
     await start(message)
 
 

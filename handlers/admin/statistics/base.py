@@ -25,7 +25,7 @@ from handlers.admin.statistics.utils import (
 )
 from handlers.error import safe_send_message
 from handlers.states import StatState
-from keyboards.keyboards import post_ev_target, stat_target, single_command_button_keyboard
+from keyboards import post_ev_target, stat_target, main_reply_keyboard
 
 # --------------------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ async def cmd_stat_ev(callback: CallbackQuery, state: FSMContext):
     events = await get_all_events()
     if not events:
         await safe_send_message(bot, callback, text="У вас нет событий",
-                                reply_markup=single_command_button_keyboard())
+                                reply_markup=main_reply_keyboard())
         await state.clear()
         return
     await safe_send_message(bot, callback, text="Выберете событие:",
@@ -147,7 +147,7 @@ async def cmd_stat_give_away(callback: CallbackQuery, state: FSMContext):
     events = await get_all_events()
     if not events:
         await safe_send_message(bot, callback, text="У вас нет событий",
-                                reply_markup=single_command_button_keyboard())
+                                reply_markup=main_reply_keyboard())
         await state.clear()
         return
     await safe_send_message(bot, callback, text="Выберете событие:",
@@ -218,7 +218,7 @@ async def cmd_stat_reg(callback: CallbackQuery, state: FSMContext):
     events = await get_all_events()
     if not events:
         await safe_send_message(bot, callback, text="У вас нет событий",
-                                reply_markup=single_command_button_keyboard())
+                                reply_markup=main_reply_keyboard())
         await state.clear()
         return
     await safe_send_message(bot, callback, text="Выберете событие:",
@@ -259,7 +259,7 @@ async def cmd_stat_reg(callback: CallbackQuery, state: FSMContext):
     events = await get_all_events()
     if not events:
         await safe_send_message(bot, callback, text="У вас нет событий",
-                                reply_markup=single_command_button_keyboard())
+                                reply_markup=main_reply_keyboard())
         await state.clear()
         return
     await safe_send_message(bot, callback, text="Выберете событие:",

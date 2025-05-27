@@ -1,0 +1,564 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>states &mdash; HSE Buisness Club Telegram-bot v3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5773a0da"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="keyboards" href="../keyboards/index.html" />
+    <link rel="prev" title="error" href="error.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            HSE Buisness Club Telegram-bot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../config/index.html">config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../database/index.html">database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../errors/index.html">errors</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">handlers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="admin/index.html">admin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="public/index.html">public</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils/index.html">utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="error.html">error</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">states</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../keyboards/index.html">keyboards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/index.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../main.html">main</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">HSE Buisness Club Telegram-bot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">handlers</a></li>
+      <li class="breadcrumb-item active">states</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/handlers/states.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-handlers.states">
+<span id="states"></span><h1>states<a class="headerlink" href="#module-handlers.states" title="Link to this heading"></a></h1>
+<p>Bot States.
+State machine definitions for various bot workflows and forms.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="handlers.states.EventCreateState">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.states.</span></span><span class="sig-name descname"><span class="pre">EventCreateState</span></span><a class="reference internal" href="../_modules/handlers/states.html#EventCreateState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.states.EventCreateState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StatesGroup</span></code></p>
+<p>Event creation form states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventCreateState.waiting_event_name">
+<span class="sig-name descname"><span class="pre">waiting_event_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventCreateState:waiting_event_name'&gt;</span></em><a class="headerlink" href="#handlers.states.EventCreateState.waiting_event_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventCreateState.waiting_event_date">
+<span class="sig-name descname"><span class="pre">waiting_event_date</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventCreateState:waiting_event_date'&gt;</span></em><a class="headerlink" href="#handlers.states.EventCreateState.waiting_event_date" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventCreateState.waiting_event_time">
+<span class="sig-name descname"><span class="pre">waiting_event_time</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventCreateState:waiting_event_time'&gt;</span></em><a class="headerlink" href="#handlers.states.EventCreateState.waiting_event_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventCreateState.waiting_event_place">
+<span class="sig-name descname"><span class="pre">waiting_event_place</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventCreateState:waiting_event_place'&gt;</span></em><a class="headerlink" href="#handlers.states.EventCreateState.waiting_event_place" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventCreateState.waiting_links_count">
+<span class="sig-name descname"><span class="pre">waiting_links_count</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventCreateState:waiting_links_count'&gt;</span></em><a class="headerlink" href="#handlers.states.EventCreateState.waiting_links_count" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="handlers.states.EventReg">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.states.</span></span><span class="sig-name descname"><span class="pre">EventReg</span></span><a class="reference internal" href="../_modules/handlers/states.html#EventReg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.states.EventReg" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StatesGroup</span></code></p>
+<p>Event registration form states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventReg.waiting_name">
+<span class="sig-name descname"><span class="pre">waiting_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventReg:waiting_name'&gt;</span></em><a class="headerlink" href="#handlers.states.EventReg.waiting_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventReg.waiting_surname">
+<span class="sig-name descname"><span class="pre">waiting_surname</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventReg:waiting_surname'&gt;</span></em><a class="headerlink" href="#handlers.states.EventReg.waiting_surname" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventReg.waiting_fathername">
+<span class="sig-name descname"><span class="pre">waiting_fathername</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventReg:waiting_fathername'&gt;</span></em><a class="headerlink" href="#handlers.states.EventReg.waiting_fathername" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventReg.waiting_mail">
+<span class="sig-name descname"><span class="pre">waiting_mail</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventReg:waiting_mail'&gt;</span></em><a class="headerlink" href="#handlers.states.EventReg.waiting_mail" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventReg.waiting_phone">
+<span class="sig-name descname"><span class="pre">waiting_phone</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventReg:waiting_phone'&gt;</span></em><a class="headerlink" href="#handlers.states.EventReg.waiting_phone" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventReg.waiting_org">
+<span class="sig-name descname"><span class="pre">waiting_org</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventReg:waiting_org'&gt;</span></em><a class="headerlink" href="#handlers.states.EventReg.waiting_org" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="handlers.states.EventState">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.states.</span></span><span class="sig-name descname"><span class="pre">EventState</span></span><a class="reference internal" href="../_modules/handlers/states.html#EventState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.states.EventState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StatesGroup</span></code></p>
+<p>Event management states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventState.waiting_ev">
+<span class="sig-name descname"><span class="pre">waiting_ev</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventState:waiting_ev'&gt;</span></em><a class="headerlink" href="#handlers.states.EventState.waiting_ev" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventState.waiting_ev_for_link">
+<span class="sig-name descname"><span class="pre">waiting_ev_for_link</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventState:waiting_ev_for_link'&gt;</span></em><a class="headerlink" href="#handlers.states.EventState.waiting_ev_for_link" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.EventState.waiting_links_count">
+<span class="sig-name descname"><span class="pre">waiting_links_count</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'EventState:waiting_links_count'&gt;</span></em><a class="headerlink" href="#handlers.states.EventState.waiting_links_count" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="handlers.states.FaceControlState">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.states.</span></span><span class="sig-name descname"><span class="pre">FaceControlState</span></span><a class="reference internal" href="../_modules/handlers/states.html#FaceControlState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.states.FaceControlState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StatesGroup</span></code></p>
+<p>States for face control management.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.FaceControlState.waiting_user_id">
+<span class="sig-name descname"><span class="pre">waiting_user_id</span></span><a class="headerlink" href="#handlers.states.FaceControlState.waiting_user_id" title="Link to this definition"></a></dt>
+<dd><p>Waiting for user ID to add/remove</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.FaceControlState.waiting_confirmation">
+<span class="sig-name descname"><span class="pre">waiting_confirmation</span></span><a class="headerlink" href="#handlers.states.FaceControlState.waiting_confirmation" title="Link to this definition"></a></dt>
+<dd><p>Waiting for confirmation to remove</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="handlers.states.GiveAwayState">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.states.</span></span><span class="sig-name descname"><span class="pre">GiveAwayState</span></span><a class="reference internal" href="../_modules/handlers/states.html#GiveAwayState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.states.GiveAwayState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StatesGroup</span></code></p>
+<p>Giveaway management states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.GiveAwayState.waiting_event">
+<span class="sig-name descname"><span class="pre">waiting_event</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'GiveAwayState:waiting_event'&gt;</span></em><a class="headerlink" href="#handlers.states.GiveAwayState.waiting_event" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.GiveAwayState.waiting_org_name">
+<span class="sig-name descname"><span class="pre">waiting_org_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'GiveAwayState:waiting_org_name'&gt;</span></em><a class="headerlink" href="#handlers.states.GiveAwayState.waiting_org_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.GiveAwayState.waiting_id">
+<span class="sig-name descname"><span class="pre">waiting_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'GiveAwayState:waiting_id'&gt;</span></em><a class="headerlink" href="#handlers.states.GiveAwayState.waiting_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="handlers.states.PostState">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.states.</span></span><span class="sig-name descname"><span class="pre">PostState</span></span><a class="reference internal" href="../_modules/handlers/states.html#PostState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.states.PostState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StatesGroup</span></code></p>
+<p>Post creation and management states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_all_text1">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_all_text1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_all_text1'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_all_text1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_all_text05">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_all_text05</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_all_text05'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_all_text05" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_all_text">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_all_text</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_all_text'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_all_text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_ev_ev_unreg">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_ev_ev_unreg</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_ev_ev_unreg'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_ev_ev_unreg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_all_text1_unreg">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_all_text1_unreg</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_all_text1_unreg'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_all_text1_unreg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_all_text05_unreg">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_all_text05_unreg</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_all_text05_unreg'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_all_text05_unreg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_all_text_unreg">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_all_text_unreg</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_all_text_unreg'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_all_text_unreg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_ev_ev">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_ev_ev</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_ev_ev'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_ev_ev" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_ev_text">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_ev_text</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_ev_text'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_ev_text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_wth_op_to_ev_ev">
+<span class="sig-name descname"><span class="pre">waiting_for_post_wth_op_to_ev_ev</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_wth_op_to_ev_ev'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_wth_op_to_ev_ev" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_wth_op_to_ev_text">
+<span class="sig-name descname"><span class="pre">waiting_for_post_wth_op_to_ev_text</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_wth_op_to_ev_text'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_wth_op_to_ev_text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_all_media">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_all_media</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_all_media'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_all_media" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_ev_media">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_ev_media</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_ev_media'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_ev_media" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.PostState.waiting_for_post_to_all_media_unreg">
+<span class="sig-name descname"><span class="pre">waiting_for_post_to_all_media_unreg</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'PostState:waiting_for_post_to_all_media_unreg'&gt;</span></em><a class="headerlink" href="#handlers.states.PostState.waiting_for_post_to_all_media_unreg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.states.</span></span><span class="sig-name descname"><span class="pre">Questionnaire</span></span><a class="reference internal" href="../_modules/handlers/states.html#Questionnaire"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.states.Questionnaire" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StatesGroup</span></code></p>
+<p>Questionnaire form states for user registration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.full_name">
+<span class="sig-name descname"><span class="pre">full_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:full_name'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.full_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.degree">
+<span class="sig-name descname"><span class="pre">degree</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:degree'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.degree" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.course">
+<span class="sig-name descname"><span class="pre">course</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:course'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.course" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.program">
+<span class="sig-name descname"><span class="pre">program</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:program'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.program" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.email">
+<span class="sig-name descname"><span class="pre">email</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:email'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.email" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.vacancy">
+<span class="sig-name descname"><span class="pre">vacancy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:vacancy'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.vacancy" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.motivation">
+<span class="sig-name descname"><span class="pre">motivation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:motivation'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.motivation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.plans">
+<span class="sig-name descname"><span class="pre">plans</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:plans'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.plans" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.strengths">
+<span class="sig-name descname"><span class="pre">strengths</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:strengths'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.strengths" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.career_goals">
+<span class="sig-name descname"><span class="pre">career_goals</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:career_goals'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.career_goals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.team_motivation">
+<span class="sig-name descname"><span class="pre">team_motivation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:team_motivation'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.team_motivation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.role_in_team">
+<span class="sig-name descname"><span class="pre">role_in_team</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:role_in_team'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.role_in_team" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.events">
+<span class="sig-name descname"><span class="pre">events</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:events'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.events" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.found_info">
+<span class="sig-name descname"><span class="pre">found_info</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:found_info'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.found_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.resume">
+<span class="sig-name descname"><span class="pre">resume</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:resume'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.resume" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.Questionnaire.another_vacancy">
+<span class="sig-name descname"><span class="pre">another_vacancy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'Questionnaire:another_vacancy'&gt;</span></em><a class="headerlink" href="#handlers.states.Questionnaire.another_vacancy" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="handlers.states.StatState">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.states.</span></span><span class="sig-name descname"><span class="pre">StatState</span></span><a class="reference internal" href="../_modules/handlers/states.html#StatState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.states.StatState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StatesGroup</span></code></p>
+<p>Statistics management states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.StatState.waiting_for_ev">
+<span class="sig-name descname"><span class="pre">waiting_for_ev</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'StatState:waiting_for_ev'&gt;</span></em><a class="headerlink" href="#handlers.states.StatState.waiting_for_ev" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.StatState.waiting_for_give_away_ev">
+<span class="sig-name descname"><span class="pre">waiting_for_give_away_ev</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'StatState:waiting_for_give_away_ev'&gt;</span></em><a class="headerlink" href="#handlers.states.StatState.waiting_for_give_away_ev" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.StatState.waiting_user_id">
+<span class="sig-name descname"><span class="pre">waiting_user_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'StatState:waiting_user_id'&gt;</span></em><a class="headerlink" href="#handlers.states.StatState.waiting_user_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.StatState.waiting_for_ev1">
+<span class="sig-name descname"><span class="pre">waiting_for_ev1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'StatState:waiting_for_ev1'&gt;</span></em><a class="headerlink" href="#handlers.states.StatState.waiting_for_ev1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.StatState.waiting_for_ev2">
+<span class="sig-name descname"><span class="pre">waiting_for_ev2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'StatState:waiting_for_ev2'&gt;</span></em><a class="headerlink" href="#handlers.states.StatState.waiting_for_ev2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="handlers.states.VacancyState">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.states.</span></span><span class="sig-name descname"><span class="pre">VacancyState</span></span><a class="reference internal" href="../_modules/handlers/states.html#VacancyState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.states.VacancyState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StatesGroup</span></code></p>
+<p>Vacancy management states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.VacancyState.waiting_for_vacancy_name">
+<span class="sig-name descname"><span class="pre">waiting_for_vacancy_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'VacancyState:waiting_for_vacancy_name'&gt;</span></em><a class="headerlink" href="#handlers.states.VacancyState.waiting_for_vacancy_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.VacancyState.waiting_for_vacancy_name_to_delete">
+<span class="sig-name descname"><span class="pre">waiting_for_vacancy_name_to_delete</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'VacancyState:waiting_for_vacancy_name_to_delete'&gt;</span></em><a class="headerlink" href="#handlers.states.VacancyState.waiting_for_vacancy_name_to_delete" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="handlers.states.WinnerState">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.states.</span></span><span class="sig-name descname"><span class="pre">WinnerState</span></span><a class="reference internal" href="../_modules/handlers/states.html#WinnerState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#handlers.states.WinnerState" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StatesGroup</span></code></p>
+<p>Winner selection states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>None</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.WinnerState.wait_give_away_event">
+<span class="sig-name descname"><span class="pre">wait_give_away_event</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'WinnerState:wait_give_away_event'&gt;</span></em><a class="headerlink" href="#handlers.states.WinnerState.wait_give_away_event" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="handlers.states.WinnerState.wait_give_away_id">
+<span class="sig-name descname"><span class="pre">wait_give_away_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;State</span> <span class="pre">'WinnerState:wait_give_away_id'&gt;</span></em><a class="headerlink" href="#handlers.states.WinnerState.wait_give_away_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="error.html" class="btn btn-neutral float-left" title="error" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../keyboards/index.html" class="btn btn-neutral float-right" title="keyboards" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, HSE IT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+admin
+=====
+
+Admin-related keyboard layouts.
+
+.. contents::
+   :local:
+   :depth: 2
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :glob:
+
+   admin_keyboards
+

@@ -1,0 +1,17 @@
+quest
+=====
+
+.. automodule:: config.texts.quest
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Constants
+---------
+
+.. py:data:: QUEST_START
+
+
+.. py:data:: QUEST_FIRST_STEP
+
+

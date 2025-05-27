@@ -1,0 +1,68 @@
+states
+======
+
+.. automodule:: handlers.states
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :exclude-members: EventCreateState,EventReg,EventState,FaceControlState,GiveAwayState,PostState,Questionnaire,StatState,VacancyState,WinnerState
+
+.. autoclass:: handlers.states.EventCreateState
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: handlers.states.EventReg
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: handlers.states.EventState
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: handlers.states.FaceControlState
+   :exclude-members: waiting_user_id,waiting_confirmation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. py:attribute:: waiting_user_id
+
+      Waiting for user ID to add/remove
+
+   .. py:attribute:: waiting_confirmation
+
+      Waiting for confirmation to remove
+
+.. autoclass:: handlers.states.GiveAwayState
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: handlers.states.PostState
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: handlers.states.Questionnaire
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: handlers.states.StatState
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: handlers.states.VacancyState
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: handlers.states.WinnerState
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

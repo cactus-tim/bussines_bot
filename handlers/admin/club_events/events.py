@@ -24,7 +24,7 @@ from database.req import (
 from handlers.error import safe_send_message
 from handlers.states import EventCreateState, EventState
 from handlers.utils.base import get_bot_username
-from keyboards.keyboards import single_command_button_keyboard, post_ev_target, apply_winner
+from keyboards import main_reply_keyboard, post_ev_target, apply_winner
 from utils.validators import is_number_in_range, is_valid_time_format
 
 # --------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ async def add_event_part_6(message: Message, state: FSMContext):
     await safe_send_message(bot, message, f"все круто, все создано!!\nссылки для регистрации:"
                                           f"\n{links}"
                                           f"\nссылка для подтверждения:"
-                                          f"\n{url2}", reply_markup=single_command_button_keyboard())
+                                          f"\n{url2}", reply_markup=main_reply_keyboard())
     await state.clear()
 
 
@@ -298,11 +298,11 @@ async def confirm_end_event(callback: CallbackQuery, state: FSMContext):
 
     if not user_ids:
         await safe_send_message(bot, user_id, text="У вас нет пользователей))",
-                                reply_markup=single_command_button_keyboard())
+                                reply_markup=main_reply_keyboard())
     else:
         for uid in user_ids:
             await safe_send_message(bot, uid, text=f"Сегодняшний победитель - @{user.handler}",
-                                    reply_markup=single_command_button_keyboard())
+                                    reply_markup=main_reply_keyboard())
 
     bad_user_ids = await get_users_tg_id_in_event_bad(event_name)
     if bad_user_ids:
@@ -392,5 +392,5 @@ async def make_link(message: Message, state: FSMContext):
     await safe_send_message(bot, message, f"все круто, все создано!!\nссылки для регистрации:"
                                           f"\n{links}"
                                           f"\nссылка для подтверждения:"
-                                          f"\n{url2}", reply_markup=single_command_button_keyboard())
+                                          f"\n{url2}", reply_markup=main_reply_keyboard())
     await state.clear()

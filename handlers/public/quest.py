@@ -21,7 +21,7 @@ from database.req import (
 )
 from handlers.error import safe_send_message
 from handlers.states import Questionnaire
-from keyboards.keyboards import (
+from keyboards import (
     vacancy_selection_keyboard,
     another_vacancy_keyboard,
     quest_keyboard_1,
