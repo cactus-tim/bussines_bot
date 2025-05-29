@@ -186,3 +186,32 @@ class FaceControlState(StatesGroup):
     """States for face control management."""
     waiting_user_id = State()  # Waiting for user ID to add/remove
     waiting_confirmation = State()  # Waiting for confirmation to remove
+
+
+class FeedbackStates(StatesGroup):
+    """States for feedback collection."""
+    waiting_for_rating = State()
+    waiting_for_comment = State()
+
+
+
+class GroupSettingsStates(StatesGroup):
+    """States for group settings configuration."""
+    waiting_for_reminder_day = State()
+    waiting_for_reminder_time = State()
+    waiting_for_pairing_day = State()
+    waiting_for_pairing_time = State()
+
+
+class ProfileStates(StatesGroup):
+    """States for profile creation/editing."""
+    waiting_for_full_name = State()
+    waiting_for_city = State()
+    waiting_for_custom_city = State()
+    waiting_for_social = State()
+    waiting_for_occupation = State()
+    waiting_for_hobbies = State()
+    waiting_for_birth_date = State()
+    waiting_for_goal = State()
+    waiting_for_format = State()
+

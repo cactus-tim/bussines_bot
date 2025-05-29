@@ -6,6 +6,7 @@ Application settings and configuration for bot and database.
 # --------------------------------------------------------------------------------
 
 import os
+
 from dotenv import load_dotenv
 
 # --------------------------------------------------------------------------------
@@ -49,11 +50,18 @@ else:
     SQL_URL = "sqlite+aiosqlite:///./database/database.db"
 
 # --------------------------------------------------------------------------------
-
 # Networking settings
+
 NETWORKING_THEMES = ["Локация", "Меню", "Команда", "Маркетинг"]
 
 # --------------------------------------------------------------------------------
+# RANDOM COFFE
+
+GLOBAL_REMINDER = {'day': 'пятница', 'hour': '17', 'minute': '0'}
+GLOBAL_PAIRING = {'day': 'понедельник', 'hour': '17', 'minute': '0'}
+
+# --------------------------------------------------------------------------------
+
 
 # Logging settings
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

@@ -5,9 +5,13 @@ SQLAlchemy models for users, club_events, vacancies, and registrations.
 
 # --------------------------------------------------------------------------------
 
-from sqlalchemy import Column, Integer, String, Boolean, BigInteger, ForeignKey
+from datetime import datetime
+
+from sqlalchemy import Column, Integer, Boolean, BigInteger, ForeignKey
+from sqlalchemy import String
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import Mapped, mapped_column
 
 from config.settings import SQL_URL
 
@@ -339,6 +343,171 @@ class FaceControl(Base):
     added_at = Column(String, nullable=False)  # Store as ISO format string
     username = Column(String, nullable=True)  # Telegram username
     full_name = Column(String, nullable=True)  # Full name from Telegram
+
+
+# --------------------------------------------------------------------------------
+
+
+class RandomCoffeeProfile(Base):
+    """RandomCoffeeProfile model for storing user profiles for Random Coffee.
+
+    Args:
+        id (Integer): Primary key.
+        user_id (BigInteger): Foreign key to user.
+        full_name (String): User's full name.
+        city (String): User's city.
+        social_links (String): User's social media links.
+        occupation (String): What user does.
+        hobbies (String): User's hobbies.
+        birth_date (String): User's birth date in DD.MM.YYYY format.
+        meeting_goal (String): User's goal for meetings (fun/benefit ratio).
+        meeting_format (String): Preferred meeting format (online/offline).
+        created_at (String): Timestamp when profile was created.
+        updated_at (String): Timestamp when profile was last updated.
+
+    Returns:
+        RandomCoffeeProfile: SQLAlchemy random coffee profile model instance.
+    """
+    __tablename__ = "random_coffee_profiles"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False, unique=True)
+    full_name = Column(String, nullable=False)
+    city = Column(String, nullable=False)
+    social_links = Column(String, nullable=False)
+    occupation = Column(String, nullable=False)
+    hobbies = Column(String, nullable=False)
+    birth_date = Column(String, nullable=False)
+    meeting_goal = Column(String, nullable=False)
+    meeting_format = Column(String, nullable=False)
+    created_at: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        default=lambda: datetime.utcnow().isoformat()
+    )
+    updated_at: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        default=lambda: datetime.utcnow().isoformat(),
+        onupdate=lambda: datetime.utcnow().isoformat()
+    )
+
+
+class RandomCoffeeWeek(Base):
+    """RandomCoffeeWeek model for tracking weekly participation.
+
+    Args:
+        id (Integer): Primary key.
+        user_id (BigInteger): Foreign key to user.
+        week_start (String): Start date of the week in ISO format.
+        is_participating (Boolean): Whether user is participating this week.
+        created_at (String): Timestamp when participation was recorded.
+
+    Returns:
+        RandomCoffeeWeek: SQLAlchemy random coffee week model instance.
+    """
+    __tablename__ = "random_coffee_weeks"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    week_start = Column(String, nullable=False)  # Store as ISO format string
+    is_participating = Column(Boolean, nullable=False, default=True)
+    created_at: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        default=lambda: datetime.utcnow().isoformat()
+    )
+
+
+class RandomCoffeePair(Base):
+    """RandomCoffeePair model for storing weekly pairs.
+
+    Args:
+        id (Integer): Primary key.
+        week_start (String): Start date of the week in ISO format.
+        user1_id (BigInteger): First user's ID.
+        user2_id (BigInteger): Second user's ID.
+        created_at (String): Timestamp when pair was created.
+
+    Returns:
+        RandomCoffeePair: SQLAlchemy random coffee pair model instance.
+    """
+    __tablename__ = "random_coffee_pairs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    week_start = Column(String, nullable=False)  # Store as ISO format string
+    user1_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    user2_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    created_at: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        default=lambda: datetime.utcnow().isoformat()
+    )
+
+
+class RandomCoffeeFeedback(Base):
+    """RandomCoffeeFeedback model for storing meeting feedback.
+
+    Args:
+        id (Integer): Primary key.
+        pair_id (Integer): Foreign key to random coffee pair.
+        user_id (BigInteger): Foreign key to user giving feedback.
+        rating (Integer): Rating from 1 to 5.
+        comment (String): Optional feedback comment.
+        created_at (String): Timestamp when feedback was given.
+
+    Returns:
+        RandomCoffeeFeedback: SQLAlchemy random coffee feedback model instance.
+    """
+    __tablename__ = "random_coffee_feedback"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    pair_id = Column(Integer, ForeignKey("random_coffee_pairs.id"), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    rating = Column(Integer, nullable=False)
+    comment = Column(String, nullable=True)
+    created_at: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        default=lambda: datetime.utcnow().isoformat()
+    )
+
+
+class RandomCoffeeGroupSettings(Base):
+    """RandomCoffeeGroupSettings model for storing group chat settings.
+
+    Args:
+        id (Integer): Primary key.
+        chat_id (BigInteger): Telegram chat ID.
+        reminder_day (String): Day of week for reminders (e.g., "Friday").
+        reminder_time (String): Time for reminders (e.g., "10:00").
+        pairing_day (String): Day of week for pairing (e.g., "Monday").
+        pairing_time (String): Time for pairing (e.g., "10:00").
+        created_at (String): Timestamp when settings were created.
+        updated_at (String): Timestamp when settings were last updated.
+
+    Returns:
+        RandomCoffeeGroupSettings: SQLAlchemy random coffee group settings model instance.
+    """
+    __tablename__ = "random_coffee_group_settings"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    chat_id = Column(BigInteger, nullable=False, unique=True)
+    reminder_day = Column(String, nullable=False)
+    reminder_time = Column(String, nullable=False)
+    pairing_day = Column(String, nullable=False)
+    pairing_time = Column(String, nullable=False)
+    created_at: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        default=lambda: datetime.utcnow().isoformat()
+    )
+    updated_at: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        default=lambda: datetime.utcnow().isoformat(),
+        onupdate=lambda: datetime.utcnow().isoformat()
+    )
 
 
 # --------------------------------------------------------------------------------

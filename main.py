@@ -5,17 +5,21 @@ Main entry point for the Telegram bot application with router registration and s
 # --------------------------------------------------------------------------------
 
 import asyncio
-
+import logging
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
 
-from config.settings import TOKEN
+from config.settings import TOKEN, SQL_URL
 from database.models import async_main
 from handlers.admin import admin_routers
 from handlers.public import public_routers
+from handlers.random_coffee import random_coffee_router, DatabaseSessionMiddleware
 from utils.logger import get_logger
+from utils.random_coffee.scheduler import RandomCoffeeScheduler
 
 # --------------------------------------------------------------------------------
 
@@ -32,6 +36,11 @@ bot = Bot(
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
+# Initialize database
+engine = create_async_engine(SQL_URL)
+async_session = sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)
 
 # --------------------------------------------------------------------------------
 
@@ -54,6 +63,12 @@ def register_routers() -> None:
         dp.include_router(router)
         logger.info(f"Registered admin router: {router.name}")
 
+    # Register Random Coffee router with database middleware
+    random_coffee_router.message.middleware(DatabaseSessionMiddleware(async_session))
+    random_coffee_router.callback_query.middleware(DatabaseSessionMiddleware(async_session))
+    dp.include_router(random_coffee_router)
+    logger.info("Registered Random Coffee router")
+
 
 # --------------------------------------------------------------------------------
 
@@ -69,11 +84,16 @@ async def main():
     try:
         logger.info("Starting bot...")
 
-        await  async_main()
+        await async_main()
 
         # Register all routers
         register_routers()
         logger.info("All routers registered successfully")
+
+        # Initialize and start Random Coffee scheduler
+        scheduler = RandomCoffeeScheduler(bot, async_session)
+        scheduler.start()
+        logger.info("Random Coffee scheduler started")
 
         # Start polling
         await dp.start_polling(bot)
@@ -81,7 +101,13 @@ async def main():
         logger.error(f"Error starting bot: {e}")
         raise
     finally:
-        logger.info("Bot stopped")
+        # Stop scheduler
+        scheduler.shutdown()
+        logger.info("Scheduler stopped")
+        
+        # Close bot session
+        await bot.session.close()
+        logger.info("Bot session closed")
 
 
 # --------------------------------------------------------------------------------

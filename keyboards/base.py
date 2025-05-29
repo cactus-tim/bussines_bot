@@ -22,7 +22,8 @@ def main_reply_keyboard() -> ReplyKeyboardMarkup:
         ReplyKeyboardMarkup: Reply keyboard markup.
     """
     return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="Получить QR-код")]],
+        keyboard=[[KeyboardButton(text="Получить QR-код")],
+                  [KeyboardButton(text="☕ Участвовать в Random Coffee")]],
         resize_keyboard=True,
     )
 

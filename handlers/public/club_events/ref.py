@@ -56,10 +56,7 @@ async def get_ref_v2_part1(message: Message):
     )
 
 
-@router.callback_query(lambda c: not c.data.startswith((
-        "qr_", "event_", "hse_", "verify_", "another_", "post_", "stat_",
-        "link_", "unreg_", "cancel", "confirm", "reroll", "top", "quest_", "face_"
-)))
+@router.callback_query(lambda c: c.data.startswith("event"))
 async def get_ref_v2_part2(callback: CallbackQuery):
     """
     Handle event selection for referral link generation.
